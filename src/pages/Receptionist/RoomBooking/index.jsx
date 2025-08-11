@@ -1,3 +1,5 @@
+// HAS TAX 12%
+
 import {
   Alert,
   Button,
@@ -255,10 +257,10 @@ const AdditionalServicesSelector = memo(
         selectedServices.map((service) =>
           service.serviceId === serviceId
             ? {
-              ...service,
-              quantity,
-              totalAmount: service.basePrice * quantity,
-            }
+                ...service,
+                quantity,
+                totalAmount: service.basePrice * quantity,
+              }
             : service
         )
       );
@@ -417,11 +419,16 @@ const PaymentSummary = memo(
 
           {appliedPromo && calculations.discountAmount > 0 && (
             <div className="flex justify-between text-green-600">
-              <Text>
-                Discount ({appliedPromo.promoCode})
-                {appliedPromo.promoType === "percentage" &&
-                  ` - ${appliedPromo.discountValue}%`}
-              </Text>
+              <div className="flex flex-col">
+                <p>
+                  Discount ({appliedPromo.promoCode})
+                  {appliedPromo.promoType === "percentage" &&
+                    ` - ${appliedPromo.discountValue}%`}
+                </p>
+                {appliedPromo.promoType === "percentage" && (
+                  <small className="text-[10px]">Based on room rate</small>
+                )}
+              </div>
               <Text>-{formatCurrency(calculations.discountAmount)}</Text>
             </div>
           )}
@@ -620,7 +627,6 @@ const EnhancedBookingForm = memo(
       }
       onBook(selectedRate, appliedPromo, selectedServices);
     }, [selectedRate, appliedPromo, selectedServices, onBook]);
-
     const totalAmount = useMemo(() => {
       if (!selectedRate) return 0;
 
@@ -629,19 +635,21 @@ const EnhancedBookingForm = memo(
         (sum, service) => sum + service.totalAmount,
         0
       );
-      const subtotal = baseAmount + servicesTotal;
 
       let discountAmount = 0;
       if (appliedPromo) {
         if (appliedPromo.promoType === "percentage") {
-          discountAmount = (subtotal * appliedPromo.discountValue) / 100;
+          discountAmount = (baseAmount * appliedPromo.discountValue) / 100;
         } else {
-          discountAmount = Math.min(appliedPromo.discountValue, subtotal);
+          discountAmount = Math.min(appliedPromo.discountValue, baseAmount);
         }
       }
 
-      const taxAmount = (subtotal - discountAmount) * 0.12;
-      return subtotal - discountAmount + taxAmount;
+      const discountedBaseAmount = baseAmount - discountAmount;
+      const subtotal = discountedBaseAmount + servicesTotal;
+      const taxAmount = subtotal * 0.12;
+      // HAS TAX
+      return subtotal + taxAmount;
     }, [selectedRate, selectedServices, appliedPromo]);
 
     const currentDayType =
@@ -710,10 +718,11 @@ const EnhancedBookingForm = memo(
                   .map((rate) => (
                     <div
                       key={rate.rateId}
-                      className={`border rounded-lg p-2 cursor-pointer transition-all hover:bg-red-50 ${selectedRate?.rateId === rate.rateId
+                      className={`border rounded-lg p-2 cursor-pointer transition-all hover:bg-red-50 ${
+                        selectedRate?.rateId === rate.rateId
                           ? "border-red-500 ring-2 ring-red-200 bg-red-50"
                           : "border-gray-200"
-                        }`}
+                      }`}
                       onClick={() => setSelectedRate(rate)}
                     >
                       <div className="flex justify-between items-center">
@@ -808,8 +817,9 @@ const RoomCard = memo(({ room, isSelected, onSelect }) => {
 
   return (
     <div
-      className={`bg-white rounded-lg shadow-sm border-2 transition-all cursor-pointer hover:shadow-md hover:scale-105 hover:border-red-400 duration-500 ${isSelected ? "border-red-500 ring-2 ring-red-200" : "border-gray-200"
-        } ${!isAvailable ? "opacity-75" : ""}`}
+      className={`bg-white rounded-lg shadow-sm border-2 transition-all cursor-pointer hover:shadow-md hover:scale-105 hover:border-red-400 duration-500 ${
+        isSelected ? "border-red-500 ring-2 ring-red-200" : "border-gray-200"
+      } ${!isAvailable ? "opacity-75" : ""}`}
       onClick={() => onSelect(room)}
     >
       <div className="p-4">
