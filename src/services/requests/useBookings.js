@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { addBookingApi, getBookingByBookingIdApi, getBookingStatusApi } from "../api/bookingsApi";
+import { addBookingApi, getBookingByBookingIdApi, getBookingByRoomIdApi, getBookingStatusApi } from "../api/bookingsApi";
 
 
 export const useAddBookingApi = () => {
@@ -9,6 +9,22 @@ export const useAddBookingApi = () => {
   });
 };
 
+
+export const useGetBookingByRoomIdApi = (roomId) => {
+  return useQuery({
+    queryKey: ["getBookingByRoomIdApi"],
+    queryFn: () => getBookingByRoomIdApi(roomId),
+    placeholderData: null,
+    retry: 1,
+    staleTime: 0,
+    cacheTime: 0,
+    enabled: !!roomId, // Only run if roomId is provided
+    refetchOnWindowFocus: false,
+    onError: (error) => {
+      console.error("Failed to fetch user:", error);
+    },
+  });
+};
 
 export const useGetBookingByBookingIdApi = (bookingId) => {
   return useQuery({

@@ -36,7 +36,7 @@ const CURRENCY_CLEANUP_REGEX = /[^0-9.]+/g;
 // Core formatting functions
 export const formatAddCommas = (num = 0) => formatters.noFraction.format(num);
 
-export const formatCurrency = (num = 0) => formatters.twoDecimals.format(num);
+// export const formatCurrency = (num = 0) => formatters.twoDecimals.format(num);
 export const formatPHPCurrencyNoFraction = (num = 0) =>
   formatters.phpCurrencyNoFraction.format(num);
 
@@ -78,3 +78,13 @@ export const formatPercent = (decimal = 0) =>
 // Batch formatting for arrays (more efficient than mapping)
 export const formatBatch = (numbers = [], formatter = formatters.phpCurrency) =>
   numbers.map((num) => formatter.format(num));
+
+
+export const formatCurrency = (amount) => {
+  return new Intl.NumberFormat("en-PH", {
+    style: "currency",
+    currency: "PHP",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(amount);
+};

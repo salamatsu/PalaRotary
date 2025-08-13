@@ -32,6 +32,15 @@ export const addBookingApi = async (payload) => {
   }
 };
 
+export const getBookingByRoomIdApi = async (roomId) => {
+  try {
+    const result = await axiosDefault.get(`/api/bookings/${roomId}/bookingByRoomId`);
+    return result.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+};
+
 export const getBookingByBookingIdApi = async (bookingId) => {
   try {
     const result = await axiosDefault.get(`/api/bookings/${bookingId}`);
