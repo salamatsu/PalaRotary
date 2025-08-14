@@ -153,10 +153,11 @@ const RoomCard = memo(({ room, isSelected, onSelect }) => {
 
   return (
     <div
-      className={`min-w-[280px] bg-white rounded-2xl shadow-lg border-2 transition-all duration-300 cursor-pointer hover:shadow-xl hover:scale-105 transform ${isSelected
-        ? "border-red-400 ring-4 ring-red-100 shadow-xl scale-105"
-        : "border-gray-100 hover:border-red-300"
-        } ${!isAvailable ? "opacity-75" : ""}`}
+      className={`min-w-[280px] bg-white rounded-2xl shadow-lg border-2 transition-all duration-300 cursor-pointer hover:shadow-xl hover:scale-105 transform ${
+        isSelected
+          ? "border-red-400 ring-4 ring-red-100 shadow-xl scale-105"
+          : "border-gray-100 hover:border-red-300"
+      } ${!isAvailable ? "opacity-75" : ""}`}
       onClick={() => onSelect(room)}
     >
       <div className="relative overflow-hidden rounded-t-2xl">
@@ -277,7 +278,7 @@ const CurrentBookedRoom = memo(({ room, onSelect }) => {
       footer={
         <div className="flex justify-end items-center">
           <Space>
-            <Button key={"extend"} size="large" type="primary" >
+            <Button key={"extend"} size="large" type="primary">
               <Plus className="w-4 h-4" />
               Extend Booking
             </Button>
@@ -623,7 +624,7 @@ const RoomBooking = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl border-0 p-8">
+        {/* <div className="bg-white rounded-2xl shadow-xl border-0 p-8">
           <div className="grid grid-cols-3 gap-6 mb-8">
             <div className="space-y-2">
               <Text strong className="text-gray-700 text-base">
@@ -681,7 +682,7 @@ const RoomBooking = () => {
               />
             </div>
           </div>
-        </div>
+        </div> */}
 
         <div className="bg-white rounded-2xl shadow-xl border-0 p-8">
           <div className="flex items-center justify-between mb-8">
@@ -693,15 +694,76 @@ const RoomBooking = () => {
                 Select a room to begin the booking process
               </p>
             </div>
-            <div className="flex items-center gap-6 text-sm">
-              {Object.entries(STATUS_CONFIGS).map(([status, config]) => (
-                <div key={status} className="flex items-center gap-2">
-                  {config.icon}
-                  <span className="text-gray-600 font-medium">
-                    {config.label}
-                  </span>
+            <div>
+              <div className="grid grid-cols-3 gap-6 mb-8">
+                <div className="space-y-2">
+                  <Text strong className="text-gray-700 text-base">
+                    Floor
+                  </Text>
+                  <Select
+                    value={filters.floor}
+                    onChange={(value) => updateFilter("floor", value)}
+                    className="w-full"
+                    size="large"
+                    options={[
+                      { value: "all", label: "All Floors" },
+                      ...availableFloors.map((floor) => ({
+                        value: floor,
+                        label: `${floor}st Floor`,
+                      })),
+                    ]}
+                  />
                 </div>
-              ))}
+                <div className="space-y-2">
+                  <Text strong className="text-gray-700 text-base">
+                    Room Type
+                  </Text>
+                  <Select
+                    value={filters.roomType}
+                    onChange={(value) => updateFilter("roomType", value)}
+                    className="w-full"
+                    size="large"
+                    loading={getRoomsByBranch.isPending}
+                    options={[
+                      { value: "all", label: "All Room Types" },
+                      ...roomTypes.map(({ roomTypeName, roomTypeId }) => ({
+                        value: roomTypeId,
+                        label: roomTypeName,
+                      })),
+                    ]}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Text strong className="text-gray-700 text-base">
+                    Status
+                  </Text>
+                  <Select
+                    value={filters.status}
+                    onChange={(value) => updateFilter("status", value)}
+                    className="w-full"
+                    size="large"
+                    options={[
+                      { value: "all", label: "All Status" },
+                      ...Object.entries(STATUS_CONFIGS).map(
+                        ([status, config]) => ({
+                          value: status,
+                          label: config.label,
+                        })
+                      ),
+                    ]}
+                  />
+                </div>
+              </div>
+              <div className="flex items-center justify-center gap-6 text-sm">
+                {Object.entries(STATUS_CONFIGS).map(([status, config]) => (
+                  <div key={status} className="flex items-center gap-2">
+                    {config.icon}
+                    <span className="text-gray-600 font-medium">
+                      {config.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
