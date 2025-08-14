@@ -3,10 +3,11 @@ import { Dashboard } from "../pages/Receptionist";
 import AdminRoute from "./pageRoutes/AdminRoute";
 import ReceptionistRoute from "./pageRoutes/ReceptionistRoute";
 import SuperAdminRoute from "./pageRoutes/SuperAdminRoute";
+import LandingPage from "../pages/LandingPage";
 
 const RootRoutes = () => {
   const router = createBrowserRouter([
-    { path: "/dashboard", Component: Dashboard },
+    { path: "/", Component: LandingPage },
     { path: "/superadmin/*", Component: SuperAdminRoute },
     { path: "/admin/*", Component: AdminRoute },
     { path: "/receptionist/*", Component: ReceptionistRoute },
