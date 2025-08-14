@@ -1,9 +1,8 @@
 import { RouterProvider, createBrowserRouter } from "react-router";
-import { Dashboard } from "../pages/Receptionist";
+import LandingPage from "../pages/LandingPage";
 import AdminRoute from "./pageRoutes/AdminRoute";
 import ReceptionistRoute from "./pageRoutes/ReceptionistRoute";
 import SuperAdminRoute from "./pageRoutes/SuperAdminRoute";
-import LandingPage from "../pages/LandingPage";
 
 const RootRoutes = () => {
   const router = createBrowserRouter([

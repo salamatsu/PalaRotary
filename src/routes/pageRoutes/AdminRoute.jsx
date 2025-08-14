@@ -10,7 +10,7 @@ const AdminRoute = () => {
   // ========== Navigation Configuration ==========
   const navigations = [
     {
-      route: "/",
+      route: "/dashboard",
       name: "Dashboard",
       label: "Dashboard",
       icon: <HomeOutlined className="h-5 w-5" />,
