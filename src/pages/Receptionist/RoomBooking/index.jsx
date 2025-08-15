@@ -153,11 +153,10 @@ const RoomCard = memo(({ room, isSelected, onSelect }) => {
 
   return (
     <div
-      className={`min-w-[280px] bg-white rounded-2xl shadow-lg border-2 transition-all duration-300 cursor-pointer hover:shadow-xl hover:scale-105 transform ${
-        isSelected
-          ? "border-red-400 ring-4 ring-red-100 shadow-xl scale-105"
-          : "border-gray-100 hover:border-red-300"
-      } ${!isAvailable ? "opacity-75" : ""}`}
+      className={`min-w-[280px] bg-white rounded-2xl shadow-lg border-2 transition-all duration-300 cursor-pointer hover:shadow-xl hover:scale-105 transform ${isSelected
+        ? "border-red-400 ring-4 ring-red-100 shadow-xl scale-105"
+        : "border-gray-100 hover:border-red-300"
+        } ${!isAvailable ? "opacity-75" : ""}`}
       onClick={() => onSelect(room)}
     >
       <div className="relative overflow-hidden rounded-t-2xl">
@@ -245,7 +244,7 @@ const CurrentBookedRoom = memo(({ room, onSelect }) => {
       placement="right"
       open={!!room}
       onClose={() => onSelect(null)}
-      width={"80%"}
+      width={"100%"}
       closeIcon={null}
       className="booking-drawer"
       title={
@@ -270,6 +269,7 @@ const CurrentBookedRoom = memo(({ room, onSelect }) => {
           key={"cancel"}
           onClick={() => onSelect(null)}
           className="rounded-lg"
+          size="large"
         >
           <X className="w-4 h-4" />
           CLOSE
@@ -624,65 +624,6 @@ const RoomBooking = () => {
           </div>
         </div>
 
-        {/* <div className="bg-white rounded-2xl shadow-xl border-0 p-8">
-          <div className="grid grid-cols-3 gap-6 mb-8">
-            <div className="space-y-2">
-              <Text strong className="text-gray-700 text-base">
-                Floor
-              </Text>
-              <Select
-                value={filters.floor}
-                onChange={(value) => updateFilter("floor", value)}
-                className="w-full"
-                size="large"
-                options={[
-                  { value: "all", label: "All Floors" },
-                  ...availableFloors.map((floor) => ({
-                    value: floor,
-                    label: `${floor}st Floor`,
-                  })),
-                ]}
-              />
-            </div>
-            <div className="space-y-2">
-              <Text strong className="text-gray-700 text-base">
-                Room Type
-              </Text>
-              <Select
-                value={filters.roomType}
-                onChange={(value) => updateFilter("roomType", value)}
-                className="w-full"
-                size="large"
-                loading={getRoomsByBranch.isPending}
-                options={[
-                  { value: "all", label: "All Room Types" },
-                  ...roomTypes.map(({ roomTypeName, roomTypeId }) => ({
-                    value: roomTypeId,
-                    label: roomTypeName,
-                  })),
-                ]}
-              />
-            </div>
-            <div className="space-y-2">
-              <Text strong className="text-gray-700 text-base">
-                Status
-              </Text>
-              <Select
-                value={filters.status}
-                onChange={(value) => updateFilter("status", value)}
-                className="w-full"
-                size="large"
-                options={[
-                  { value: "all", label: "All Status" },
-                  ...Object.entries(STATUS_CONFIGS).map(([status, config]) => ({
-                    value: status,
-                    label: config.label,
-                  })),
-                ]}
-              />
-            </div>
-          </div>
-        </div> */}
 
         <div className="bg-white rounded-2xl shadow-xl border-0 p-8">
           <div className="flex items-center justify-between mb-8">
@@ -792,14 +733,14 @@ const RoomBooking = () => {
           ) : (
             Object.keys(groupedRooms)
               .sort()
-              .map((floor) => (
-                <div key={floor} className="mb-10">
+              .map((floor, index) => (
+                <div key={floor} >
                   <div className="flex items-center gap-4 mb-6">
-                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
+                    {/* <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
                       <span className="text-white font-bold text-lg">
                         {floor}
                       </span>
-                    </div>
+                    </div> */}
                     <div>
                       <p className="mb-0 text-gray-900 text-xl font-semibold ">
                         Floor {floor}
@@ -820,6 +761,12 @@ const RoomBooking = () => {
                       />
                     ))}
                   </div>
+
+                  {
+                    index % 2 === 0 && (
+                      <div className="w-full h-0.5 bg-gradient-to-r from-blue-200 to-purple-200 my-4"></div>
+                    )
+                  }
                 </div>
               ))
           )}
@@ -828,8 +775,8 @@ const RoomBooking = () => {
         <Drawer
           open={!!selectedRoom}
           onClose={() => setSelectedRoom(null)}
-          height={"95%"}
-          placement="bottom"
+          placement="right"
+          width={'100%'}
           className="booking-drawer"
           title={
             <div className="flex items-center gap-4">

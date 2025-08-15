@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Building,
   Calendar,
@@ -12,7 +12,10 @@ import {
   Users,
   ShoppingCart,
   Receipt,
+  Plus,
 } from "lucide-react";
+import { Button, Drawer, Empty, Modal, Typography } from "antd";
+import AdditionalServicesSelector from "../../pages/Receptionist/RoomBooking/components/AdditionalServicesSelector";
 
 // StatusBadge component
 const StatusBadge = ({ status }) => {
@@ -49,6 +52,10 @@ const StatusBadge = ({ status }) => {
 };
 
 const BookingInformation = ({ bookingData }) => {
+
+  const [selectedServices, setSelectedServices] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const formatDateTime = (dateTime) => {
     if (!dateTime) return "Not set";
     const date = new Date(dateTime);
@@ -74,7 +81,7 @@ const BookingInformation = ({ bookingData }) => {
         {/* Booking Reference */}
         <div className="mb-4 text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Booking #{bookingData.bookingReference}
+            Booking Ref No# : <Typography.Text style={{ fontSize: "1.25rem", fontWeight: 'bolder' }} strong>{bookingData.bookingReference}</Typography.Text>
           </h1>
           <div className="flex justify-center gap-4">
             <StatusBadge status={bookingData?.bookingStatus} />
@@ -84,11 +91,11 @@ const BookingInformation = ({ bookingData }) => {
 
         {/* Quick Info Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
+          <div className="bg-gradient-to-r from-red-50 to-red-100 p-4 rounded-lg border border-red-200">
             <div className="flex items-center gap-3">
-              <Building className="h-8 w-8 text-blue-600" />
+              <Building className="h-8 w-8 text-red-600" />
               <div>
-                <p className="text-sm text-blue-600 font-medium">Branch</p>
+                <p className="text-sm text-red-600 font-medium">Branch</p>
                 <p className="font-semibold text-gray-900">
                   {bookingData.branchName}
                 </p>
@@ -138,7 +145,7 @@ const BookingInformation = ({ bookingData }) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Check-in/Check-out Information */}
         <div className="bg-white rounded-xl shadow-lg p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
@@ -222,7 +229,7 @@ const BookingInformation = ({ bookingData }) => {
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Service Charges</p>
+                <p className="text-sm text-gray-600">Additional Charges</p>
                 <p className="font-semibold text-gray-900">
                   {formatCurrency(bookingData.serviceChargesAmount)}
                 </p>
@@ -269,158 +276,108 @@ const BookingInformation = ({ bookingData }) => {
         </div>
 
         {/* Additional Charges */}
-        {bookingData.additionalCharges && bookingData.additionalCharges.length > 0 && (
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <ShoppingCart className="h-5 w-5 text-indigo-600" />
-              Additional Charges
-            </h2>
-
-            <div className="space-y-3">
-              {bookingData.additionalCharges.map((charge) => (
-                <div key={charge.chargeId} className="bg-gray-50 p-4 rounded-lg">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-medium text-gray-900">
-                        {charge.serviceName}
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        {charge.itemDescription}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Qty: {charge.quantity} × {formatCurrency(charge.unitPrice)}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-gray-900">
-                        {formatCurrency(charge.totalAmount)}
-                      </p>
-                      <StatusBadge status={charge.status} />
+        {/* {bookingData.additionalCharges && bookingData.additionalCharges.length > 0 && (
+        )} */}
+        <div className="bg-white rounded-xl flex flex-col gap-6 shadow-lg p-6">
+          <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+            <ShoppingCart className="h-5 w-5 text-indigo-600" />
+            Additional Charges
+          </h2>
+          {
+            bookingData.additionalCharges.length > 0 ?
+              <div className="space-y-3">
+                {bookingData.additionalCharges.map((charge) => (
+                  <div key={charge.chargeId} className="bg-gray-50 p-4 rounded-lg">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="font-medium text-gray-900">
+                          {charge.serviceName}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          {charge.itemDescription}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          Qty: {charge.quantity} × {formatCurrency(charge.unitPrice)}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-gray-900">
+                          {formatCurrency(charge.totalAmount)}
+                        </p>
+                        <StatusBadge status={charge.status} />
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
 
-              <div className="border-t pt-3 mt-3">
-                <div className="flex justify-between items-center">
-                  <p className="font-semibold text-gray-900">
-                    Total Additional Charges
-                  </p>
-                  <p className="font-semibold text-gray-900">
-                    {formatCurrency(
-                      bookingData.additionalCharges.reduce(
-                        (sum, charge) => sum + charge.totalAmount,
-                        0
-                      )
-                    )}
-                  </p>
+                <div className="border-t pt-3 mt-3">
+                  <div className="flex justify-between items-center">
+                    <p className="font-semibold text-gray-900">
+                      Total Additional Charges
+                    </p>
+                    <p className="font-semibold text-gray-900">
+                      {formatCurrency(
+                        bookingData.additionalCharges.reduce(
+                          (sum, charge) => sum + charge.totalAmount,
+                          0
+                        )
+                      )}
+                    </p>
+                  </div>
                 </div>
+
               </div>
-            </div>
-          </div>
-        )}
+              :
+              (
+                <div className="text-center h-full flex items-center justify-center ">
+                  <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="No additional charges" />
+                </div>
+              )
+          }
+          <Button size="large" type="primary" onClick={() => setIsModalOpen(true)} ><Plus /> ADD</Button>
+        </div>
 
         {/* Payment History */}
-        {bookingData.payments && bookingData.payments.length > 0 && (
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <Receipt className="h-5 w-5 text-green-600" />
-              Payment History
-            </h2>
-
-            <div className="space-y-3">
-              {bookingData.payments.map((payment) => (
-                <div key={payment.paymentId} className="bg-gray-50 p-4 rounded-lg">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-medium text-gray-900 capitalize">
-                        {payment.paymentType.replace('_', ' ')}
-                      </h3>
-                      <p className="text-sm text-gray-600 capitalize">
-                        {payment.paymentMethod} • {payment.paymentCategory}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {formatDateTime(payment.paymentDateTime)}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Processed by: {payment.processedBy}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-green-700">
-                        {formatCurrency(payment.amount)}
-                      </p>
-                      <StatusBadge status={payment.paymentStatus} />
-                    </div>
-                  </div>
-                  {payment.notes && (
-                    <p className="text-sm text-gray-600 mt-2">
-                      Note: {payment.notes}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Guest Information */}
+        {/* {bookingData.payments && bookingData.payments.length > 0 && (
+        )} */}
         <div className="bg-white rounded-xl shadow-lg p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <User className="h-5 w-5 text-purple-600" />
-            Guest Information
+            <Receipt className="h-5 w-5 text-green-600" />
+            Payment History
           </h2>
 
-          <div className="space-y-4">
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <div className="grid grid-cols-1 gap-3">
-                <div className="flex items-center gap-3">
-                  <User className="h-4 w-4 text-gray-500" />
+          <div className="space-y-3">
+            {bookingData.payments.map((payment) => (
+              <div key={payment.paymentId} className="bg-gray-50 p-4 rounded-lg">
+                <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm text-gray-600">Primary Guest</p>
-                    <p className="font-medium text-gray-900">
-                      {bookingData.primaryGuestName || "Not provided"}
+                    <h3 className="font-medium text-gray-900 capitalize">
+                      {payment.paymentType.replace('_', ' ')}
+                    </h3>
+                    <p className="text-sm text-gray-600 capitalize">
+                      {payment.paymentMethod} • {payment.paymentCategory}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {formatDateTime(payment.paymentDateTime)}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Processed by: {payment.processedBy}
                     </p>
                   </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <Phone className="h-4 w-4 text-gray-500" />
-                  <div>
-                    <p className="text-sm text-gray-600">Contact</p>
-                    <p className="font-medium text-gray-900">
-                      {bookingData.primaryGuestContact || "Not provided"}
+                  <div className="text-right">
+                    <p className="font-semibold text-green-700">
+                      {formatCurrency(payment.amount)}
                     </p>
+                    <StatusBadge status={payment.paymentStatus} />
                   </div>
                 </div>
-
-                <div className="flex items-center gap-3">
-                  <Mail className="h-4 w-4 text-gray-500" />
-                  <div>
-                    <p className="text-sm text-gray-600">Email</p>
-                    <p className="font-medium text-gray-900">
-                      {bookingData.primaryGuestEmail || "Not provided"}
-                    </p>
-                  </div>
-                </div>
+                {payment.notes && (
+                  <p className="text-sm text-gray-600 mt-2">
+                    Note: {payment.notes}
+                  </p>
+                )}
               </div>
-            </div>
-
-            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-              <h3 className="font-medium text-blue-900 mb-2">
-                Special Requests
-              </h3>
-              <p className="text-sm text-gray-700">
-                {bookingData.specialRequests || "None"}
-              </p>
-            </div>
-
-            <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-              <h3 className="font-medium text-yellow-900 mb-2">Guest Notes</h3>
-              <p className="text-sm text-gray-700">
-                {bookingData.guestNotes || "None"}
-              </p>
-            </div>
+            ))}
           </div>
         </div>
 
@@ -485,7 +442,74 @@ const BookingInformation = ({ bookingData }) => {
             </div>
           </div>
         </div>
+
+        {/* Guest Information */}
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <User className="h-5 w-5 text-purple-600" />
+            Guest Information
+          </h2>
+
+          <div className="space-y-4">
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <div className="grid grid-cols-1 gap-3">
+                <div className="flex items-center gap-3">
+                  <User className="h-4 w-4 text-gray-500" />
+                  <div>
+                    <p className="text-sm text-gray-600">Primary Guest</p>
+                    <p className="font-medium text-gray-900">
+                      {bookingData.primaryGuestName || "Not provided"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <Phone className="h-4 w-4 text-gray-500" />
+                  <div>
+                    <p className="text-sm text-gray-600">Contact</p>
+                    <p className="font-medium text-gray-900">
+                      {bookingData.primaryGuestContact || "Not provided"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <Mail className="h-4 w-4 text-gray-500" />
+                  <div>
+                    <p className="text-sm text-gray-600">Email</p>
+                    <p className="font-medium text-gray-900">
+                      {bookingData.primaryGuestEmail || "Not provided"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+              <h3 className="font-medium text-blue-900 mb-2">
+                Special Requests
+              </h3>
+              <p className="text-sm text-gray-700">
+                {bookingData.specialRequests || "None"}
+              </p>
+            </div>
+
+            <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+              <h3 className="font-medium text-yellow-900 mb-2">Guest Notes</h3>
+              <p className="text-sm text-gray-700">
+                {bookingData.guestNotes || "None"}
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
+
+      <Drawer placement="right" open={isModalOpen} onClose={() => setIsModalOpen(false)} title="Additional Services" width={"50%"} footer={<Button size="large" block type="primary" onClick={() => setIsModalOpen(false)}>PROCEED TO PAYMENT</Button>} >
+        <AdditionalServicesSelector
+          selectedServices={selectedServices}
+          onServicesChange={setSelectedServices}
+        />
+      </Drawer>
     </div>
   );
 };
