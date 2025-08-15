@@ -3153,7 +3153,7 @@ const SuperAdminCMS = () => {
       </Sider>
 
       <Layout className=" h-screen">
-        <Header style={{ backgroundColor: "white" }} className="bg-white shadow-sm px-4 flex items-center justify-between">
+        <Header style={{ backgroundColor: "white", padding: '0 20px 0 20px' }} className="bg-white shadow-sm flex items-center justify-between">
           <Button
             type="text"
             icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
@@ -3162,7 +3162,6 @@ const SuperAdminCMS = () => {
           />
 
           <div className="flex items-center space-x-4">
-
             <Popover
               content={
                 <Card>
@@ -3197,8 +3196,6 @@ const SuperAdminCMS = () => {
             >
               <Text className="text-gray-600 capitalize">Welcome, {[userData.firstName, userData.lastName].join(" ")}</Text>
             </Popover>
-
-
             {/* <Button icon={<SettingOutlined />} type="text" /> */}
           </div>
         </Header>
