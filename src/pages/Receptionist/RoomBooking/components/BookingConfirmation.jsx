@@ -1,6 +1,6 @@
 import { Card, Select, Typography } from "antd";
-import { PAYMENT_METHODS } from "../../lib/constants";
-import PaymentSummary from "./PaymentSummary";
+import { PAYMENT_METHODS } from "../../../../lib/constants";
+import PaymentSummary from "../../../../components/features/PaymentSummary";
 
 const { Text } = Typography;
 const BookingConfirmation = ({
