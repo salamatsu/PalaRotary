@@ -24,8 +24,8 @@ import {
   XCircle,
 } from "lucide-react";
 import { memo, useCallback, useMemo, useState } from "react";
-import BookingConfirmation from "../../../components/features/BookingConfirmation";
-import BookingInformation from "../../../components/features/BookingInformation";
+import BookingConfirmation from "./components/BookingConfirmation";
+import BookingInformation from "./components/BookingInformation";
 import StatusTag from "../../../components/features/StatusTag";
 import { ROOM_STATUSES, STATUS_CONFIGS } from "../../../lib/constants";
 import {
@@ -153,10 +153,11 @@ const RoomCard = memo(({ room, isSelected, onSelect }) => {
 
   return (
     <div
-      className={`min-w-[280px] bg-white rounded-2xl shadow-lg border-2 transition-all duration-300 cursor-pointer hover:shadow-xl hover:scale-105 transform ${isSelected
-        ? "border-red-400 ring-4 ring-red-100 shadow-xl scale-105"
-        : "border-gray-100 hover:border-red-300"
-        } ${!isAvailable ? "opacity-75" : ""}`}
+      className={`min-w-[280px] bg-white rounded-2xl shadow-lg border-2 transition-all duration-300 cursor-pointer hover:shadow-xl hover:scale-105 transform ${
+        isSelected
+          ? "border-red-400 ring-4 ring-red-100 shadow-xl scale-105"
+          : "border-gray-100 hover:border-red-300"
+      } ${!isAvailable ? "opacity-75" : ""}`}
       onClick={() => onSelect(room)}
     >
       <div className="relative overflow-hidden rounded-t-2xl">
@@ -624,7 +625,6 @@ const RoomBooking = () => {
           </div>
         </div>
 
-
         <div className="bg-white rounded-2xl shadow-xl border-0 p-8">
           <div className="flex items-center justify-between mb-8">
             <div>
@@ -734,7 +734,7 @@ const RoomBooking = () => {
             Object.keys(groupedRooms)
               .sort()
               .map((floor, index) => (
-                <div key={floor} >
+                <div key={floor}>
                   <div className="flex items-center gap-4 mb-6">
                     {/* <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
                       <span className="text-white font-bold text-lg">
@@ -762,11 +762,9 @@ const RoomBooking = () => {
                     ))}
                   </div>
 
-                  {
-                    index % 2 === 0 && (
-                      <div className="w-full h-0.5 bg-gradient-to-r from-blue-200 to-purple-200 my-4"></div>
-                    )
-                  }
+                  {index % 2 === 0 && (
+                    <div className="w-full h-0.5 bg-gradient-to-r from-blue-200 to-purple-200 my-4"></div>
+                  )}
                 </div>
               ))
           )}
@@ -776,7 +774,7 @@ const RoomBooking = () => {
           open={!!selectedRoom}
           onClose={() => setSelectedRoom(null)}
           placement="right"
-          width={'100%'}
+          width={"100%"}
           className="booking-drawer"
           title={
             <div className="flex items-center gap-4">

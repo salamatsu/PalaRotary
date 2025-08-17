@@ -14,47 +14,58 @@ import {
   Receipt,
   Plus,
 } from "lucide-react";
-import { Button, Drawer, Empty, Modal, Typography } from "antd";
-import AdditionalServicesSelector from "../../pages/Receptionist/RoomBooking/components/AdditionalServicesSelector";
+import { App, Button, Drawer, Empty, Modal, Typography } from "antd";
+import AdditionalServicesSelector from "./AdditionalServicesSelector";
 
 // StatusBadge component
 const StatusBadge = ({ status }) => {
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
-      case 'confirmed':
-        return 'bg-blue-100 text-blue-800';
-      case 'checked-in':
-        return 'bg-green-100 text-green-800';
-      case 'checked-out':
-        return 'bg-gray-100 text-gray-800';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800';
-      case 'paid':
-        return 'bg-green-100 text-green-800';
-      case 'partial':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'pending':
-        return 'bg-orange-100 text-orange-800';
-      case 'completed':
-        return 'bg-green-100 text-green-800';
-      case 'applied':
-        return 'bg-blue-100 text-blue-800';
+      case "confirmed":
+        return "bg-blue-100 text-blue-800";
+      case "checked-in":
+        return "bg-green-100 text-green-800";
+      case "checked-out":
+        return "bg-gray-100 text-gray-800";
+      case "cancelled":
+        return "bg-red-100 text-red-800";
+      case "paid":
+        return "bg-green-100 text-green-800";
+      case "partial":
+        return "bg-yellow-100 text-yellow-800";
+      case "pending":
+        return "bg-orange-100 text-orange-800";
+      case "completed":
+        return "bg-green-100 text-green-800";
+      case "applied":
+        return "bg-blue-100 text-blue-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   return (
-    <span className={`inline-flex px-2 py-1 text-sm rounded-full font-medium capitalize ${getStatusColor(status)}`}>
-      {status || 'Unknown'}
+    <span
+      className={`inline-flex px-2 py-1 text-sm rounded-full font-medium capitalize ${getStatusColor(
+        status
+      )}`}
+    >
+      {status || "Unknown"}
     </span>
   );
 };
 
 const BookingInformation = ({ bookingData }) => {
-
   const [selectedServices, setSelectedServices] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { modal } = App.useApp();
+
+  const isPending = false;
+
+  const totalSelectedValue = selectedServices.reduce(
+    (sum, service) => sum + service.totalAmount,
+    0
+  );
 
   const formatDateTime = (dateTime) => {
     if (!dateTime) return "Not set";
@@ -73,6 +84,38 @@ const BookingInformation = ({ bookingData }) => {
       minimumFractionDigits: 2,
     })}`;
   };
+  const handleConfirmPayment = async () => {
+    modal.confirm({
+      className: "booking-modal",
+      footer: (
+        <div className="flex gap-3">
+          <Button
+            block
+            size="large"
+            // onClick={}
+            // disabled={isPending}
+            className="rounded-lg"
+            htmlType="button"
+          >
+            Cancel
+          </Button>
+          <Button
+            block
+            size="large"
+            type="primary"
+            loading={isPending}
+            onClick={() => {}}
+            icon={<CreditCard className="w-4 h-4" />}
+            className="rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 border-0"
+          >
+            {isPending
+              ? "Processing Payment..."
+              : `Pay ${formatCurrency(totalSelectedValue)}`}
+          </Button>
+        </div>
+      ),
+    });
+  };
 
   return (
     <div className="w-full mx-auto min-h-screen">
@@ -81,7 +124,13 @@ const BookingInformation = ({ bookingData }) => {
         {/* Booking Reference */}
         <div className="mb-4 text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Booking Ref No# : <Typography.Text style={{ fontSize: "1.25rem", fontWeight: 'bolder' }} strong>{bookingData.bookingReference}</Typography.Text>
+            Booking Ref No# :{" "}
+            <Typography.Text
+              style={{ fontSize: "1.25rem", fontWeight: "bolder" }}
+              strong
+            >
+              {bookingData.bookingReference}
+            </Typography.Text>
           </h1>
           <div className="flex justify-center gap-4">
             <StatusBadge status={bookingData?.bookingStatus} />
@@ -244,7 +293,9 @@ const BookingInformation = ({ bookingData }) => {
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-600 font-semibold">Total Paid</p>
+                <p className="text-sm text-gray-600 font-semibold">
+                  Total Paid
+                </p>
                 <p className="font-semibold text-green-700">
                   {formatCurrency(bookingData.totalPaid)}
                 </p>
@@ -263,10 +314,11 @@ const BookingInformation = ({ bookingData }) => {
               <div className="flex justify-between items-center">
                 <p className="text-sm text-gray-600">Balance</p>
                 <p
-                  className={`font-semibold ${bookingData.balanceAmount > 0
-                    ? "text-red-600"
-                    : "text-green-600"
-                    }`}
+                  className={`font-semibold ${
+                    bookingData.balanceAmount > 0
+                      ? "text-red-600"
+                      : "text-green-600"
+                  }`}
                 >
                   {formatCurrency(bookingData.balanceAmount)}
                 </p>
@@ -283,58 +335,67 @@ const BookingInformation = ({ bookingData }) => {
             <ShoppingCart className="h-5 w-5 text-indigo-600" />
             Additional Charges
           </h2>
-          {
-            bookingData.additionalCharges.length > 0 ?
-              <div className="space-y-3">
-                {bookingData.additionalCharges.map((charge) => (
-                  <div key={charge.chargeId} className="bg-gray-50 p-4 rounded-lg">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-medium text-gray-900">
-                          {charge.serviceName}
-                        </h3>
-                        <p className="text-sm text-gray-600">
-                          {charge.itemDescription}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          Qty: {charge.quantity} × {formatCurrency(charge.unitPrice)}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-semibold text-gray-900">
-                          {formatCurrency(charge.totalAmount)}
-                        </p>
-                        <StatusBadge status={charge.status} />
-                      </div>
+          {bookingData.additionalCharges.length > 0 ? (
+            <div className="space-y-3">
+              {bookingData.additionalCharges.map((charge) => (
+                <div
+                  key={charge.chargeId}
+                  className="bg-gray-50 p-4 rounded-lg"
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-medium text-gray-900">
+                        {charge.serviceName}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {charge.itemDescription}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Qty: {charge.quantity} ×{" "}
+                        {formatCurrency(charge.unitPrice)}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold text-gray-900">
+                        {formatCurrency(charge.totalAmount)}
+                      </p>
+                      <StatusBadge status={charge.status} />
                     </div>
                   </div>
-                ))}
-
-                <div className="border-t pt-3 mt-3">
-                  <div className="flex justify-between items-center">
-                    <p className="font-semibold text-gray-900">
-                      Total Additional Charges
-                    </p>
-                    <p className="font-semibold text-gray-900">
-                      {formatCurrency(
-                        bookingData.additionalCharges.reduce(
-                          (sum, charge) => sum + charge.totalAmount,
-                          0
-                        )
-                      )}
-                    </p>
-                  </div>
                 </div>
+              ))}
 
+              <div className="border-t pt-3 mt-3">
+                <div className="flex justify-between items-center">
+                  <p className="font-semibold text-gray-900">
+                    Total Additional Charges
+                  </p>
+                  <p className="font-semibold text-gray-900">
+                    {formatCurrency(
+                      bookingData.additionalCharges.reduce(
+                        (sum, charge) => sum + charge.totalAmount,
+                        0
+                      )
+                    )}
+                  </p>
+                </div>
               </div>
-              :
-              (
-                <div className="text-center h-full flex items-center justify-center ">
-                  <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="No additional charges" />
-                </div>
-              )
-          }
-          <Button size="large" type="primary" onClick={() => setIsModalOpen(true)} ><Plus /> ADD</Button>
+            </div>
+          ) : (
+            <div className="text-center h-full flex items-center justify-center ">
+              <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                description="No additional charges"
+              />
+            </div>
+          )}
+          <Button
+            size="large"
+            type="primary"
+            onClick={() => setIsModalOpen(true)}
+          >
+            <Plus /> ADD
+          </Button>
         </div>
 
         {/* Payment History */}
@@ -348,11 +409,14 @@ const BookingInformation = ({ bookingData }) => {
 
           <div className="space-y-3">
             {bookingData.payments.map((payment) => (
-              <div key={payment.paymentId} className="bg-gray-50 p-4 rounded-lg">
+              <div
+                key={payment.paymentId}
+                className="bg-gray-50 p-4 rounded-lg"
+              >
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="font-medium text-gray-900 capitalize">
-                      {payment.paymentType.replace('_', ' ')}
+                      {payment.paymentType.replace("_", " ")}
                     </h3>
                     <p className="text-sm text-gray-600 capitalize">
                       {payment.paymentMethod} • {payment.paymentCategory}
@@ -504,7 +568,23 @@ const BookingInformation = ({ bookingData }) => {
         </div>
       </div>
 
-      <Drawer placement="right" open={isModalOpen} onClose={() => setIsModalOpen(false)} title="Additional Services" width={"50%"} footer={<Button size="large" block type="primary" onClick={() => setIsModalOpen(false)}>PROCEED TO PAYMENT</Button>} >
+      <Drawer
+        placement="right"
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Additional Services"
+        width={"50%"}
+        footer={
+          <Button
+            size="large"
+            block
+            type="primary"
+            onClick={handleConfirmPayment}
+          >
+            PROCEED TO PAYMENT
+          </Button>
+        }
+      >
         <AdditionalServicesSelector
           selectedServices={selectedServices}
           onServicesChange={setSelectedServices}
