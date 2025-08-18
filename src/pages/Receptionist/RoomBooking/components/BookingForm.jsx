@@ -1,17 +1,20 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { useGetRoomsRates } from "../../../../services/requests/useRooms";
-import { App, Button, Card, Collapse, Drawer, Image, InputNumber, Tag } from "antd";
+import { App, Button, Card, Drawer, Image, InputNumber, Tag } from "antd";
 import dayjs from "dayjs";
 import { Calculator, CreditCard, Gift, Plus, User } from "lucide-react";
-import { formatCurrency } from "../../../../utils/formatCurrency";
-import PromoCodeInput from "./PromoCodeInput";
-import AdditionalServicesSelector from "./AdditionalServicesSelector";
+import { useCallback, useEffect, useState } from "react";
 import PaymentSummary from "../../../../components/features/PaymentSummary";
+import { useGetRoomsRates } from "../../../../services/requests/useRooms";
+import { formatCurrency } from "../../../../utils/formatCurrency";
+import AdditionalServicesSelector from "./AdditionalServicesSelector";
+import PromoCodeInput from "./PromoCodeInput";
 
-const { Panel } = Collapse;
-
-const BookingForm = ({ selectedRoom, bookingDetails, onBookingChange, onBook }) => {
-  const { notification } = App.useApp()
+const BookingForm = ({
+  selectedRoom,
+  bookingDetails,
+  onBookingChange,
+  onBook,
+}) => {
+  const { notification } = App.useApp();
   const [selectedRate, setSelectedRate] = useState(null);
   const [appliedPromo, setAppliedPromo] = useState(null);
   const [selectedServices, setSelectedServices] = useState([]);
@@ -43,7 +46,6 @@ const BookingForm = ({ selectedRoom, bookingDetails, onBookingChange, onBook }) 
 
   return (
     <div className=" mx-auto">
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Room Details Card */}
         <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300">
@@ -71,7 +73,9 @@ const BookingForm = ({ selectedRoom, bookingDetails, onBookingChange, onBook }) 
               </p>
               <div className="flex items-center gap-2 text-sm text-blue-600 bg-blue-50 px-3 py-2 rounded-lg">
                 <User className="w-4 h-4" />
-                <span>Max occupancy: {selectedRoom?.maxOccupancy || 2} guests</span>
+                <span>
+                  Max occupancy: {selectedRoom?.maxOccupancy || 2} guests
+                </span>
               </div>
             </div>
 
@@ -104,7 +108,9 @@ const BookingForm = ({ selectedRoom, bookingDetails, onBookingChange, onBook }) 
             </div>
             <div>
               <h3 className="text-lg font-bold text-gray-900">Select Rate</h3>
-              <p className="text-sm text-gray-600">Choose your preferred rate plan</p>
+              <p className="text-sm text-gray-600">
+                Choose your preferred rate plan
+              </p>
             </div>
           </div>
 
@@ -112,16 +118,16 @@ const BookingForm = ({ selectedRoom, bookingDetails, onBookingChange, onBook }) 
             {/* <div className="space-y-3 max-h-80 overflow-y-auto mb-6"> */}
             {getRoomsRates.data
               .filter(
-                ({ dayType }) =>
-                  dayType === "all" || dayType === currentDayType
+                ({ dayType }) => dayType === "all" || dayType === currentDayType
               )
               .map((rate) => (
                 <div
                   key={rate.rateId}
-                  className={`relative border-2 rounded-xl p-4 cursor-pointer transition-all duration-300 group ${selectedRate?.rateId === rate.rateId
-                    ? "border-blue-400 bg-gradient-to-br from-blue-50 to-indigo-50 shadow-lg scale-[1.02]"
-                    : "border-gray-200 hover:border-blue-300 hover:shadow-md hover:scale-[1.01]"
-                    }`}
+                  className={`relative border-2 rounded-xl p-4 cursor-pointer transition-all duration-300 group ${
+                    selectedRate?.rateId === rate.rateId
+                      ? "border-blue-400 bg-gradient-to-br from-blue-50 to-indigo-50 shadow-lg scale-[1.02]"
+                      : "border-gray-200 hover:border-blue-300 hover:shadow-md hover:scale-[1.01]"
+                  }`}
                   onClick={() => setSelectedRate(rate)}
                 >
                   {selectedRate?.rateId === rate.rateId && (
@@ -160,7 +166,9 @@ const BookingForm = ({ selectedRoom, bookingDetails, onBookingChange, onBook }) 
                 <Gift className="w-5 h-5 text-purple-600" />
               </div>
               <div>
-                <h4 className="text-sm font-semibold text-gray-700">Promo Code</h4>
+                <h4 className="text-sm font-semibold text-gray-700">
+                  Promo Code
+                </h4>
                 <p className="text-xs text-gray-500">Apply a discount code</p>
               </div>
             </div>
@@ -178,9 +186,17 @@ const BookingForm = ({ selectedRoom, bookingDetails, onBookingChange, onBook }) 
           <div className="space-y-6">
             {/* Additional Services */}
             <div>
-              <Button block size="large" onClick={() => setIsModalOpen(true)} type="dashed" className="rounded-xl h-14 font-bold text-base transition-all duration-300 hover:bg-orange-50 hover:border-orange-200 hover:shadow-lg hover:scale-[1.02]">
+              <Button
+                block
+                size="large"
+                onClick={() => setIsModalOpen(true)}
+                type="dashed"
+                className="rounded-xl h-14 font-bold text-base transition-all duration-300 hover:bg-orange-50 hover:border-orange-200 hover:shadow-lg hover:scale-[1.02]"
+              >
                 <Plus className="w-4 h-4 text-orange-600" />
-                <span className="font-semibold text-gray-900">Additional Services</span>
+                <span className="font-semibold text-gray-900">
+                  Additional Services
+                </span>
                 {selectedServices.length > 0 && (
                   <div className="flex items-center gap-2 mt-1">
                     <Tag color="blue" className="rounded-full text-xs">
@@ -209,12 +225,15 @@ const BookingForm = ({ selectedRoom, bookingDetails, onBookingChange, onBook }) 
                 disabled={!selectedRate}
                 onClick={handleBookClick}
                 icon={<Calculator className="w-5 h-5" />}
-                className={`rounded-xl h-14 font-bold text-base transition-all duration-300 ${selectedRate
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 border-0 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transform hover:scale-[1.02]'
-                  : 'bg-gray-300'
-                  }`}
+                className={`rounded-xl h-14 font-bold text-base transition-all duration-300 ${
+                  selectedRate
+                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 border-0 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                    : "bg-gray-300"
+                }`}
               >
-                {selectedRate ? "Complete Booking" : "Select a Rate to Continue"}
+                {selectedRate
+                  ? "Complete Booking"
+                  : "Select a Rate to Continue"}
               </Button>
 
               {!selectedRate && (
@@ -227,16 +246,20 @@ const BookingForm = ({ selectedRoom, bookingDetails, onBookingChange, onBook }) 
         </Card>
       </div>
 
-      <Drawer placement="right" open={isModalOpen} onClose={() => setIsModalOpen(false)} title="Additional Services" size="large">
-
+      <Drawer
+        placement="right"
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Additional Services"
+        size="large"
+      >
         <AdditionalServicesSelector
           selectedServices={selectedServices}
+          setSelectedServices={setSelectedServices}
           onServicesChange={setSelectedServices}
-          showHeader={false}
         />
       </Drawer>
     </div>
-
   );
 };
 

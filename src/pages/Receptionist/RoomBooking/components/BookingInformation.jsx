@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Building,
   Calendar,
@@ -14,8 +14,19 @@ import {
   Receipt,
   Plus,
 } from "lucide-react";
-import { App, Button, Drawer, Empty, Modal, Typography } from "antd";
+import {
+  App,
+  Button,
+  Card,
+  Drawer,
+  Empty,
+  Modal,
+  Select,
+  Typography,
+} from "antd";
 import AdditionalServicesSelector from "./AdditionalServicesSelector";
+import { PAYMENT_METHODS } from "../../../../lib/constants";
+const { Text } = Typography;
 
 // StatusBadge component
 const StatusBadge = ({ status }) => {
@@ -56,9 +67,13 @@ const StatusBadge = ({ status }) => {
 };
 
 const BookingInformation = ({ bookingData }) => {
+  const { modal } = App.useApp();
+
   const [selectedServices, setSelectedServices] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { modal } = App.useApp();
+  const [paymentMethod, setPaymentMethod] = useState(
+    PAYMENT_METHODS[0]?.value || "cash"
+  );
 
   const isPending = false;
 
@@ -85,17 +100,65 @@ const BookingInformation = ({ bookingData }) => {
     })}`;
   };
   const handleConfirmPayment = async () => {
-    modal.confirm({
+    const currentModal = modal.confirm({
       className: "booking-modal",
+      width: 700,
+      content: (
+        <div className=" mb-4">
+          <h2 className="text-lg font-semibold mb-4">Confirm Payment</h2>
+
+          {/* Payment Method */}
+          <Card size="small" title="Payment Method">
+            <Select
+              value={paymentMethod}
+              onChange={setPaymentMethod}
+              className="w-full"
+              options={PAYMENT_METHODS}
+            />
+          </Card>
+
+          <div className="bg-gray-50 rounded-lg p-4 mt-4">
+            {selectedServices.length > 0 && (
+              <>
+                <div className="flex justify-between">
+                  <Text className=" font-semibold">Additional Services</Text>
+                </div>
+                <div className="space-y-1">
+                  {selectedServices.map((service, index) => (
+                    <div
+                      key={`service-${index}`}
+                      className="grid grid-cols-12 text-sm text-gray-600"
+                    >
+                      <div className=" col-span-9">
+                        <Text>
+                          {service.serviceName}
+                          {service.isPerItem == 1 && ` × ${service.quantity}`}
+                        </Text>
+                      </div>
+                      <div className="col-span-3 text-right ">
+                        <Text>{formatCurrency(service.totalAmount)}</Text>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+            <div className=" flex justify-between mt-4 border-t pt-4">
+              <Text className="font-bold">Total Amount</Text>
+              <Text className="font-semibold">
+                {formatCurrency(totalSelectedValue)}?
+              </Text>
+            </div>
+          </div>
+        </div>
+      ),
       footer: (
         <div className="flex gap-3">
           <Button
             block
             size="large"
-            // onClick={}
-            // disabled={isPending}
             className="rounded-lg"
-            htmlType="button"
+            onClick={() => currentModal.destroy()}
           >
             Cancel
           </Button>
@@ -116,6 +179,10 @@ const BookingInformation = ({ bookingData }) => {
       ),
     });
   };
+
+  useEffect(() => {
+    setSelectedServices([]);
+  }, [bookingData]);
 
   return (
     <div className="w-full mx-auto min-h-screen">
@@ -442,6 +509,20 @@ const BookingInformation = ({ bookingData }) => {
                 )}
               </div>
             ))}
+
+            <div className="border-t pt-3 mt-3">
+              <div className="flex justify-between items-center">
+                <p className="font-semibold text-gray-900">Total Amount</p>
+                <p className="font-semibold text-gray-900">
+                  {formatCurrency(
+                    bookingData.payments.reduce(
+                      (sum, payment) => sum + payment.amount,
+                      0
+                    )
+                  )}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -580,6 +661,7 @@ const BookingInformation = ({ bookingData }) => {
             block
             type="primary"
             onClick={handleConfirmPayment}
+            disabled={selectedServices.length === 0}
           >
             PROCEED TO PAYMENT
           </Button>
@@ -587,6 +669,7 @@ const BookingInformation = ({ bookingData }) => {
       >
         <AdditionalServicesSelector
           selectedServices={selectedServices}
+          setSelectedServices={setSelectedServices}
           onServicesChange={setSelectedServices}
         />
       </Drawer>

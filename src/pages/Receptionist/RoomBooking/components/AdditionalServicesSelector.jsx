@@ -1,13 +1,34 @@
 import React, { useState, useMemo } from "react";
 import { useGetAllAdditionalServices } from "../../../../services/requests/useAdditionalServices";
-import { Checkbox, InputNumber, Spin, Typography, Select, Input, Button, Tag, Card, Badge } from "antd";
-import { SearchOutlined, FilterOutlined, ClearOutlined, ShoppingOutlined, DollarCircleOutlined } from "@ant-design/icons";
+import {
+  Checkbox,
+  InputNumber,
+  Spin,
+  Typography,
+  Select,
+  Input,
+  Button,
+  Tag,
+  Card,
+  Badge,
+} from "antd";
+import {
+  SearchOutlined,
+  FilterOutlined,
+  ClearOutlined,
+  ShoppingOutlined,
+  DollarCircleOutlined,
+} from "@ant-design/icons";
 import { formatCurrency } from "../../../../utils/formatCurrency";
 
 const { Text, Title } = Typography;
 const { Option } = Select;
 
-const AdditionalServicesSelector = ({ selectedServices, onServicesChange, showHeader = true }) => {
+const AdditionalServicesSelector = ({
+  selectedServices,
+  setSelectedServices,
+  onServicesChange,
+}) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [priceRange, setPriceRange] = useState("all");
@@ -18,7 +39,11 @@ const AdditionalServicesSelector = ({ selectedServices, onServicesChange, showHe
   // Get unique service types for category filter
   const serviceTypes = useMemo(() => {
     if (!getAllAdditionalServices.data) return [];
-    const types = [...new Set(getAllAdditionalServices.data.map(service => service.serviceType))];
+    const types = [
+      ...new Set(
+        getAllAdditionalServices.data.map((service) => service.serviceType)
+      ),
+    ];
     return types.sort();
   }, [getAllAdditionalServices.data]);
 
@@ -30,19 +55,21 @@ const AdditionalServicesSelector = ({ selectedServices, onServicesChange, showHe
 
     // Search filter
     if (searchTerm) {
-      filtered = filtered.filter(service =>
+      filtered = filtered.filter((service) =>
         service.serviceName.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
     // Category filter
     if (selectedCategory !== "all") {
-      filtered = filtered.filter(service => service.serviceType === selectedCategory);
+      filtered = filtered.filter(
+        (service) => service.serviceType === selectedCategory
+      );
     }
 
     // Price range filter
     if (priceRange !== "all") {
-      filtered = filtered.filter(service => {
+      filtered = filtered.filter((service) => {
         switch (priceRange) {
           case "free":
             return service.basePrice === 0;
@@ -62,11 +89,17 @@ const AdditionalServicesSelector = ({ selectedServices, onServicesChange, showHe
 
     // Per item filter
     if (showOnlyPerItem) {
-      filtered = filtered.filter(service => service.isPerItem === 1);
+      filtered = filtered.filter((service) => service.isPerItem === 1);
     }
 
     return filtered;
-  }, [getAllAdditionalServices.data, searchTerm, selectedCategory, priceRange, showOnlyPerItem]);
+  }, [
+    getAllAdditionalServices.data,
+    searchTerm,
+    selectedCategory,
+    priceRange,
+    showOnlyPerItem,
+  ]);
 
   const handleServiceToggle = (service, checked) => {
     if (checked) {
@@ -88,10 +121,10 @@ const AdditionalServicesSelector = ({ selectedServices, onServicesChange, showHe
       selectedServices.map((service) =>
         service.serviceId === serviceId
           ? {
-            ...service,
-            quantity,
-            totalAmount: service.basePrice * quantity,
-          }
+              ...service,
+              quantity,
+              totalAmount: service.basePrice * quantity,
+            }
           : service
       )
     );
@@ -112,9 +145,16 @@ const AdditionalServicesSelector = ({ selectedServices, onServicesChange, showHe
     setShowOnlyPerItem(false);
   };
 
-  const hasActiveFilters = searchTerm || selectedCategory !== "all" || priceRange !== "all" || showOnlyPerItem;
+  const hasActiveFilters =
+    searchTerm ||
+    selectedCategory !== "all" ||
+    priceRange !== "all" ||
+    showOnlyPerItem;
 
-  const totalSelectedValue = selectedServices.reduce((sum, service) => sum + service.totalAmount, 0);
+  const totalSelectedValue = selectedServices.reduce(
+    (sum, service) => sum + service.totalAmount,
+    0
+  );
 
   if (getAllAdditionalServices.isPending)
     return (
@@ -134,7 +174,8 @@ const AdditionalServicesSelector = ({ selectedServices, onServicesChange, showHe
             Additional Services
           </Title>
           <Text className="text-gray-600">
-            Choose from {getAllAdditionalServices.data?.length || 0} available services
+            Choose from {getAllAdditionalServices.data?.length || 0} available
+            services
           </Text>
         </div>
 
@@ -144,7 +185,10 @@ const AdditionalServicesSelector = ({ selectedServices, onServicesChange, showHe
             className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 shadow-sm min-w-fit"
           >
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-center sm:text-left">
-              <Badge count={selectedServices.length} className="hidden sm:inline-block">
+              <Badge
+                count={selectedServices.length}
+                className="hidden sm:inline-block"
+              >
                 <Button type="text" size="small" icon={<ShoppingOutlined />} />
               </Badge>
               <div className="sm:hidden">
@@ -154,7 +198,8 @@ const AdditionalServicesSelector = ({ selectedServices, onServicesChange, showHe
               </div>
               <div className="hidden sm:block">
                 <Text strong className="text-blue-600">
-                  {selectedServices.length} service{selectedServices.length !== 1 ? 's' : ''} selected
+                  {selectedServices.length} service
+                  {selectedServices.length !== 1 ? "s" : ""} selected
                 </Text>
               </div>
               <div className="flex items-center gap-1">
@@ -163,6 +208,13 @@ const AdditionalServicesSelector = ({ selectedServices, onServicesChange, showHe
                   {formatCurrency(totalSelectedValue)}
                 </Text>
               </div>
+              <Button
+                onClick={() => setSelectedServices([])}
+                danger
+                type="text"
+              >
+                Clear
+              </Button>
             </div>
           </Card>
         )}
@@ -174,7 +226,9 @@ const AdditionalServicesSelector = ({ selectedServices, onServicesChange, showHe
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="flex items-center gap-2">
               <FilterOutlined className="text-blue-500" />
-              <Text strong className="text-base">Filters</Text>
+              <Text strong className="text-base">
+                Filters
+              </Text>
               {hasActiveFilters && (
                 <Badge dot>
                   <span></span>
@@ -198,7 +252,9 @@ const AdditionalServicesSelector = ({ selectedServices, onServicesChange, showHe
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Search */}
             <div className="space-y-2">
-              <Text className="text-sm font-medium text-gray-700">Search Services</Text>
+              <Text className="text-sm font-medium text-gray-700">
+                Search Services
+              </Text>
               <Input
                 placeholder="Search by name..."
                 prefix={<SearchOutlined className="text-gray-400" />}
@@ -211,7 +267,9 @@ const AdditionalServicesSelector = ({ selectedServices, onServicesChange, showHe
 
             {/* Category Filter */}
             <div className="space-y-2">
-              <Text className="text-sm font-medium text-gray-700">Category</Text>
+              <Text className="text-sm font-medium text-gray-700">
+                Category
+              </Text>
               <Select
                 value={selectedCategory}
                 onChange={setSelectedCategory}
@@ -223,7 +281,7 @@ const AdditionalServicesSelector = ({ selectedServices, onServicesChange, showHe
                     <span>All Categories</span>
                   </span>
                 </Option>
-                {serviceTypes.map(type => (
+                {serviceTypes.map((type) => (
                   <Option key={type} value={type}>
                     {type.charAt(0).toUpperCase() + type.slice(1).toLowerCase()}
                   </Option>
@@ -233,7 +291,9 @@ const AdditionalServicesSelector = ({ selectedServices, onServicesChange, showHe
 
             {/* Price Range Filter */}
             <div className="space-y-2">
-              <Text className="text-sm font-medium text-gray-700">Price Range</Text>
+              <Text className="text-sm font-medium text-gray-700">
+                Price Range
+              </Text>
               <Select
                 value={priceRange}
                 onChange={setPriceRange}
@@ -251,7 +311,9 @@ const AdditionalServicesSelector = ({ selectedServices, onServicesChange, showHe
 
             {/* Per Item Filter */}
             <div className="space-y-2">
-              <Text className="text-sm font-medium text-gray-700">Service Type</Text>
+              <Text className="text-sm font-medium text-gray-700">
+                Service Type
+              </Text>
               <div className="flex items-center h-8">
                 <Checkbox
                   checked={showOnlyPerItem}
@@ -268,7 +330,9 @@ const AdditionalServicesSelector = ({ selectedServices, onServicesChange, showHe
           {hasActiveFilters && (
             <div className="pt-4 border-t border-gray-100">
               <div className="flex flex-wrap items-center gap-2">
-                <Text className="text-sm text-gray-600 font-medium">Active filters:</Text>
+                <Text className="text-sm text-gray-600 font-medium">
+                  Active filters:
+                </Text>
                 {searchTerm && (
                   <Tag
                     closable
@@ -284,7 +348,9 @@ const AdditionalServicesSelector = ({ selectedServices, onServicesChange, showHe
                     onClose={() => setSelectedCategory("all")}
                     className="rounded-full bg-green-50 border-green-200 text-green-700"
                   >
-                    Category: {selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1).toLowerCase()}
+                    Category:{" "}
+                    {selectedCategory.charAt(0).toUpperCase() +
+                      selectedCategory.slice(1).toLowerCase()}
                   </Tag>
                 )}
                 {priceRange !== "all" && (
@@ -293,10 +359,16 @@ const AdditionalServicesSelector = ({ selectedServices, onServicesChange, showHe
                     onClose={() => setPriceRange("all")}
                     className="rounded-full bg-purple-50 border-purple-200 text-purple-700"
                   >
-                    Price: {priceRange === "free" ? "Free" :
-                      priceRange === "low" ? "$1-$100" :
-                        priceRange === "medium" ? "$101-$500" :
-                          priceRange === "high" ? "$501-$1,000" : "$1,000+"}
+                    Price:{" "}
+                    {priceRange === "free"
+                      ? "Free"
+                      : priceRange === "low"
+                      ? "$1-$100"
+                      : priceRange === "medium"
+                      ? "$101-$500"
+                      : priceRange === "high"
+                      ? "$501-$1,000"
+                      : "$1,000+"}
                   </Tag>
                 )}
                 {showOnlyPerItem && (
@@ -318,7 +390,10 @@ const AdditionalServicesSelector = ({ selectedServices, onServicesChange, showHe
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-1">
         <Text className="text-gray-600">
           <span className="font-medium">{filteredServices.length}</span> of{" "}
-          <span className="font-medium">{getAllAdditionalServices.data?.length || 0}</span> services
+          <span className="font-medium">
+            {getAllAdditionalServices.data?.length || 0}
+          </span>{" "}
+          services
         </Text>
       </div>
 
@@ -329,16 +404,21 @@ const AdditionalServicesSelector = ({ selectedServices, onServicesChange, showHe
             <div className="space-y-4">
               <div className="text-6xl">🔍</div>
               <div>
-                <Title level={5} className="!mb-2 text-gray-600">No services found</Title>
+                <Title level={5} className="!mb-2 text-gray-600">
+                  No services found
+                </Title>
                 <Text className="text-gray-500">
                   {hasActiveFilters
                     ? "Try adjusting your filters to see more services"
-                    : "No services are currently available"
-                  }
+                    : "No services are currently available"}
                 </Text>
               </div>
               {hasActiveFilters && (
-                <Button type="primary" onClick={clearAllFilters} className="mt-4">
+                <Button
+                  type="primary"
+                  onClick={clearAllFilters}
+                  className="mt-4"
+                >
                   Clear All Filters
                 </Button>
               )}
@@ -354,10 +434,11 @@ const AdditionalServicesSelector = ({ selectedServices, onServicesChange, showHe
               return (
                 <Card
                   key={service.serviceId}
-                  className={`transition-all duration-300 hover:shadow-lg cursor-pointer border-2 ${isSelected
-                    ? 'border-blue-300 bg-gradient-to-r from-blue-50 to-indigo-50 shadow-md'
-                    : 'border-gray-200 hover:border-blue-200'
-                    }`}
+                  className={`transition-all duration-300 hover:shadow-lg cursor-pointer border-2 ${
+                    isSelected
+                      ? "border-blue-300 bg-gradient-to-r from-blue-50 to-indigo-50 shadow-md"
+                      : "border-gray-200 hover:border-blue-200"
+                  }`}
                   onClick={() => handleServiceToggle(service, !isSelected)}
                   size="small"
                 >
@@ -382,7 +463,8 @@ const AdditionalServicesSelector = ({ selectedServices, onServicesChange, showHe
                               color="blue"
                               className="rounded-full text-xs font-medium border-0 px-3"
                             >
-                              {service.serviceType.charAt(0).toUpperCase() + service.serviceType.slice(1).toLowerCase()}
+                              {service.serviceType.charAt(0).toUpperCase() +
+                                service.serviceType.slice(1).toLowerCase()}
                             </Tag>
                             {service.isPerItem === 1 && (
                               <Tag
@@ -407,10 +489,14 @@ const AdditionalServicesSelector = ({ selectedServices, onServicesChange, showHe
                       {/* Price Display */}
                       <div className="flex flex-col items-end text-right flex-shrink-0">
                         <Text className="text-xl font-bold text-blue-600">
-                          {service.basePrice === 0 ? "Free" : formatCurrency(service.basePrice)}
+                          {service.basePrice === 0
+                            ? "Free"
+                            : formatCurrency(service.basePrice)}
                         </Text>
                         {service.isPerItem === 1 && service.basePrice > 0 && (
-                          <Text className="text-xs text-gray-500 font-medium">per item</Text>
+                          <Text className="text-xs text-gray-500 font-medium">
+                            per item
+                          </Text>
                         )}
                       </div>
                     </div>
@@ -424,7 +510,9 @@ const AdditionalServicesSelector = ({ selectedServices, onServicesChange, showHe
                       >
                         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                           <div className="flex items-center gap-3 flex-1">
-                            <Text className="font-medium text-gray-700">Quantity:</Text>
+                            <Text className="font-medium text-gray-700">
+                              Quantity:
+                            </Text>
                             <InputNumber
                               min={1}
                               max={100}
@@ -440,7 +528,8 @@ const AdditionalServicesSelector = ({ selectedServices, onServicesChange, showHe
                             <Text className="text-gray-600">Total:</Text>
                             <Text className="text-lg font-bold text-green-600">
                               {formatCurrency(
-                                selectedService?.totalAmount || service.basePrice
+                                selectedService?.totalAmount ||
+                                  service.basePrice
                               )}
                             </Text>
                           </div>
