@@ -110,6 +110,7 @@ const CurrentBookedRoom = memo(({ room, onSelect }) => {
         <ExtendBooking
           bookingData={getBookingByRoomIdApi.data}
           request={getBookingByRoomIdApi}
+          callback={() => setIsShowExtend(false)}
         />
       </Drawer>
     </Drawer>

@@ -1,20 +1,3 @@
-import React, { useEffect, useState, useCallback, useMemo, memo } from "react";
-import {
-  Building,
-  Calendar,
-  Clock,
-  CreditCard,
-  FileText,
-  Mail,
-  MapPin,
-  Phone,
-  User,
-  Users,
-  ShoppingCart,
-  Receipt,
-  Plus,
-  Loader2,
-} from "lucide-react";
 import {
   App,
   Button,
@@ -22,15 +5,31 @@ import {
   Checkbox,
   Drawer,
   Empty,
-  Modal,
   Select,
-  Typography,
   Spin,
+  Typography,
   message,
 } from "antd";
-import AdditionalServicesSelector from "./AdditionalServicesSelector";
+import {
+  Building,
+  Calendar,
+  Clock,
+  CreditCard,
+  FileText,
+  Loader2,
+  Mail,
+  MapPin,
+  Phone,
+  Plus,
+  Receipt,
+  ShoppingCart,
+  User,
+  Users,
+} from "lucide-react";
+import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { PAYMENT_METHODS } from "../../../../lib/constants";
 import { useAddAdditionalServices } from "../../../../services/requests/useAdditionalServices";
+import AdditionalServicesSelector from "./AdditionalServicesSelector";
 
 const { Text } = Typography;
 
@@ -668,13 +667,43 @@ const BookingInformation = memo(({ bookingData, loading = false, request }) => {
                 </div>
               ))}
 
-              <div className="border-t pt-3 mt-3">
-                <div className="flex justify-between items-center">
-                  <p className="font-semibold text-gray-900">Total Payments</p>
-                  <p className="font-semibold text-gray-900">
+              <div className="border-t pt-4">
+                <div className="flex justify-between items-center mb-2">
+                  <p className="text-lg font-semibold text-gray-900">
+                    Total Amount
+                  </p>
+                  <p className="text-xl font-bold text-gray-900">
                     {formatCurrency(
                       bookingData.payments.reduce(
                         (sum, payment) => sum + payment.amount,
+                        0
+                      )
+                    )}
+                  </p>
+                </div>
+                <div className="flex justify-between items-center">
+                  <p className="text-sm text-gray-600">Balance</p>
+                  <p
+                    className={`font-semibold ${
+                      bookingData.payments.reduce(
+                        (sum, payment) =>
+                          sum +
+                          (payment.paymentStatus === "pending"
+                            ? payment.amount
+                            : 0),
+                        0
+                      ) > 0
+                        ? "text-red-600"
+                        : "text-green-600"
+                    }`}
+                  >
+                    {formatCurrency(
+                      bookingData.payments.reduce(
+                        (sum, payment) =>
+                          sum +
+                          (payment.paymentStatus === "pending"
+                            ? payment.amount
+                            : 0),
                         0
                       )
                     )}

@@ -1,6 +1,6 @@
 // HAS TAX 12%
 
-import { App, Drawer, notification, Select, Typography } from "antd";
+import { App, Drawer, Select, Typography } from "antd";
 import { Bed, CheckCircle, CreditCard, Plus, Receipt, X } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { useFilters } from "../../../hooks/useFilters";
@@ -20,7 +20,7 @@ const { Text } = Typography;
 const RoomBooking = () => {
   const [filters, updateFilter] = useFilters();
   const { userData } = useReceptionistAuthStore();
-  const { message } = App.useApp();
+  const { message, notification } = App.useApp();
 
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [selectedRoomNotAvailable, setSelectedRoomNotAvailable] =

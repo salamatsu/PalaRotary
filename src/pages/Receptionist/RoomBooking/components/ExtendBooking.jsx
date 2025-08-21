@@ -17,6 +17,8 @@ import {
   Alert,
   Tooltip,
   Badge,
+  Switch,
+  Radio,
 } from "antd";
 import {
   ClockCircleOutlined,
@@ -26,13 +28,15 @@ import {
   CheckCircleOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
+import { formatCurrency } from "../../../../utils/formatCurrency";
+import { CheckCircleIcon, Clock, Info, ToggleRightIcon } from "lucide-react";
 
 const { Title, Text } = Typography;
 
-const ExtendBooking = ({ bookingData, request }) => {
+const ExtendBooking = ({ bookingData, request, callback = () => {} }) => {
   const [form] = Form.useForm();
   const extendBookingApi = useExtendBookingApi();
-  const { message } = App.useApp();
+  const { message, modal, notification } = App.useApp();
   const [previewData, setPreviewData] = useState({
     newCheckOut: null,
     extensionRate: 0,
@@ -59,36 +63,68 @@ const ExtendBooking = ({ bookingData, request }) => {
     const newCheckOut = calculateNewCheckOut(extensionHours);
     const extensionRate = calculateExtensionRate(extensionHours);
 
-    extendBookingApi.mutate(
-      {
-        bookingId: bookingData?.bookingId,
-        originalCheckOut: bookingData?.expectedCheckOutDateTime,
-        newCheckOut: newCheckOut?.toISOString(),
-        newCheckOutFormatted: newCheckOut?.format("MMM DD, YYYY h:mm A"),
-        extensionHours: extensionHours,
-        extensionRate: extensionRate,
-        reason: values.reason || "Guest requested extension",
-        ...values,
-      },
-      {
-        onSuccess: () => {
-          message.success("Booking extended successfully!");
-          form.resetFields();
-          setPreviewData({
-            newCheckOut: null,
-            extensionRate: 0,
-            totalRate: 0,
-          });
+    modal.confirm({
+      title: "Confirm Extension",
+      content: (
+        <div>
+          <p>
+            Are you sure you want to extend the booking for{" "}
+            <strong>{extensionHours} hours</strong>?
+          </p>
+          <p>
+            New Checkout Time:{" "}
+            <strong>{newCheckOut?.format("MMM DD, YYYY h:mm A")}</strong>
+          </p>
+          <p>
+            Total Rate: <strong>{formatCurrency(extensionRate)}</strong>
+          </p>
+          {values.reason && (
+            <p>
+              Reason: <strong>{values.reason}</strong>
+            </p>
+          )}
+        </div>
+      ),
+      okText: "Extend",
+      cancelText: "Cancel",
+      onOk: () => {
+        extendBookingApi.mutate(
+          {
+            bookingId: bookingData?.bookingId,
+            originalCheckOut: bookingData?.expectedCheckOutDateTime,
+            newCheckOut: newCheckOut?.toISOString(),
+            newCheckOutFormatted: newCheckOut?.format("MMM DD, YYYY h:mm A"),
+            extensionHours: extensionHours,
+            extensionRate: extensionRate,
+            reason: values.reason || "Guest requested extension",
+            currentBookingStatus: bookingData?.bookingStatus,
+            ...values,
+          },
+          {
+            onSuccess: (result) => {
+              notification.success({
+                message: "Booking Extended Successfully",
+                description: `Booking ${result.data?.bookingReference} has been extended successfully.`,
+              });
 
-          if (request) {
-            request.refetch();
+              form.resetFields();
+              setPreviewData({
+                newCheckOut: null,
+                extensionRate: 0,
+                totalRate: 0,
+              });
+              callback(result.data);
+              if (request) {
+                request.refetch();
+              }
+            },
+            onError: (error) => {
+              message.error(error?.message || "Failed to extend booking");
+            },
           }
-        },
-        onError: (error) => {
-          message.error(error?.message || "Failed to extend booking");
-        },
-      }
-    );
+        );
+      },
+    });
   };
 
   const handleExtensionHoursChange = (value) => {
@@ -244,7 +280,7 @@ const ExtendBooking = ({ bookingData, request }) => {
           <InfoCard
             icon={<DollarOutlined />}
             title="Hourly Rate"
-            value={`₱${bookingData?.rateAmountPerHour?.toLocaleString()}`}
+            value={formatCurrency(bookingData?.rateAmountPerHour)}
             color="success"
           />
         </div>
@@ -265,7 +301,7 @@ const ExtendBooking = ({ bookingData, request }) => {
             className="w-full"
             label={
               <Space size="small" wrap>
-                <ClockCircleOutlined />
+                <Clock />
                 <span style={{ fontWeight: 600, fontSize: "14px" }}>
                   Extension Hours
                 </span>
@@ -297,29 +333,46 @@ const ExtendBooking = ({ bookingData, request }) => {
               addonAfter="hours"
             />
           </Form.Item>
-
           <Form.Item
             className="w-full"
             label={
               <Space size="small" wrap>
-                <InfoCircleOutlined />
+                <CheckCircleIcon />
                 <span style={{ fontWeight: 600, fontSize: "14px" }}>
-                  Reason (Optional)
+                  Mark as Paid
                 </span>
               </Space>
             }
-            name="reason"
+            name="paymentStatus"
+            initialValue={"completed"}
           >
-            <Input.TextArea
-              size="large"
-              placeholder="Reason for extension"
-              style={{
-                height: "44px",
-                borderRadius: "8px",
-              }}
-            />
+            <Radio.Group>
+              <Radio value="completed">PAID</Radio>
+              <Radio value="pending">UNPAID</Radio>
+            </Radio.Group>
           </Form.Item>
         </div>
+        <Form.Item
+          className="w-full"
+          label={
+            <Space size="small" wrap>
+              <Info />
+              <span style={{ fontWeight: 600, fontSize: "14px" }}>
+                Reason (Optional)
+              </span>
+            </Space>
+          }
+          name="reason"
+        >
+          <Input.TextArea
+            size="large"
+            placeholder="Reason for extension"
+            style={{
+              height: "44px",
+              borderRadius: "8px",
+            }}
+          />
+        </Form.Item>
 
         {/* Preview Section */}
         {previewData.newCheckOut && (
@@ -369,7 +422,7 @@ const ExtendBooking = ({ bookingData, request }) => {
                           marginBottom: "8px",
                         }}
                       >
-                        ₱{previewData.extensionRate.toLocaleString()}
+                        {formatCurrency(previewData.extensionRate)}
                       </div>
                       <Text type="secondary" style={{ fontSize: "12px" }}>
                         Extension Charge
@@ -386,7 +439,7 @@ const ExtendBooking = ({ bookingData, request }) => {
                           marginBottom: "8px",
                         }}
                       >
-                        ₱{previewData.totalRate.toLocaleString()}
+                        {formatCurrency(previewData.totalRate)}
                       </div>
                       <Text type="secondary" style={{ fontSize: "12px" }}>
                         New Total Amount
@@ -461,62 +514,6 @@ const ExtendBooking = ({ bookingData, request }) => {
           </Button>
         </div>
       </Form>
-
-      <style jsx>{`
-        .info-card:hover {
-          transform: translateY(-1px);
-          box-shadow: 0 6px 20px -6px rgb(0 0 0 / 0.12);
-        }
-
-        .ant-statistic-title {
-          font-size: 12px;
-          font-weight: 500;
-          color: #64748b;
-        }
-
-        .ant-input-number-affix-wrapper,
-        .ant-input {
-          transition: all 0.3s ease;
-        }
-
-        .ant-input-number-affix-wrapper:hover,
-        .ant-input:hover {
-          transform: translateY(-1px);
-          box-shadow: 0 4px 12px -4px rgb(0 0 0 / 0.1);
-        }
-
-        @media (max-width: 576px) {
-          .info-card {
-            padding: 12px;
-            min-height: 70px;
-          }
-
-          .ant-form-item-label {
-            padding-bottom: 4px;
-          }
-
-          .ant-input-number-affix-wrapper,
-          .ant-input {
-            height: 40px !important;
-            font-size: 14px;
-          }
-
-          .ant-btn {
-            height: 40px !important;
-            font-size: 14px;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .ant-space-item .ant-typography {
-            font-size: 13px;
-          }
-
-          .info-card div div {
-            font-size: 12px !important;
-          }
-        }
-      `}</style>
     </div>
   );
 };
