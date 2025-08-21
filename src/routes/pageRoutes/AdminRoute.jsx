@@ -52,7 +52,7 @@ const AdminRoute = () => {
       name: "RatesAndPricing",
       label: "Rates & Pricing",
       icon: <DollarSign className="h-5 w-5" />,
-      component: <PAGES.RoomTypes />,
+      component: <PAGES.RatesAndPricing />,
       isFilter: true,
       isShow: true,
     },

@@ -58,6 +58,7 @@ import {
 } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
 import AddBranch from "./Components/AddBranch";
+import { useStyledTable } from "../ReusableComponents/Hooks/useStyleTable";
 
 const { Header, Sider, Content } = Layout;
 const { Title, Text } = Typography;
@@ -282,7 +283,7 @@ const Branch = () => {
       title: "Branch Code",
       dataIndex: "branchCode",
       key: "branchCode",
-      width: 120,
+      width: 140,
       sorter: (a, b) => a.branchCode.localeCompare(b.branchCode),
     },
     {
@@ -290,6 +291,7 @@ const Branch = () => {
       dataIndex: "branchName",
       key: "branchName",
       sorter: (a, b) => a.branchName.localeCompare(b.branchName),
+      width: 180,
     },
     {
       title: "Location",
@@ -409,6 +411,8 @@ const Branch = () => {
     return <Badge status={getColor()} text={status} />;
   };
 
+  const components = useStyledTable();
+
 
 
   return (
@@ -443,6 +447,8 @@ const Branch = () => {
       </div>
 
       <Table
+        size="small"
+        components={components}
         columns={columns}
         dataSource={filteredBranches}
         rowKey="branchId"
@@ -456,132 +462,6 @@ const Branch = () => {
       />
 
       <AddBranch isModalVisible={isVisible} setIsModalVisible={setIsVisible} />
-      {/* <Modal
-        title={editingRecord ? "Edit Branch" : "Add New Branch"}
-        open={isVisible}
-        onCancel={hideModal}
-        footer={null}
-        width={800}
-        className="top-4"
-      >
-        <div
-          form={form}
-          layout="vertical"
-          onFinish={handleSubmit}
-          className="mt-4"
-        >
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                name="branchCode"
-                label="Branch Code"
-                rules={[
-                  { required: true, message: "Please input branch code!" },
-                ]}
-              >
-                <Input placeholder="e.g., BR001" />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                name="branchName"
-                label="Branch Name"
-                rules={[
-                  { required: true, message: "Please input branch name!" },
-                ]}
-              >
-                <Input placeholder="e.g., Metro Manila Branch" />
-              </Form.Item>
-            </Col>
-          </Row>
-
-          <Form.Item
-            name="address"
-            label="Address"
-            rules={[{ required: true, message: "Please input address!" }]}
-          >
-            <Input.TextArea rows={2} placeholder="Complete address" />
-          </Form.Item>
-
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                name="city"
-                label="City"
-                rules={[{ required: true, message: "Please input city!" }]}
-              >
-                <Input placeholder="City" />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                name="region"
-                label="Region"
-                rules={[{ required: true, message: "Please select region!" }]}
-              >
-                <Select placeholder="Select region">
-                  <Option value="NCR">NCR</Option>
-                  <Option value="Region I">Region I</Option>
-                  <Option value="Region IV-A">Region IV-A</Option>
-                </Select>
-              </Form.Item>
-            </Col>
-          </Row>
-
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item name="contactNumber" label="Contact Number">
-                <Input placeholder="+63 2 1234 5678" />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item name="email" label="Email">
-                <Input type="email" placeholder="branch@hotel.com" />
-              </Form.Item>
-            </Col>
-          </Row>
-
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item name="operatingHours" label="Operating Hours">
-                <Input placeholder="24/7" />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item name="isActive" label="Status" valuePropName="checked">
-                <Switch checkedChildren="Active" unCheckedChildren="Inactive" />
-              </Form.Item>
-            </Col>
-          </Row>
-
-          <Form.Item name="amenities" label="Amenities">
-            <Select
-              mode="tags"
-              placeholder="Add amenities"
-              tokenSeparators={[","]}
-            >
-              <Option value="WiFi">WiFi</Option>
-              <Option value="Parking">Parking</Option>
-              <Option value="Restaurant">Restaurant</Option>
-              <Option value="Pool">Pool</Option>
-              <Option value="Gym">Gym</Option>
-            </Select>
-          </Form.Item>
-
-          <Form.Item className="mb-0">
-            <Space className="w-full justify-end">
-              <Button onClick={hideModal}>Cancel</Button>
-              <Button
-                type="primary"
-                onClick={() => handleSubmit(form.getFieldsValue())}
-                className="bg-blue-600"
-              >
-                {editingRecord ? "Update" : "Create"} Branch
-              </Button>
-            </Space>
-          </Form.Item>
-        </div>
-      </Modal> */}
     </div>
   );
 }

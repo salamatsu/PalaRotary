@@ -3,6 +3,7 @@ import { Button, Input, Popconfirm, Space, Table, Tag, Tooltip, Typography } fro
 import { Bed } from "lucide-react";
 import React from 'react'
 import { StatusBadge } from '../ReusableComponents/StatusBadge';
+import { useStyledTable } from '../ReusableComponents/Hooks/useStyleTable';
 const { Title, Text } = Typography;
 
 const RoomTypes = () => {
@@ -172,6 +173,7 @@ const RoomTypes = () => {
     }
   ]
 
+  const components = useStyledTable();
 
   return (
     <div className="space-y-4 m-4 p-4">
@@ -185,7 +187,7 @@ const RoomTypes = () => {
           onClick={() => setIsVisible(true)}
           className="bg-blue-600 hover:bg-blue-700"
         >
-          Add Branch
+          Add Room Type
         </Button>
       </div>
 
@@ -205,6 +207,8 @@ const RoomTypes = () => {
       </div>
 
       <Table
+        components={components}
+        size='middle'
         columns={columns}
         dataSource={dataSource}
         rowKey="branchId"
