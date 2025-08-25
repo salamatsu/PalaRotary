@@ -1,12 +1,16 @@
 import { DeleteOutlined, EditOutlined, ExportOutlined, EyeOutlined, FilterOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons'
 import { Button, Input, Popconfirm, Space, Table, Tag, Tooltip, Typography } from 'antd'
 import { Bed } from "lucide-react";
-import React from 'react'
+import React, { useState } from 'react'
 import { StatusBadge } from '../ReusableComponents/StatusBadge';
 import { useStyledTable } from '../ReusableComponents/Hooks/useStyleTable';
+import AddRoomType from './Components/AddRoomType';
 const { Title, Text } = Typography;
 
 const RoomTypes = () => {
+
+  const [open, setOpen] = useState(null)
+
   const parseJsonField = (jsonString) => {
     try {
       return JSON.parse(jsonString || "[]");
@@ -184,7 +188,7 @@ const RoomTypes = () => {
         <Button
           type="primary"
           icon={<PlusOutlined />}
-          onClick={() => setIsVisible(true)}
+          onClick={() => setOpen(true)}
           className="bg-blue-600 hover:bg-blue-700"
         >
           Add Room Type
@@ -220,6 +224,8 @@ const RoomTypes = () => {
         }}
         className="overflow-x-auto"
       />
+
+      <AddRoomType open={open} setOpen={setOpen} />
     </div>
   )
 }
