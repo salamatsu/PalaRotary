@@ -225,7 +225,6 @@ export const WaterSensorComponent = ({
   status = "online",
   customColor = "#0ea5e9",
   installationDate = "2023-01-15",
-  batteryLevel = 85,
   signalStrength = "strong",
   deviceInfo = {},
 }) => {
@@ -246,8 +245,6 @@ export const WaterSensorComponent = ({
   // Initialize sensor data
   useEffect(() => {
     const { data } = generateWaterSensorData(sensorType);
-
-    console.log(data, sensorType);
     setSensorData(data);
     setCurrentValue(data[data.length - 1]?.value || 0);
   }, [sensorType]);
@@ -268,8 +265,8 @@ export const WaterSensorComponent = ({
         sensorType === "water_quality_ph"
           ? 0.1
           : sensorType === "water_temperature"
-          ? 0.5
-          : 0.2;
+            ? 0.5
+            : 0.2;
 
       if (newValue > oldValue + threshold) {
         setTrend("up");
@@ -353,13 +350,6 @@ export const WaterSensorComponent = ({
       default:
         return <Wifi className="w-4 h-4 text-gray-500" />;
     }
-  };
-
-  // Get battery color based on level
-  const getBatteryColor = () => {
-    if (batteryLevel > 60) return "text-green-500";
-    if (batteryLevel > 30) return "text-orange-500";
-    return "text-red-500";
   };
 
   // Render chart
@@ -468,13 +458,12 @@ export const WaterSensorComponent = ({
   return (
     <>
       <Card
-        className={`w-full transition-all duration-300 ${
-          valueStatus === "critical"
-            ? "border-red-500 shadow-red-100"
-            : valueStatus === "warning"
+        className={`w-full transition-all duration-300 ${valueStatus === "critical"
+          ? "border-red-500 shadow-red-100"
+          : valueStatus === "warning"
             ? "border-orange-500 shadow-orange-100"
             : "border-gray-200 hover:shadow-lg"
-        }`}
+          }`}
         title={
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -525,13 +514,12 @@ export const WaterSensorComponent = ({
               <div className="flex items-center space-x-2">
                 {getTrendIcon()}
                 <span
-                  className={`text-3xl font-bold ${
-                    valueStatus === "critical"
-                      ? "text-red-600"
-                      : valueStatus === "warning"
+                  className={`text-3xl font-bold ${valueStatus === "critical"
+                    ? "text-red-600"
+                    : valueStatus === "warning"
                       ? "text-orange-600"
                       : "text-gray-800"
-                  }`}
+                    }`}
                 >
                   {currentValue} {sensorConfig.unit}
                 </span>
@@ -540,10 +528,6 @@ export const WaterSensorComponent = ({
             <div className="text-right">
               <div className="flex items-center space-x-1 mb-1">
                 {getSignalIcon()}
-                <Battery className={`w-4 h-4 ${getBatteryColor()}`} />
-                <span className={`text-sm ${getBatteryColor()}`}>
-                  {batteryLevel}%
-                </span>
               </div>
               <div className="text-xs text-gray-500">
                 <MapPin className="w-3 h-3 inline mr-1" />
@@ -639,8 +623,9 @@ export const WaterSensorComponent = ({
         onCancel={() => setShowDeviceInfo(false)}
         footer={null}
         width={600}
+
       >
-        <Descriptions bordered column={2} size="small">
+        <Descriptions bordered column={1} size="small">
           <Descriptions.Item label="Sensor ID">{sensorId}</Descriptions.Item>
           <Descriptions.Item label="Status" span={1}>
             <Badge color={statusConfig.color} text={statusConfig.text} />
@@ -672,13 +657,12 @@ export const WaterSensorComponent = ({
             {location}
           </Descriptions.Item>
 
-          <Descriptions.Item label="Battery Level">
-            <Battery className={`w-4 h-4 inline mr-1 ${getBatteryColor()}`} />
-            {batteryLevel}%
-          </Descriptions.Item>
           <Descriptions.Item label="Signal Strength">
-            {getSignalIcon()}
-            <span className="ml-1 capitalize">{signalStrength}</span>
+            <span className=" flex">
+              {getSignalIcon()}
+              <span className="ml-1 capitalize">{signalStrength}</span>
+
+            </span>
           </Descriptions.Item>
 
           <Descriptions.Item label="Data Interval">
