@@ -4,10 +4,12 @@ import { Button, Drawer, Space, Typography } from "antd";
 import { Plus, Printer, X, XCircle } from "lucide-react";
 import BookingInformation from "./BookingInformation";
 import ExtendBooking from "./ExtendBooking";
+import PaymentSettlement from "./PaymentSettlement";
 
 const CurrentBookedRoom = memo(({ room, onSelect }) => {
   const getBookingByRoomIdApi = useGetBookingByRoomIdApi(room?.roomId);
   const [isShowExtend, setIsShowExtend] = useState(false);
+  const [isPaymentDrawerOpen, setIsPaymentDrawerOpen] = useState(false);
 
   return (
     <Drawer
@@ -76,6 +78,7 @@ const CurrentBookedRoom = memo(({ room, onSelect }) => {
           <BookingInformation
             bookingData={getBookingByRoomIdApi.data}
             request={getBookingByRoomIdApi}
+            settlePayment={() => setIsPaymentDrawerOpen(true)}
           />
         )}
       </div>
@@ -113,6 +116,17 @@ const CurrentBookedRoom = memo(({ room, onSelect }) => {
           callback={() => setIsShowExtend(false)}
         />
       </Drawer>
+
+      <PaymentSettlement
+        open={isPaymentDrawerOpen}
+        onClose={() => setIsPaymentDrawerOpen(false)}
+        bookingId={getBookingByRoomIdApi.data?.bookingId}
+        bookingReference={getBookingByRoomIdApi.data?.bookingReference}
+        onPaymentSuccess={(result) => {
+          console.log("Payment processed:", result);
+          // Handle success - refresh booking data, show success message, etc.
+        }}
+      />
     </Drawer>
   );
 });

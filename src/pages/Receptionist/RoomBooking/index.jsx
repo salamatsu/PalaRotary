@@ -14,6 +14,7 @@ import BookingModal from "./components/BookingModal";
 import CurrentBookedRoom from "./components/CurrentBooking";
 import RoomCard from "./components/RoomCard";
 import BookingNotes from "../../../components/ui/cards/BookingNotes";
+import PaymentSettlement from "./components/PaymentSettlement";
 
 const { Text } = Typography;
 

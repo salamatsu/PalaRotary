@@ -55,6 +55,29 @@ export const getBookingByRoomIdApi = async (roomId) => {
   }
 };
 
+export const paymentSettleApi = async ({ bookingId, ...payload }) => {
+  try {
+    const result = await axiosDefault.post(
+      `/api/bookings/${bookingId}/payments/settle`,
+      payload
+    );
+    return result.data;
+  } catch (error) {
+    throw handleApiError(error);
+  }
+};
+
+export const getBookingPaymentSummaryApi = async (bookingId) => {
+  try {
+    const result = await axiosDefault.get(
+      `/api/bookings/${bookingId}/payments/summary`
+    );
+    return result.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+};
+
 export const getBookingByBookingIdApi = async (bookingId) => {
   try {
     const result = await axiosDefault.get(`/api/bookings/${bookingId}`);
