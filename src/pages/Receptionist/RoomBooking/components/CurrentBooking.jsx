@@ -120,8 +120,7 @@ const CurrentBookedRoom = memo(({ room, onSelect }) => {
       <PaymentSettlement
         open={isPaymentDrawerOpen}
         onClose={() => setIsPaymentDrawerOpen(false)}
-        bookingId={getBookingByRoomIdApi.data?.bookingId}
-        bookingReference={getBookingByRoomIdApi.data?.bookingReference}
+        bookingData={getBookingByRoomIdApi.data}
         onPaymentSuccess={(result) => {
           console.log("Payment processed:", result);
           // Handle success - refresh booking data, show success message, etc.

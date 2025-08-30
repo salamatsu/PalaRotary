@@ -30,6 +30,7 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { PAYMENT_METHODS } from "../../../../lib/constants";
 import { useAddAdditionalServices } from "../../../../services/requests/useAdditionalServices";
 import AdditionalServicesSelector from "./AdditionalServicesSelector";
+import PaymentHistory from "./PaymentHistory";
 
 const { Text } = Typography;
 
@@ -475,11 +476,13 @@ const BookingInformation = memo(
           </div>
 
           {/* Payment Information */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <CreditCard className="h-5 w-5 text-green-600" />
-              Payment Summary
-            </h2>
+          <div className="bg-white rounded-xl space-y-6 shadow-lg p-6">
+            <div className=" flex jusbtify-between">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <CreditCard className="h-5 w-5 text-green-600" />
+                Payment Summary
+              </h2>
+            </div>
 
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -550,15 +553,21 @@ const BookingInformation = memo(
                 </div>
               </div>
             </div>
-            <Button
-              className="mt-6"
-              type="primary"
-              size="large"
-              block
-              onClick={() => settlePayment()}
-            >
-              Settle Payment ({formatCurrency(balanceAmount)})
-            </Button>
+            <div className=" flex gap-6">
+              <Button size="large" block>
+                Summary
+              </Button>
+              <Button
+                type="primary"
+                size="large"
+                block
+                onClick={() => settlePayment()}
+              >
+                {balanceAmount <= 0
+                  ? "See Payment"
+                  : `Settle Payment (${formatCurrency(balanceAmount)})`}
+              </Button>
+            </div>
           </div>
 
           {/* Additional Charges */}
@@ -637,97 +646,7 @@ const BookingInformation = memo(
           </div>
 
           {/* Payment History */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <Receipt className="h-5 w-5 text-green-600" />
-              Payment History
-            </h2>
-
-            {bookingData.payments?.length > 0 ? (
-              <div className="space-y-3">
-                {bookingData.payments.map((payment) => (
-                  <div
-                    key={payment.paymentId}
-                    className="bg-gray-50 p-4 rounded-lg"
-                  >
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <h3 className="font-medium text-gray-900 capitalize">
-                          {payment.paymentType?.replace("_", " ")}
-                        </h3>
-                        <p className="text-sm text-gray-600 capitalize">
-                          {payment.paymentMethod} • {payment.paymentCategory}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          {formatDateTime(payment.paymentDateTime)}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          Processed by: {payment.processedBy}
-                        </p>
-                      </div>
-                      <div className="text-right ml-4">
-                        <p className="font-semibold text-green-700">
-                          {formatCurrency(payment.amount)}
-                        </p>
-                        <StatusBadge status={payment.paymentStatus} />
-                      </div>
-                    </div>
-                    {payment.notes && (
-                      <p className="text-sm text-gray-600 mt-2">
-                        Note: {payment.notes}
-                      </p>
-                    )}
-                  </div>
-                ))}
-
-                <div className="border-t pt-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <p className="text-lg font-semibold text-gray-900">
-                      Total Amount
-                    </p>
-                    <p className="text-xl font-bold text-gray-900">
-                      {formatCurrency(
-                        bookingData.payments.reduce(
-                          (sum, payment) => sum + payment.amount,
-                          0
-                        )
-                      )}
-                    </p>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <p className="text-sm text-gray-600">Balance</p>
-                    <p
-                      className={`font-semibold ${
-                        bookingData.payments.reduce(
-                          (sum, payment) =>
-                            sum +
-                            (payment.paymentStatus === "pending"
-                              ? payment.amount
-                              : 0),
-                          0
-                        ) > 0
-                          ? "text-red-600"
-                          : "text-green-600"
-                      }`}
-                    >
-                      {formatCurrency(
-                        bookingData.payments.reduce(
-                          (sum, payment) =>
-                            sum +
-                            (payment.paymentStatus === "pending"
-                              ? payment.amount
-                              : 0),
-                          0
-                        )
-                      )}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <Empty description="No payment history" />
-            )}
-          </div>
+          <PaymentHistory bookingData={bookingData} />
 
           {/* Booking Information */}
           <div className="bg-white rounded-xl shadow-lg p-6">
