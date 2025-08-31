@@ -28,6 +28,7 @@ import {
 } from "antd";
 import { useState } from "react";
 import { useGetBookingsApi } from "../../../services/requests/useBookings";
+import { formatDateTime } from "../../../utils/formatDate";
 
 const { Title, Text, Paragraph } = Typography;
 const { TabPane } = Tabs;
@@ -35,182 +36,6 @@ const { TabPane } = Tabs;
 const BookingsManagement = () => {
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-
-  // Sample booking data
-  // const bookingsData = [
-  //   {
-  //     bookingId: 43,
-  //     bookingReference: "BK86506760405",
-  //     branchId: 1,
-  //     roomId: 1,
-  //     roomTypeId: 1,
-  //     rateId: 1,
-  //     rateTypeId: 1,
-  //     numberOfGuests: 2,
-  //     checkInDateTime: "2025-08-30T20:41:46.741Z",
-  //     expectedCheckOutDateTime: "2025-08-30T23:41:46.741Z",
-  //     actualCheckInDateTime: null,
-  //     actualCheckOutDateTime: null,
-  //     stayDuration: 3,
-  //     stayDurationType: "hours",
-  //     bookingStatus: "confirmed",
-  //     paymentStatus: "partial",
-  //     baseAmount: 1350,
-  //     discountAmount: 0,
-  //     taxAmount: 162,
-  //     totalAmount: 1450,
-  //     currency: "PHP",
-  //     paymentMethod: null,
-  //     specialRequests: null,
-  //     guestNotes: null,
-  //     staffNotes: null,
-  //     source: "walk-in",
-  //     cancellationPolicy: null,
-  //     createdAt: "2025-08-30 20:41:46",
-  //     updatedAt: "2025-08-30 20:41:55",
-  //     createdBy: "3",
-  //     primaryGuestName: null,
-  //     primaryGuestContact: null,
-  //     primaryGuestEmail: null,
-  //     plannedDuration: null,
-  //     promoId: null,
-  //     serviceChargesAmount: 0,
-  //     totalPaid: 1350,
-  //     balanceAmount: 100,
-  //     actualDuration: null,
-  //     cancellationReason: null,
-  //     lastUpdatedBy: null,
-  //     bookingDateTime: null,
-  //     branchCode: "SOGO-EDSA-CUB",
-  //     branchName: "Hotel Sogo EDSA Cubao",
-  //     branchAddress: "1234 EDSA, Cubao, Quezon City",
-  //     branchCity: "Quezon City",
-  //     branchRegion: "Metro Manila",
-  //     branchContact: "63-2-8123-4567",
-  //     branchEmail: "cubao@hotelsogo.com",
-  //     operatingHours: "24/7",
-  //     branchAmenities:
-  //       '["Free WiFi","24-hour Front Desk","Room Service","Cable TV","Air Conditioning"]',
-  //     roomNumber: "101",
-  //     floor: "1",
-  //     roomStatus: "occupied",
-  //     lastCleaned: "2024-08-07",
-  //     maintenanceStatus: "good",
-  //     roomNotes: null,
-  //     roomTypeCode: "PREM",
-  //     roomTypeName: "Premium Room",
-  //     roomTypeDescription:
-  //       "Comfortable and affordable room with essential amenities for budget-conscious travelers",
-  //     bedConfiguration: "Queen Bed",
-  //     maxOccupancy: 2,
-  //     roomSize: "20",
-  //     roomTypeAmenities:
-  //       '["Free WiFi", "Air Conditioning", "LED TV", "Private Bathroom", "Complimentary Toiletries", "Cable Channels"]',
-  //     roomTypeFeatures:
-  //       '["12/24 Hour Rates", "Clean Linens", "Room Service Available", "Safe Environment", "Japanese Theme Decor"]',
-  //     roomTypeImage:
-  //       "https://www.hotelsogo.com/images/photos/1555053327_Premium.jpg",
-  //     rateAmountPerHour: 450,
-  //     rateCurrency: "PHP",
-  //     rateEffectiveFrom: "2025-01-01",
-  //     rateEffectiveTo: "2026-12-31",
-  //     rateTypeCode: "3HR",
-  //     rateTypeName: "3 Hour Rate",
-  //     rateTypeDuration: 3,
-  //     durationType: "HOUR",
-  //     rateTypeDayType: "all",
-  //     rateTypeDescription:
-  //       "Short stay rate for 3 hours - perfect for rest and relaxation",
-  //     createdByUsername: "receptionist",
-  //     createdByFirstName: "receptionist",
-  //     createdByLastName: "user",
-  //     createdByRole: "receptionist",
-  //     lastUpdatedByUsername: null,
-  //     lastUpdatedByFirstName: null,
-  //     lastUpdatedByLastName: null,
-  //     lastUpdatedByRole: null,
-  //     promotion: null,
-  //     additionalCharges: [
-  //       {
-  //         chargeId: 77,
-  //         bookingId: 43,
-  //         serviceId: 1,
-  //         chargeType: "room_service",
-  //         itemDescription: null,
-  //         quantity: 2,
-  //         unitPrice: 50,
-  //         totalAmount: 100,
-  //         appliedAt: null,
-  //         appliedBy: null,
-  //         status: null,
-  //         serviceName: "Extra Towels",
-  //         serviceType: "AMENITY",
-  //         serviceBasePrice: 50,
-  //         isPerItem: 1,
-  //         appliedByUsername: null,
-  //         appliedByFirstName: null,
-  //         appliedByLastName: null,
-  //         approvedByUsername: null,
-  //         approvedByFirstName: null,
-  //         approvedByLastName: null,
-  //       },
-  //     ],
-  //     payments: [
-  //       {
-  //         paymentId: 101,
-  //         bookingId: 43,
-  //         paymentType: "service_charge",
-  //         paymentMethod: "cash",
-  //         amount: 100,
-  //         currency: "PHP",
-  //         paymentDateTime: "2025-08-30 20:41:55",
-  //         transactionReference: null,
-  //         paymentStatus: "pending",
-  //         processedBy: "3",
-  //         notes: null,
-  //         paymentCategory: "additional_service",
-  //         processedAt: "2025-08-30T20:41:55.409Z",
-  //         relatedChargeId: null,
-  //         receiptNumber: null,
-  //         processedByUsername: "receptionist",
-  //         processedByFirstName: "receptionist",
-  //         processedByLastName: "user",
-  //         verifiedByUsername: "receptionist",
-  //         verifiedByFirstName: "receptionist",
-  //         verifiedByLastName: "user",
-  //         relatedChargeDescription: null,
-  //         parentTransactionReference: null,
-  //       },
-  //       {
-  //         paymentId: 100,
-  //         bookingId: 43,
-  //         paymentType: "room_charge",
-  //         paymentMethod: "cash",
-  //         amount: 1350,
-  //         currency: "PHP",
-  //         paymentDateTime: "2025-08-30 20:41:46",
-  //         transactionReference: null,
-  //         paymentStatus: "completed",
-  //         processedBy: "3",
-  //         notes: null,
-  //         paymentCategory: "booking",
-  //         processedAt: "2025-08-30T20:41:46.763Z",
-  //         relatedChargeId: null,
-  //         receiptNumber: null,
-  //         processedByUsername: "receptionist",
-  //         processedByFirstName: "receptionist",
-  //         processedByLastName: "user",
-  //         verifiedByUsername: "receptionist",
-  //         verifiedByFirstName: "receptionist",
-  //         verifiedByLastName: "user",
-  //         relatedChargeDescription: null,
-  //         parentTransactionReference: null,
-  //       },
-  //     ],
-  //     extensions: [],
-  //     statusHistory: [],
-  //   },
-  // ];
 
   const { data: bookingsData } = useGetBookingsApi();
 
@@ -228,10 +53,6 @@ const BookingsManagement = () => {
     return colors[status] || "default";
   };
 
-  const formatDateTime = (dateTime) => {
-    if (!dateTime) return "-";
-    return new Date(dateTime).toLocaleString();
-  };
 
   const formatCurrency = (amount, currency = "PHP") => {
     return new Intl.NumberFormat("en-PH", {
@@ -264,19 +85,19 @@ const BookingsManagement = () => {
         </Text>
       ),
     },
-    {
-      title: "Branch",
-      dataIndex: "branchName",
-      key: "branchName",
-      render: (text, record) => (
-        <div>
-          <div className="font-medium">{text}</div>
-          <Text type="secondary" className="text-sm">
-            {record.branchCode}
-          </Text>
-        </div>
-      ),
-    },
+    // {
+    //   title: "Branch",
+    //   dataIndex: "branchName",
+    //   key: "branchName",
+    //   render: (text, record) => (
+    //     <div>
+    //       <div className="font-medium">{text}</div>
+    //       <Text type="secondary" className="text-sm">
+    //         {record.branchCode}
+    //       </Text>
+    //     </div>
+    //   ),
+    // },
     {
       title: "Room",
       key: "room",
@@ -663,7 +484,7 @@ const BookingsManagement = () => {
                   </Descriptions.Item>
                   <Descriptions.Item label="Name">
                     {booking.lastUpdatedByFirstName &&
-                    booking.lastUpdatedByLastName
+                      booking.lastUpdatedByLastName
                       ? `${booking.lastUpdatedByFirstName} ${booking.lastUpdatedByLastName}`
                       : "N/A"}
                   </Descriptions.Item>
