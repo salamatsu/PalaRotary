@@ -29,6 +29,7 @@ import {
 import { useState } from "react";
 import { useGetBookingsApi } from "../../../services/requests/useBookings";
 import { formatDateTime } from "../../../utils/formatDate";
+import { formatCurrency } from "../../../utils/formatCurrency";
 
 const { Title, Text, Paragraph } = Typography;
 const { TabPane } = Tabs;
@@ -54,12 +55,6 @@ const BookingsManagement = () => {
   };
 
 
-  const formatCurrency = (amount, currency = "PHP") => {
-    return new Intl.NumberFormat("en-PH", {
-      style: "currency",
-      currency: currency,
-    }).format(amount);
-  };
 
   const parseJsonArray = (jsonString) => {
     try {
@@ -517,9 +512,8 @@ const BookingsManagement = () => {
       <Card>
         <div className="mb-4 flex justify-between items-center">
           <Space>
-            <Badge count={bookingsData.length} showZero>
-              <Button icon={<CalendarOutlined />}>Total Bookings</Button>
-            </Badge>
+            Total Bookings
+            <Badge count={bookingsData.length} showZero />
           </Space>
           <Space>
             <Button type="primary">Add New Booking</Button>
