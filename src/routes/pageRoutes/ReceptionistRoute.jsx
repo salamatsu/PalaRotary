@@ -19,9 +19,9 @@ const ReceptionistRoute = () => {
       isShow: true,
     },
     {
-      route: "/room-booking",
-      name: "Room Booking",
-      label: "Room Booking",
+      route: "/rooms",
+      name: "Rooms",
+      label: "Rooms",
       icon: <KeyOutlined className="h-5 w-5" />,
       component: <RECEPTIONISTPAGES.RoomBooking />,
       isFilter: true,

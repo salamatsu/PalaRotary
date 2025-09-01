@@ -7,7 +7,7 @@ import { useWindowSize } from "../../hooks/useWindowSize";
 import { generateItems, getItem } from "../../utils/itemFormat";
 
 const { Sider } = Layout;
-const TopMenus = ({ path, navigations = [], handleCollapse = () => { } }) => (
+const TopMenus = ({ path, navigations = [], handleCollapse = () => {} }) => (
   <Menu
     className=" flex-1"
     mode="inline"
@@ -133,8 +133,8 @@ const Sidebar = ({
           onCollapse={(value) => handleCollapse(value)}
           width={250}
         >
-          <center>
-            <div className="logo">
+          <center className=" p-2">
+            <div className="logo bg-primary-color rounded-lg">
               <Image
                 preview={false}
                 src={logo}

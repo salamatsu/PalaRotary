@@ -1,6 +1,6 @@
 // HAS TAX 12%
 
-import { App, Drawer, Select, Typography } from "antd";
+import { App, Drawer, Select, Tag, Typography } from "antd";
 import { Bed, CheckCircle, CreditCard, Plus, Receipt, X } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import BookingNotes from "../../../components/ui/cards/BookingNotes";
@@ -253,7 +253,7 @@ const RoomBooking = () => {
           <div className="flex-1 flex-col gap-6">
             <div className="mb-8">
               <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">
-                Room Booking System
+                Rooms
               </h1>
               <p className="text-gray-600 text-lg">
                 Book rooms with promo codes, additional services, and integrated
@@ -361,9 +361,12 @@ const RoomBooking = () => {
                   />
                 </div>
               </div>
-              <div className="flex items-center justify-center gap-6 text-sm">
+              <div className="flex items-center justify-center gap-2 text-sm">
                 {Object.entries(STATUS_CONFIGS).map(([status, config]) => (
-                  <div key={status} className="flex items-center gap-2">
+                  <div
+                    key={status}
+                    className={`flex items-center gap-2 ${config.color} p-1 px-2 rounded-full `}
+                  >
                     {config.icon}
                     <span className="text-gray-600 font-medium">
                       {config.label}
