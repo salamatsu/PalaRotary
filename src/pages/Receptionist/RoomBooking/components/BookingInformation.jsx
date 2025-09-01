@@ -27,12 +27,12 @@ import {
   Users,
   X,
 } from "lucide-react";
-import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import PaymentSummary from "../../../../components/features/PaymentSummary";
 import { PAYMENT_METHODS } from "../../../../lib/constants";
 import { useAddAdditionalServices } from "../../../../services/requests/useAdditionalServices";
 import AdditionalServicesSelector from "./AdditionalServicesSelector";
 import PaymentHistory from "./PaymentHistory";
-import PaymentSummary from "../../../../components/features/PaymentSummary";
 
 const { Text } = Typography;
 
@@ -129,8 +129,9 @@ const BookingInformation = memo(
       let currentModal = null;
 
       const PaymentConfirmationContent = () => {
-        const [localPaymentMethod, setLocalPaymentMethod] =
-          useState(PAYMENT_METHODS[0]?.value || "cash");
+        const [localPaymentMethod, setLocalPaymentMethod] = useState(
+          PAYMENT_METHODS[0]?.value || "cash"
+        );
         const [localMarkAsPaid, setLocalMarkAsPaid] = useState(markAsPaid);
 
         const handleSubmit = async () => {

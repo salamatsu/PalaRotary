@@ -1,5 +1,5 @@
 import Dashboard from "./Dashboard";
 import RoomBooking from "./RoomBooking";
-import BookingsManagement from "./Bookings Management";
+import Bookings from "./Bookings";
 
-export { Dashboard, RoomBooking, BookingsManagement };
+export { Dashboard, RoomBooking, Bookings };

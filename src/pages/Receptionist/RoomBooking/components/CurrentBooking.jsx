@@ -1,7 +1,7 @@
+import { Button, Drawer, Space, Typography } from "antd";
+import { Plus, Printer, X } from "lucide-react";
 import { memo, useState } from "react";
 import { useGetBookingByRoomIdApi } from "../../../../services/requests/useBookings";
-import { Button, Drawer, Space, Typography } from "antd";
-import { Plus, Printer, X, XCircle } from "lucide-react";
 import BookingInformation from "./BookingInformation";
 import ExtendBooking from "./ExtendBooking";
 import PaymentSettlement from "./PaymentSettlement";
@@ -59,10 +59,6 @@ const CurrentBookedRoom = memo(({ room, onSelect }) => {
             </Button>
             <Button key={"print"} size="large">
               <Printer className="w-4 h-4" /> Print Booking
-            </Button>
-            <Button danger key={"cancel"} size="large">
-              <XCircle className="w-4 h-4" />
-              Cancel Booking
             </Button>
           </Space>
         </div>
