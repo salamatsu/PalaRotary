@@ -1,39 +1,42 @@
 import React, { useState } from 'react';
-import { Modal, Form, Input, Select, Switch, Button, message, Space } from 'antd';
+import { Modal, Form, Input, Select, Switch, Button, Space, App } from 'antd';
 import { CloseOutlined } from '@ant-design/icons';
+import { useCreateBranch } from '../../../../services/requests/Admin/useBranch';
 
 const { Option } = Select;
 const { TextArea } = Input;
 
 const AddBranch = ({ isModalVisible, setIsModalVisible, editingRecord = null }) => {
+  const { message, notification } = App.useApp();
+
+  const createBranch = useCreateBranch();
+
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
-  const handleCancel = () => {
+  const handleClose = () => {
     setIsModalVisible(false);
     form.resetFields();
   };
 
-  const handleSubmit = async (values) => {
-    setLoading(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Form values:', values);
-      message.success(`Branch ${editingRecord ? 'updated' : 'created'} successfully`);
-      setIsModalVisible(false);
-      form.resetFields();
-    } catch (error) {
-      message.error('Failed to save branch');
-    } finally {
-      setLoading(false);
-    }
+  const handleSubmit = (values) => {
+    console.log(values)
+    createBranch.mutate(values, {
+      onSuccess: () => {
+        message.success("Successfully Updated!");
+      },
+      onError: (error) => {
+        message.error(error.message);
+      },
+    });
   };
+
 
   return (
     <Modal
       title={null}
       open={isModalVisible}
-      onCancel={handleCancel}
+      onCancel={handleClose}
       footer={null}
       width={700}
       centered
@@ -174,25 +177,22 @@ const AddBranch = ({ isModalVisible, setIsModalVisible, editingRecord = null }) 
                 className="h-9 text-sm border-gray-200 hover:border-black focus:border-black focus:shadow-none"
               />
             </Form.Item>
-            <div className="flex flex-col">
-              <span className="text-xs font-medium text-gray-700 uppercase tracking-wide">Status</span>
-              <div className="flex items-center justify-between py-2">
-                <div>
-                  <span className="text-sm font-medium text-black">Active</span>
-                  <p className="text-xs text-gray-500 mt-1">Branch is operational</p>
-                </div>
-                <Form.Item name="isActive" valuePropName="checked" className="mb-0">
+            <div className="flex flex-col space-y-2">
+              <span className="text-xs font-medium text-gray-700 uppercase tracking-wide">
+                Status
+              </span>
+
+              <Form.Item name="isActive" valuePropName="checked" className="mt-4">
+                <div className="flex items-center  pt-3 pl-2">
+                  <p className="text-xs text-gray-500 pr-2">"Branch is: </p>
                   <Switch
-                    size="small"
+                    size="default"
                     checkedChildren="Active"
                     unCheckedChildren="Inactive"
-                    style={{
-                      backgroundColor: '#d1d5db'
-                    }}
-                    className="bg-gray-300"
                   />
-                </Form.Item>
-              </div>
+
+                </div>
+              </Form.Item>
             </div>
           </div>
 
@@ -224,7 +224,7 @@ const AddBranch = ({ isModalVisible, setIsModalVisible, editingRecord = null }) 
       {/* Footer */}
       <div className="flex justify-end gap-3 px-6 py-4 bg-gray-50 border-t border-gray-100">
         <Button
-          onClick={handleCancel}
+          onClick={handleClose}
           className="h-9 px-6 text-sm font-medium text-gray-700 border-gray-300 hover:border-gray-400 hover:text-gray-700 focus:border-gray-400 focus:text-gray-700"
           disabled={loading}
         >

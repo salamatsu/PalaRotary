@@ -1,25 +1,27 @@
 import { Badge } from "antd";
 
 export const StatusBadge = ({ status, type = "default" }) => {
-  const getColor = () => {
+  const getStatus = () => {
     if (type === "room") {
-      switch (status) {
+      switch (status.toLowerCase()) {
+        case "active":
         case "available":
-          return "green";
+          return "success";
+        case "inactive":
         case "occupied":
-          return "red";
+          return "error";
         case "cleaning":
-          return "orange";
+          return "processing";
         case "maintenance":
-          return "purple";
+          return "warning";
         case "out_of_order":
-          return "volcano";
+          return "default";
         default:
           return "default";
       }
     }
-    return status ? "green" : "red";
+    return status === "Active" ? "success" : "error";
   };
 
-  return <Badge status={getColor()} text={status} />;
+  return <Badge status={getStatus()} text={status} />;
 };

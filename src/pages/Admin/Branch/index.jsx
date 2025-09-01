@@ -59,6 +59,7 @@ import {
 import React, { useEffect, useMemo, useState } from "react";
 import AddBranch from "./Components/AddBranch";
 import { useStyledTable } from "../ReusableComponents/Hooks/useStyleTable";
+import { StatusBadge } from "../ReusableComponents/StatusBadge";
 
 const { Header, Sider, Content } = Layout;
 const { Title, Text } = Typography;
@@ -386,30 +387,6 @@ const Branch = () => {
     form.resetFields();
     // }
   }, [form]);
-
-  const StatusBadge = ({ status, type = "default" }) => {
-    const getColor = () => {
-      if (type === "room") {
-        switch (status) {
-          case "available":
-            return "green";
-          case "occupied":
-            return "red";
-          case "cleaning":
-            return "orange";
-          case "maintenance":
-            return "purple";
-          case "out_of_order":
-            return "volcano";
-          default:
-            return "default";
-        }
-      }
-      return status ? "green" : "red";
-    };
-
-    return <Badge status={getColor()} text={status} />;
-  };
 
   const components = useStyledTable();
 
