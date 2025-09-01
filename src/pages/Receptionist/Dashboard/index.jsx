@@ -1,403 +1,585 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Row, Col, Statistic, Progress, Badge, Avatar, List, Typography, Divider, Button, Tag } from 'antd';
+import { Card, Row, Col, Statistic, Select, DatePicker, Table, Badge, Progress, Avatar, Tooltip, Tabs } from 'antd';
 import {
-  Bed,
-  Users,
   Calendar,
+  Users,
   DollarSign,
-  Clock,
-  UserCheck,
-  UserX,
-  Sparkles,
-  Settings,
-  AlertTriangle,
   TrendingUp,
-  Home,
+  Clock,
+  Bed,
+  UserCheck,
+  AlertCircle,
+  CheckCircle,
+  XCircle,
   Phone,
-  User
+  Mail,
+  MapPin,
+  Star,
+  Filter,
+  Download,
+  RefreshCw
 } from 'lucide-react';
+import Highcharts from 'highcharts';
+import HighchartsReact from 'highcharts-react-official';
 
-const { Title, Text } = Typography;
+const { RangePicker } = DatePicker;
+const { Option } = Select;
+const { TabPane } = Tabs;
 
 // Mock data generator
 const generateMockData = () => {
-  return {
-    roomStatus: [
-      { roomStatus: 'available', count: 15 },
-      { roomStatus: 'occupied', count: 22 },
-      { roomStatus: 'cleaning', count: 5 },
-      { roomStatus: 'maintenance', count: 2 },
-      { roomStatus: 'out_of_order', count: 1 }
-    ],
-    todayBookings: [
-      { bookingStatus: 'confirmed', count: 8, totalRevenue: 12500.00 },
-      { bookingStatus: 'checked_in', count: 22, totalRevenue: 45600.00 },
-      { bookingStatus: 'checked_out', count: 15, totalRevenue: 28900.00 },
-      { bookingStatus: 'cancelled', count: 2, totalRevenue: 0 },
-      { bookingStatus: 'no_show', count: 1, totalRevenue: 0 }
-    ],
-    currentOccupancy: [
-      { occupiedRooms: 22, totalRooms: 45 }
-    ],
-    pendingCheckouts: [
-      { count: 8 }
-    ],
-    walkInQueue: [
-      { count: 3 }
-    ]
-  };
+  const today = new Date();
+  const last7Days = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date(today);
+    date.setDate(date.getDate() - i);
+    return date;
+  }).reverse();
+
+  const bookings = Array.from({ length: 50 }, (_, i) => ({
+    bookingId: `BK${String(i + 1).padStart(4, '0')}`,
+    bookingReference: `HTL-${String(i + 1).padStart(6, '0')}`,
+    roomNumber: `${Math.floor(Math.random() * 5) + 1}${String(Math.floor(Math.random() * 20) + 1).padStart(2, '0')}`,
+    primaryGuestName: ['John Smith', 'Mary Johnson', 'David Wilson', 'Sarah Brown', 'Mike Davis'][Math.floor(Math.random() * 5)],
+    primaryGuestContact: `+63${Math.floor(Math.random() * 1000000000)}`,
+    primaryGuestEmail: ['john@email.com', 'mary@email.com', 'david@email.com', 'sarah@email.com', 'mike@email.com'][Math.floor(Math.random() * 5)],
+    roomTypeName: ['Standard', 'Deluxe', 'Suite', 'Presidential'][Math.floor(Math.random() * 4)],
+    bookingStatus: ['confirmed', 'checkedIn', 'checkedOut', 'cancelled', 'pending'][Math.floor(Math.random() * 5)],
+    paymentStatus: ['paid', 'pending', 'partial', 'refunded'][Math.floor(Math.random() * 4)],
+    checkInDateTime: new Date(today.getTime() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
+    expectedCheckOutDateTime: new Date(today.getTime() + Math.random() * 3 * 24 * 60 * 60 * 1000).toISOString(),
+    totalAmount: Math.floor(Math.random() * 5000) + 1000,
+    numberOfGuests: Math.floor(Math.random() * 4) + 1,
+    source: ['Online', 'Phone', 'Walk-in', 'Agency'][Math.floor(Math.random() * 4)]
+  }));
+
+  const rooms = Array.from({ length: 20 }, (_, i) => ({
+    roomId: i + 1,
+    roomNumber: `${Math.floor(i / 4) + 1}${String((i % 4) + 1).padStart(2, '0')}`,
+    roomTypeName: ['Standard', 'Deluxe', 'Suite', 'Presidential'][i % 4],
+    roomStatus: ['available', 'occupied', 'maintenance', 'cleaning', 'reserved'][Math.floor(Math.random() * 5)],
+    floor: Math.floor(i / 4) + 1,
+    maxOccupancy: [2, 3, 4, 6][i % 4],
+    lastCleaned: new Date(today.getTime() - Math.random() * 24 * 60 * 60 * 1000).toISOString()
+  }));
+
+  return { bookings, rooms, last7Days };
 };
 
 const Dashboard = () => {
-  const [dashboardData, setDashboardData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [selectedDateRange, setSelectedDateRange] = useState(null);
+  const [selectedBranch, setSelectedBranch] = useState('all');
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [mockData, setMockData] = useState(generateMockData());
 
-  // Simulate API call
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      setLoading(true);
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      const mockData = generateMockData();
-      setDashboardData(mockData);
-      setLoading(false);
-    };
+  const { bookings, rooms, last7Days } = mockData;
 
-    fetchDashboardData();
+  // Calculate statistics
+  const totalBookings = bookings.length;
+  const checkedInToday = bookings.filter(b =>
+    new Date(b.checkInDateTime).toDateString() === new Date().toDateString() &&
+    b.bookingStatus === 'checkedIn'
+  ).length;
+  const totalRevenue = bookings.reduce((sum, b) => b.bookingStatus !== 'cancelled' ? sum + b.totalAmount : sum, 0);
+  const occupancyRate = Math.round((rooms.filter(r => r.roomStatus === 'occupied').length / rooms.length) * 100);
 
-    // Auto-refresh every 30 seconds
-    const interval = setInterval(fetchDashboardData, 30000);
-    return () => clearInterval(interval);
-  }, []);
+  const availableRooms = rooms.filter(r => r.roomStatus === 'available').length;
+  const maintenanceRooms = rooms.filter(r => r.roomStatus === 'maintenance').length;
+  const cleaningRooms = rooms.filter(r => r.roomStatus === 'cleaning').length;
 
-  if (loading || !dashboardData) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[...Array(8)].map((_, i) => (
-              <Card key={i} loading className="shadow-lg" />
-            ))}
+  // Chart configurations
+  const bookingTrendsConfig = {
+    chart: { type: 'line', height: 300 },
+    title: { text: 'Booking Trends (Last 7 Days)', style: { fontSize: '16px' } },
+    xAxis: {
+      categories: last7Days.map(d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }))
+    },
+    yAxis: { title: { text: 'Number of Bookings' } },
+    series: [{
+      name: 'Bookings',
+      data: last7Days.map(() => Math.floor(Math.random() * 15) + 5),
+      color: '#3b82f6'
+    }],
+    legend: { enabled: false },
+    credits: { enabled: false }
+  };
+
+  const revenueConfig = {
+    chart: { type: 'column', height: 300 },
+    title: { text: 'Revenue by Room Type', style: { fontSize: '16px' } },
+    xAxis: { categories: ['Standard', 'Deluxe', 'Suite', 'Presidential'] },
+    yAxis: { title: { text: 'Revenue (₱)' } },
+    series: [{
+      name: 'Revenue',
+      data: [45000, 68000, 92000, 125000],
+      color: '#10b981'
+    }],
+    legend: { enabled: false },
+    credits: { enabled: false }
+  };
+
+  const occupancyConfig = {
+    chart: { type: 'pie', height: 300 },
+    title: { text: 'Room Status Distribution', style: { fontSize: '16px' } },
+    series: [{
+      name: 'Rooms',
+      data: [
+        { name: 'Occupied', y: rooms.filter(r => r.roomStatus === 'occupied').length, color: '#ef4444' },
+        { name: 'Available', y: availableRooms, color: '#10b981' },
+        { name: 'Maintenance', y: maintenanceRooms, color: '#f59e0b' },
+        { name: 'Cleaning', y: cleaningRooms, color: '#6366f1' },
+        { name: 'Reserved', y: rooms.filter(r => r.roomStatus === 'reserved').length, color: '#8b5cf6' }
+      ]
+    }],
+    credits: { enabled: false }
+  };
+
+  const paymentStatusConfig = {
+    chart: { type: 'pie', height: 300 },
+    title: { text: 'Payment Status Overview', style: { fontSize: '16px' } },
+    plotOptions: {
+      pie: {
+        innerSize: '50%',
+        dataLabels: {
+          enabled: true,
+          format: '{point.name}: {point.percentage:.1f}%'
+        }
+      }
+    },
+    series: [{
+      name: 'Payments',
+      data: [
+        { name: 'Paid', y: bookings.filter(b => b.paymentStatus === 'paid').length, color: '#10b981' },
+        { name: 'Pending', y: bookings.filter(b => b.paymentStatus === 'pending').length, color: '#f59e0b' },
+        { name: 'Partial', y: bookings.filter(b => b.paymentStatus === 'partial').length, color: '#6366f1' },
+        { name: 'Refunded', y: bookings.filter(b => b.paymentStatus === 'refunded').length, color: '#ef4444' }
+      ]
+    }],
+    credits: { enabled: false }
+  };
+
+  // Table columns
+  const bookingColumns = [
+    {
+      title: 'Booking Ref',
+      dataIndex: 'bookingReference',
+      key: 'bookingReference',
+      render: (text) => <span className="font-mono text-sm">{text}</span>
+    },
+    {
+      title: 'Guest',
+      dataIndex: 'primaryGuestName',
+      key: 'primaryGuestName',
+      render: (text, record) => (
+        <div className="flex items-center space-x-3">
+          <Avatar size={32} style={{ backgroundColor: '#3b82f6' }}>
+            {text.split(' ').map(n => n[0]).join('')}
+          </Avatar>
+          <div>
+            <div className="font-medium">{text}</div>
+            <div className="text-xs text-gray-500">{record.primaryGuestContact}</div>
           </div>
         </div>
-      </div>
-    );
-  }
+      )
+    },
+    {
+      title: 'Room',
+      dataIndex: 'roomNumber',
+      key: 'roomNumber',
+      render: (text, record) => (
+        <div>
+          <div className="font-medium">{text}</div>
+          <div className="text-xs text-gray-500">{record.roomTypeName}</div>
+        </div>
+      )
+    },
+    {
+      title: 'Status',
+      dataIndex: 'bookingStatus',
+      key: 'bookingStatus',
+      render: (status) => {
+        const statusConfig = {
+          confirmed: { color: 'blue', icon: CheckCircle },
+          checkedIn: { color: 'green', icon: UserCheck },
+          checkedOut: { color: 'gray', icon: CheckCircle },
+          cancelled: { color: 'red', icon: XCircle },
+          pending: { color: 'orange', icon: Clock }
+        };
+        const config = statusConfig[status];
+        const IconComponent = config.icon;
+        return (
+          <Badge
+            color={config.color}
+            text={
+              <span className="flex items-center space-x-1">
+                <IconComponent size={12} />
+                <span className="capitalize">{status}</span>
+              </span>
+            }
+          />
+        );
+      }
+    },
+    {
+      title: 'Payment',
+      dataIndex: 'paymentStatus',
+      key: 'paymentStatus',
+      render: (status) => {
+        const colors = { paid: 'green', pending: 'orange', partial: 'blue', refunded: 'red' };
+        return <Badge color={colors[status]} text={status.charAt(0).toUpperCase() + status.slice(1)} />;
+      }
+    },
+    {
+      title: 'Amount',
+      dataIndex: 'totalAmount',
+      key: 'totalAmount',
+      render: (amount) => <span className="font-medium">₱{amount.toLocaleString()}</span>
+    },
+    {
+      title: 'Check-in',
+      dataIndex: 'checkInDateTime',
+      key: 'checkInDateTime',
+      render: (date) => new Date(date).toLocaleDateString()
+    }
+  ];
 
-  // Process data for display
-  const roomStatusData = dashboardData.roomStatus.reduce((acc, item) => {
-    acc[item.roomStatus] = item.count;
-    return acc;
-  }, {});
+  const roomColumns = [
+    {
+      title: 'Room',
+      dataIndex: 'roomNumber',
+      key: 'roomNumber',
+      render: (text, record) => (
+        <div>
+          <div className="font-medium text-lg">{text}</div>
+          <div className="text-xs text-gray-500">Floor {record.floor}</div>
+        </div>
+      )
+    },
+    {
+      title: 'Type',
+      dataIndex: 'roomTypeName',
+      key: 'roomTypeName',
+      render: (text, record) => (
+        <div>
+          <div className="font-medium">{text}</div>
+          <div className="text-xs text-gray-500">Max {record.maxOccupancy} guests</div>
+        </div>
+      )
+    },
+    {
+      title: 'Status',
+      dataIndex: 'roomStatus',
+      key: 'roomStatus',
+      render: (status) => {
+        const statusConfig = {
+          available: { color: 'green', bg: 'bg-green-100', text: 'text-green-800' },
+          occupied: { color: 'red', bg: 'bg-red-100', text: 'text-red-800' },
+          maintenance: { color: 'orange', bg: 'bg-orange-100', text: 'text-orange-800' },
+          cleaning: { color: 'blue', bg: 'bg-blue-100', text: 'text-blue-800' },
+          reserved: { color: 'purple', bg: 'bg-purple-100', text: 'text-purple-800' }
+        };
+        const config = statusConfig[status];
+        return (
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
+            {status.charAt(0).toUpperCase() + status.slice(1)}
+          </span>
+        );
+      }
+    },
+    {
+      title: 'Last Cleaned',
+      dataIndex: 'lastCleaned',
+      key: 'lastCleaned',
+      render: (date) => {
+        const cleanedDate = new Date(date);
+        const hoursAgo = Math.floor((new Date() - cleanedDate) / (1000 * 60 * 60));
+        return (
+          <div>
+            <div>{cleanedDate.toLocaleDateString()}</div>
+            <div className="text-xs text-gray-500">{hoursAgo}h ago</div>
+          </div>
+        );
+      }
+    }
+  ];
 
-  const bookingData = dashboardData.todayBookings.reduce((acc, item) => {
-    acc[item.bookingStatus] = { count: item.count, revenue: item.totalRevenue };
-    return acc;
-  }, {});
-
-  const occupancyData = dashboardData.currentOccupancy[0];
-  const occupancyRate = ((occupancyData.occupiedRooms / occupancyData.totalRooms) * 100).toFixed(1);
-
-  const totalRevenue = dashboardData.todayBookings.reduce((sum, item) => sum + item.totalRevenue, 0);
-  const totalBookings = dashboardData.todayBookings.reduce((sum, item) => sum + item.count, 0);
-  const pendingCheckouts = dashboardData.pendingCheckouts[0].count;
-  const walkInQueue = dashboardData.walkInQueue[0].count;
-
-  // Room status configuration
-  const roomStatusConfig = {
-    available: { color: '#52c41a', icon: Home, label: 'Available' },
-    occupied: { color: '#1890ff', icon: Users, label: 'Occupied' },
-    cleaning: { color: '#faad14', icon: Sparkles, label: 'Cleaning' },
-    maintenance: { color: '#ff7875', icon: Settings, label: 'Maintenance' },
-    out_of_order: { color: '#f5222d', icon: AlertTriangle, label: 'Out of Order' }
-  };
-
-  const getOccupancyColor = (rate) => {
-    if (rate >= 90) return '#f5222d';
-    if (rate >= 75) return '#faad14';
-    return '#52c41a';
-  };
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-PH', {
-      style: 'currency',
-      currency: 'PHP',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount);
+  const handleRefresh = () => {
+    setMockData(generateMockData());
+    setRefreshKey(prev => prev + 1);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <Title level={2} className="!mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Reception Dashboard
-              </Title>
-              <Text type="secondary" className="text-lg">
-                Welcome back! Here's what's happening today
-              </Text>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Badge dot status="processing">
-                <Button type="primary" className="shadow-lg">
-                  Live Updates
-                </Button>
-              </Badge>
-              <Text type="secondary">
-                Last updated: {new Date().toLocaleTimeString()}
-              </Text>
-            </div>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Receptionist Dashboard</h1>
+            <p className="text-gray-600">Welcome back! Here's what's happening at your hotel today.</p>
+          </div>
+          <div className="flex flex-wrap gap-3 mt-4 sm:mt-0">
+            <Select
+              value={selectedBranch}
+              onChange={setSelectedBranch}
+              className="w-40"
+              suffixIcon={<MapPin size={16} />}
+            >
+              <Option value="all">All Branches</Option>
+              <Option value="main">Main Branch</Option>
+              <Option value="north">North Branch</Option>
+            </Select>
+            <RangePicker
+              value={selectedDateRange}
+              onChange={setSelectedDateRange}
+              className="w-64"
+            />
+            <Tooltip title="Refresh Data">
+              <button
+                onClick={handleRefresh}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
+              >
+                <RefreshCw size={16} />
+                Refresh
+              </button>
+            </Tooltip>
           </div>
         </div>
 
-        {/* Key Metrics Row */}
+        {/* Key Metrics */}
         <Row gutter={[24, 24]} className="mb-8">
           <Col xs={24} sm={12} lg={6}>
-            <Card className="shadow-xl border-0 bg-gradient-to-br from-green-400 to-green-600 text-white transform hover:scale-105 transition-transform duration-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-green-700 text-sm font-medium mb-2">Today's Revenue</div>
-                  <div className="text-3xl font-bold">{formatCurrency(totalRevenue)}</div>
-                  <div className="text-green-700 text-xs mt-1 flex items-center">
-                    <TrendingUp size={12} className="mr-1" />
-                    +12.5% from yesterday
-                  </div>
-                </div>
-                <div className="bg-white/20 p-3 rounded-full">
-                  <DollarSign size={32} />
-                </div>
+            <Card className="hover:shadow-lg transition-shadow">
+              <Statistic
+                title="Today's Check-ins"
+                value={checkedInToday}
+                prefix={<UserCheck className="text-blue-500" size={24} />}
+                valueStyle={{ color: '#3b82f6', fontSize: '28px' }}
+              />
+              <div className="mt-2 text-sm text-gray-500">
+                +12% from yesterday
               </div>
             </Card>
           </Col>
-
           <Col xs={24} sm={12} lg={6}>
-            <Card className="shadow-xl border-0 bg-gradient-to-br from-blue-400 to-blue-600 text-white transform hover:scale-105 transition-transform duration-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-blue-700 text-sm font-medium mb-2">Room Occupancy</div>
-                  <div className="text-3xl font-bold">{occupancyRate}%</div>
-                  <div className="text-blue-700 text-xs mt-1">
-                    {occupancyData.occupiedRooms} of {occupancyData.totalRooms} rooms
-                  </div>
-                </div>
-                <div className="bg-white/20 p-3 rounded-full">
-                  <Bed size={32} />
-                </div>
+            <Card className="hover:shadow-lg transition-shadow">
+              <Statistic
+                title="Total Bookings"
+                value={totalBookings}
+                prefix={<Calendar className="text-green-500" size={24} />}
+                valueStyle={{ color: '#10b981', fontSize: '28px' }}
+              />
+              <div className="mt-2 text-sm text-gray-500">
+                Active reservations
               </div>
             </Card>
           </Col>
-
           <Col xs={24} sm={12} lg={6}>
-            <Card className="shadow-xl border-0 bg-gradient-to-br from-purple-400 to-purple-600 text-white transform hover:scale-105 transition-transform duration-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-purple-700 text-sm font-medium mb-2">Today's Bookings</div>
-                  <div className="text-3xl font-bold">{totalBookings}</div>
-                  <div className="text-purple-700 text-xs mt-1">
-                    {bookingData.confirmed?.count || 0} pending check-in
-                  </div>
-                </div>
-                <div className="bg-white/20 p-3 rounded-full">
-                  <Calendar size={32} />
-                </div>
+            <Card className="hover:shadow-lg transition-shadow">
+              <Statistic
+                title="Revenue Today"
+                value={totalRevenue}
+                prefix="₱"
+                precision={0}
+                valueStyle={{ color: '#f59e0b', fontSize: '28px' }}
+              />
+              <div className="mt-2 text-sm text-gray-500">
+                <TrendingUp size={12} className="inline mr-1" />
+                +8% from last week
               </div>
             </Card>
           </Col>
-
           <Col xs={24} sm={12} lg={6}>
-            <Card className="shadow-xl border-0 bg-gradient-to-br from-orange-400 to-orange-600 text-white transform hover:scale-105 transition-transform duration-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-orange-700 text-sm font-medium mb-2">Pending Actions</div>
-                  <div className="text-3xl font-bold">{pendingCheckouts + walkInQueue}</div>
-                  <div className="text-orange-700 text-xs mt-1">
-                    {pendingCheckouts} checkouts, {walkInQueue} in queue
-                  </div>
-                </div>
-                <div className="bg-white/20 p-3 rounded-full">
-                  <Clock size={32} />
-                </div>
-              </div>
-            </Card>
-          </Col>
-        </Row>
-
-        {/* Detailed Information Row */}
-        <Row gutter={[24, 24]}>
-          {/* Room Status Breakdown */}
-          <Col xs={24} lg={12}>
-            <Card
-              title={
-                <div className="flex items-center">
-                  <Home className="mr-2" size={20} />
-                  Room Status Overview
-                </div>
-              }
-              className="shadow-xl border-0 h-full"
-              extra={
-                <Badge count={roomStatusData.maintenance + roomStatusData.out_of_order}
-                  style={{ backgroundColor: '#ff4d4f' }}>
-                  <Button type="text" size="small">View All Rooms</Button>
-                </Badge>
-              }
-            >
-              <div className="space-y-4">
-                {Object.entries(roomStatusConfig).map(([status, config]) => {
-                  const count = roomStatusData[status] || 0;
-                  const Icon = config.icon;
-                  const percentage = ((count / occupancyData.totalRooms) * 100).toFixed(1);
-
-                  return (
-                    <div key={status} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                      <div className="flex items-center space-x-3">
-                        <div
-                          className="p-2 rounded-full"
-                          style={{ backgroundColor: `${config.color}20` }}
-                        >
-                          <Icon size={20} style={{ color: config.color }} />
-                        </div>
-                        <div>
-                          <div className="font-semibold text-gray-800">{config.label}</div>
-                          <div className="text-sm text-gray-500">{percentage}% of total rooms</div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-2xl font-bold" style={{ color: config.color }}>{count}</div>
-                        <div className="text-xs text-gray-400">rooms</div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <Divider />
-
-              <div className="text-center">
+            <Card className="hover:shadow-lg transition-shadow">
+              <Statistic
+                title="Occupancy Rate"
+                value={occupancyRate}
+                suffix="%"
+                prefix={<Bed className="text-purple-500" size={24} />}
+                valueStyle={{ color: '#8b5cf6', fontSize: '28px' }}
+              />
+              <div className="mt-2">
                 <Progress
-                  type="circle"
-                  percent={parseFloat(occupancyRate)}
-                  strokeColor={getOccupancyColor(occupancyRate)}
-                  format={percent => `${percent}%`}
-                  width={120}
+                  percent={occupancyRate}
+                  showInfo={false}
+                  strokeColor="#8b5cf6"
+                  size="small"
                 />
-                <div className="mt-2 text-sm text-gray-500">Current Occupancy Rate</div>
-              </div>
-            </Card>
-          </Col>
-
-          {/* Booking Status & Queue */}
-          <Col xs={24} lg={12}>
-            <Card
-              title={
-                <div className="flex items-center">
-                  <Users className="mr-2" size={20} />
-                  Today's Activity
-                </div>
-              }
-              className="shadow-xl border-0 h-full"
-            >
-              <div className="space-y-6">
-                {/* Booking Status */}
-                <div>
-                  <Title level={5} className="!mb-4">Booking Status</Title>
-                  <Row gutter={[16, 16]}>
-                    <Col span={12}>
-                      <div className="text-center p-4 bg-blue-50 rounded-lg">
-                        <UserCheck size={24} className="mx-auto mb-2 text-blue-600" />
-                        <div className="text-2xl font-bold text-blue-600">
-                          {bookingData.checked_in?.count || 0}
-                        </div>
-                        <div className="text-sm text-gray-600">Checked In</div>
-                        <div className="text-xs text-gray-400">
-                          {formatCurrency(bookingData.checked_in?.revenue || 0)}
-                        </div>
-                      </div>
-                    </Col>
-                    <Col span={12}>
-                      <div className="text-center p-4 bg-green-50 rounded-lg">
-                        <UserX size={24} className="mx-auto mb-2 text-green-600" />
-                        <div className="text-2xl font-bold text-green-600">
-                          {bookingData.checked_out?.count || 0}
-                        </div>
-                        <div className="text-sm text-gray-600">Checked Out</div>
-                        <div className="text-xs text-gray-400">
-                          {formatCurrency(bookingData.checked_out?.revenue || 0)}
-                        </div>
-                      </div>
-                    </Col>
-                  </Row>
-                </div>
-
-                <Divider />
-
-                {/* Quick Actions */}
-                <div>
-                  <Title level={5} className="!mb-4">Quick Actions</Title>
-                  <div className="grid grid-cols-2 gap-4">
-                    <Button
-                      type="primary"
-                      size="large"
-                      className="h-16 flex flex-col items-center justify-center bg-gradient-to-r from-blue-500 to-blue-600 border-0"
-                      danger={pendingCheckouts > 5}
-                    >
-                      <Clock size={20} className="mb-1" />
-                      <span className="text-sm">Checkouts ({pendingCheckouts})</span>
-                    </Button>
-
-                    <Button
-                      type="default"
-                      size="large"
-                      className="h-16 flex flex-col items-center justify-center border-dashed"
-                      danger={walkInQueue > 2}
-                    >
-                      <Phone size={20} className="mb-1" />
-                      <span className="text-sm">Queue ({walkInQueue})</span>
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Recent Activity Preview */}
-                <div>
-                  <Title level={5} className="!mb-4">Recent Activity</Title>
-                  <List
-                    size="small"
-                    dataSource={[
-                      { action: 'Check-in', guest: 'Receptionist', room: '301', time: '10:30 AM', type: 'checkin' },
-                      { action: 'Payment', guest: 'Bell boy', room: '205', time: '10:15 AM', type: 'payment' },
-                      { action: 'Check-out', guest: 'Bell boy', room: '108', time: '09:45 AM', type: 'checkout' },
-                    ]}
-                    renderItem={item => (
-                      <List.Item className="hover:bg-gray-50 px-2 rounded">
-                        <div className="flex items-center justify-between w-full">
-                          <div className="flex items-center space-x-3">
-                            <Avatar
-                              size="small"
-                              style={{
-                                backgroundColor: item.type === 'checkin' ? '#52c41a' :
-                                  item.type === 'payment' ? '#1890ff' : '#faad14'
-                              }}
-                            >
-                              <User size={14} />
-                            </Avatar>
-                            <div>
-                              <div className="text-sm font-medium">{item.action} - {item.guest}</div>
-                              <div className="text-xs text-gray-500">Room {item.room}</div>
-                            </div>
-                          </div>
-                          <div className="text-xs text-gray-400">{item.time}</div>
-                        </div>
-                      </List.Item>
-                    )}
-                  />
-                </div>
               </div>
             </Card>
           </Col>
         </Row>
+
+        {/* Room Status Cards */}
+        <Row gutter={[24, 24]} className="mb-8">
+          <Col xs={12} sm={6}>
+            <Card className="text-center hover:shadow-lg transition-shadow border-l-4 border-green-500">
+              <div className="text-2xl font-bold text-green-600">{availableRooms}</div>
+              <div className="text-sm text-gray-600">Available Rooms</div>
+            </Card>
+          </Col>
+          <Col xs={12} sm={6}>
+            <Card className="text-center hover:shadow-lg transition-shadow border-l-4 border-red-500">
+              <div className="text-2xl font-bold text-red-600">{rooms.filter(r => r.roomStatus === 'occupied').length}</div>
+              <div className="text-sm text-gray-600">Occupied Rooms</div>
+            </Card>
+          </Col>
+          <Col xs={12} sm={6}>
+            <Card className="text-center hover:shadow-lg transition-shadow border-l-4 border-orange-500">
+              <div className="text-2xl font-bold text-orange-600">{maintenanceRooms}</div>
+              <div className="text-sm text-gray-600">Maintenance</div>
+            </Card>
+          </Col>
+          <Col xs={12} sm={6}>
+            <Card className="text-center hover:shadow-lg transition-shadow border-l-4 border-blue-500">
+              <div className="text-2xl font-bold text-blue-600">{cleaningRooms}</div>
+              <div className="text-sm text-gray-600">Cleaning</div>
+            </Card>
+          </Col>
+        </Row>
+
+        {/* Charts Section */}
+        <Row gutter={[24, 24]} className="mb-8">
+          <Col xs={24} lg={12}>
+            <Card title="Booking Trends" className="hover:shadow-lg transition-shadow">
+              <HighchartsReact
+                highcharts={Highcharts}
+                options={bookingTrendsConfig}
+                key={`booking-trends-${refreshKey}`}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} lg={12}>
+            <Card title="Revenue by Room Type" className="hover:shadow-lg transition-shadow">
+              <HighchartsReact
+                highcharts={Highcharts}
+                options={revenueConfig}
+                key={`revenue-${refreshKey}`}
+              />
+            </Card>
+          </Col>
+        </Row>
+
+        <Row gutter={[24, 24]} className="mb-8">
+          <Col xs={24} lg={12}>
+            <Card title="Room Status Distribution" className="hover:shadow-lg transition-shadow">
+              <HighchartsReact
+                highcharts={Highcharts}
+                options={occupancyConfig}
+                key={`occupancy-${refreshKey}`}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} lg={12}>
+            <Card title="Payment Status" className="hover:shadow-lg transition-shadow">
+              <HighchartsReact
+                highcharts={Highcharts}
+                options={paymentStatusConfig}
+                key={`payment-${refreshKey}`}
+              />
+            </Card>
+          </Col>
+        </Row>
+
+        {/* Data Tables */}
+        <Card className="hover:shadow-lg transition-shadow">
+          <Tabs defaultActiveKey="bookings" className="w-full">
+            <TabPane
+              tab={
+                <span className="flex items-center space-x-2">
+                  <Calendar size={16} />
+                  <span>Recent Bookings</span>
+                  <Badge count={bookings.filter(b => b.bookingStatus === 'pending').length} />
+                </span>
+              }
+              key="bookings"
+            >
+              <div className="mb-4 flex flex-wrap gap-2">
+                <Select placeholder="Filter by Status" className="w-40" allowClear>
+                  <Option value="confirmed">Confirmed</Option>
+                  <Option value="checkedIn">Checked In</Option>
+                  <Option value="pending">Pending</Option>
+                  <Option value="cancelled">Cancelled</Option>
+                </Select>
+                <Select placeholder="Filter by Payment" className="w-40" allowClear>
+                  <Option value="paid">Paid</Option>
+                  <Option value="pending">Pending</Option>
+                  <Option value="partial">Partial</Option>
+                </Select>
+                <button className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2">
+                  <Download size={16} />
+                  Export
+                </button>
+              </div>
+              <Table
+                columns={bookingColumns}
+                dataSource={bookings.slice(0, 10)}
+                rowKey="bookingId"
+                pagination={{ pageSize: 10 }}
+                scroll={{ x: 800 }}
+              />
+            </TabPane>
+            <TabPane
+              tab={
+                <span className="flex items-center space-x-2">
+                  <Bed size={16} />
+                  <span>Room Status</span>
+                  <Badge count={maintenanceRooms + cleaningRooms} />
+                </span>
+              }
+              key="rooms"
+            >
+              <div className="mb-4 flex flex-wrap gap-2">
+                <Select placeholder="Filter by Status" className="w-40" allowClear>
+                  <Option value="available">Available</Option>
+                  <Option value="occupied">Occupied</Option>
+                  <Option value="maintenance">Maintenance</Option>
+                  <Option value="cleaning">Cleaning</Option>
+                </Select>
+                <Select placeholder="Filter by Floor" className="w-40" allowClear>
+                  <Option value="1">Floor 1</Option>
+                  <Option value="2">Floor 2</Option>
+                  <Option value="3">Floor 3</Option>
+                </Select>
+              </div>
+              <Table
+                columns={roomColumns}
+                dataSource={rooms}
+                rowKey="roomId"
+                pagination={{ pageSize: 10 }}
+                scroll={{ x: 600 }}
+              />
+            </TabPane>
+          </Tabs>
+        </Card>
+
+        {/* Quick Actions */}
+        <Card title="Quick Actions" className="mt-8 hover:shadow-lg transition-shadow">
+          <Row gutter={[16, 16]}>
+            <Col xs={24} sm={12} md={6}>
+              <button className="w-full p-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex flex-col items-center space-y-2">
+                <UserCheck size={24} />
+                <span>New Check-in</span>
+              </button>
+            </Col>
+            <Col xs={24} sm={12} md={6}>
+              <button className="w-full p-4 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors flex flex-col items-center space-y-2">
+                <Calendar size={24} />
+                <span>New Booking</span>
+              </button>
+            </Col>
+            <Col xs={24} sm={12} md={6}>
+              <button className="w-full p-4 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors flex flex-col items-center space-y-2">
+                <AlertCircle size={24} />
+                <span>Room Maintenance</span>
+              </button>
+            </Col>
+            <Col xs={24} sm={12} md={6}>
+              <button className="w-full p-4 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors flex flex-col items-center space-y-2">
+                <DollarSign size={24} />
+                <span>Process Payment</span>
+              </button>
+            </Col>
+          </Row>
+        </Card>
       </div>
     </div>
   );

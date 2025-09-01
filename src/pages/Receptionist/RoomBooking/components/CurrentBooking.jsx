@@ -1,13 +1,15 @@
+import { Button, Drawer, Space, Typography } from "antd";
+import { Plus, Printer, X } from "lucide-react";
 import { memo, useState } from "react";
 import { useGetBookingByRoomIdApi } from "../../../../services/requests/useBookings";
-import { Button, Drawer, Space, Typography } from "antd";
-import { Plus, Printer, X, XCircle } from "lucide-react";
 import BookingInformation from "./BookingInformation";
 import ExtendBooking from "./ExtendBooking";
+import PaymentSettlement from "./PaymentSettlement";
 
 const CurrentBookedRoom = memo(({ room, onSelect }) => {
   const getBookingByRoomIdApi = useGetBookingByRoomIdApi(room?.roomId);
   const [isShowExtend, setIsShowExtend] = useState(false);
+  const [isPaymentDrawerOpen, setIsPaymentDrawerOpen] = useState(false);
 
   return (
     <Drawer
@@ -35,15 +37,13 @@ const CurrentBookedRoom = memo(({ room, onSelect }) => {
       }
       extra={
         <Button
-          danger
+          type="text"
           key={"cancel"}
           onClick={() => onSelect(null)}
           className="rounded-lg"
           size="large"
-        >
-          <X className="w-4 h-4" />
-          CLOSE
-        </Button>
+          icon={<X />}
+        />
       }
       footer={
         <div className="flex justify-end items-center">
@@ -60,10 +60,6 @@ const CurrentBookedRoom = memo(({ room, onSelect }) => {
             <Button key={"print"} size="large">
               <Printer className="w-4 h-4" /> Print Booking
             </Button>
-            <Button danger key={"cancel"} size="large">
-              <XCircle className="w-4 h-4" />
-              Cancel Booking
-            </Button>
           </Space>
         </div>
       }
@@ -76,6 +72,7 @@ const CurrentBookedRoom = memo(({ room, onSelect }) => {
           <BookingInformation
             bookingData={getBookingByRoomIdApi.data}
             request={getBookingByRoomIdApi}
+            settlePayment={() => setIsPaymentDrawerOpen(true)}
           />
         )}
       </div>
@@ -113,6 +110,16 @@ const CurrentBookedRoom = memo(({ room, onSelect }) => {
           callback={() => setIsShowExtend(false)}
         />
       </Drawer>
+
+      <PaymentSettlement
+        open={isPaymentDrawerOpen}
+        onClose={() => setIsPaymentDrawerOpen(false)}
+        bookingData={getBookingByRoomIdApi.data}
+        onPaymentSuccess={(result) => {
+          console.log("Payment processed:", result);
+          // Handle success - refresh booking data, show success message, etc.
+        }}
+      />
     </Drawer>
   );
 });

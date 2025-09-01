@@ -1,35 +1,28 @@
-import React, { useState, useEffect } from "react";
-import { useExtendBookingApi } from "../../../../services/requests/useBookings";
 import {
+  CalendarOutlined,
+  CheckCircleOutlined,
+  DollarOutlined,
+  InfoCircleOutlined,
+} from "@ant-design/icons";
+import {
+  Alert,
   App,
+  Button,
+  Col,
+  Divider,
   Form,
   Input,
   InputNumber,
-  Button,
-  Card,
-  Row,
-  Col,
-  Typography,
-  Space,
-  Divider,
-  Tag,
-  Statistic,
-  Alert,
-  Tooltip,
-  Badge,
-  Switch,
   Radio,
+  Row,
+  Space,
+  Typography,
 } from "antd";
-import {
-  ClockCircleOutlined,
-  CalendarOutlined,
-  DollarOutlined,
-  InfoCircleOutlined,
-  CheckCircleOutlined,
-} from "@ant-design/icons";
 import dayjs from "dayjs";
+import { CheckCircleIcon, Clock, Info } from "lucide-react";
+import React, { useState } from "react";
+import { useExtendBookingApi } from "../../../../services/requests/useBookings";
 import { formatCurrency } from "../../../../utils/formatCurrency";
-import { CheckCircleIcon, Clock, Info, ToggleRightIcon } from "lucide-react";
 
 const { Title, Text } = Typography;
 
