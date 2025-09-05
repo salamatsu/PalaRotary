@@ -1,19 +1,13 @@
 import { Button, Input, Select, Space, Table, Tag } from "antd";
 import {
-  AlertCircle,
-  Bed,
   Calendar,
-  Clock,
   CreditCard,
-  DollarSign,
   Eye,
   Grid3X3,
   List,
   MapPin,
-  Phone,
   Search,
-  Timer,
-  Users,
+  Timer
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useGetBookingsApi } from "../../../services/requests/useBookings";

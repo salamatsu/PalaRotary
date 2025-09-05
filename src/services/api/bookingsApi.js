@@ -96,14 +96,6 @@ export const getBookingByBookingIdApi = async (bookingId) => {
   }
 };
 
-export const getBookingStatusApi = async (bookingId) => {
-  try {
-    const result = await axiosDefault.get(`/api/bookings/${bookingId}/status`);
-    return result.data;
-  } catch (error) {
-    handleApiError(error);
-  }
-};
 
 // PAYMENT OPERATIONS
 export const getBookingPaymentsApi = async (bookingId) => {

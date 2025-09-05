@@ -22,16 +22,6 @@ const handleApiError = (error) => {
   throw new Error(error.message || "An unexpected error occurred");
 };
 
-// Get all promotions
-export const getAllPromotions = async () => {
-  try {
-    const result = await axiosDefault.get("/api/promotions");
-    return result.data;
-  } catch (error) {
-    handleApiError(error);
-  }
-};
-
 export const getPromotionsByMyBranch = async () => {
   try {
     const result = await axiosDefault.get(`/api/promotions/myBranch`);

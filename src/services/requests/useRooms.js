@@ -41,28 +41,6 @@ export const useGetRoomsByBranch = (branchId = null, options = {}) => {
   });
 };
 
-// Get available rooms
-export const useGetAvailableRooms = (
-  checkIn,
-  checkOut,
-  branchId = null,
-  options = {}
-) => {
-  return useQuery({
-    queryKey: ["availableRooms", checkIn, checkOut, branchId],
-    queryFn: () => getAvailableRoomsApi(checkIn, checkOut, branchId),
-    placeholderData: [],
-    enabled: !!checkIn && !!checkOut, // Only run query if dates are provided
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    cacheTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnWindowFocus: false,
-    retry: 2,
-    onError: (error) => {
-      console.error("Failed to fetch available rooms:", error);
-    },
-    ...options,
-  });
-};
 
 // Update room status mutation
 export const useUpdateRoomStatus = () => {

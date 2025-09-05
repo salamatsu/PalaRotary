@@ -4,8 +4,7 @@ import {
   extendBookingApi,
   getBookingByBookingIdApi,
   getBookingByRoomIdApi,
-  getBookingsApi,
-  getBookingStatusApi,
+  getBookingsApi
 } from "../api/bookingsApi";
 
 export const useAddBookingApi = () => {
@@ -57,18 +56,6 @@ export const useGetBookingByBookingIdApi = (bookingId) => {
   return useQuery({
     queryKey: ["getBookingByBookingIdApi"],
     queryFn: () => getBookingByBookingIdApi(bookingId),
-    placeholderData: [],
-    retry: 1,
-    onError: (error) => {
-      console.error("Failed to fetch user:", error);
-    },
-  });
-};
-
-export const useGetBookingStatusApi = (bookingId) => {
-  return useQuery({
-    queryKey: ["getBookingStatusApi"],
-    queryFn: () => getBookingStatusApi(bookingId),
     placeholderData: [],
     retry: 1,
     onError: (error) => {

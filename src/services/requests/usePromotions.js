@@ -1,23 +1,9 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
-  getAllPromotions,
   getPromotionByPromoCode,
-  getPromotionsByMyBranch,
+  getPromotionsByMyBranch
 } from "../api/promotions";
 
-export const useGetUserById = () => {
-  return useQuery({
-    queryKey: ["promotions"],
-    queryFn: () => getAllPromotions(),
-    placeholderData: [],
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    cacheTime: 5 * 60 * 1000, // 5 minutes
-    retry: 2,
-    onError: (error) => {
-      console.error("Failed to fetch user:", error);
-    },
-  });
-};
 export const useGetPromotionsByMyBranch = () => {
   return useQuery({
     queryKey: ["getPromotionsByMyBranch"],
