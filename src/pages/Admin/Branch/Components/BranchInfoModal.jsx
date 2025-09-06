@@ -58,7 +58,17 @@ const BranchInfoModal = ({ open, onClose, branchData }) => {
       onCancel={onClose}
       footer={null}
       width={700}
-      className="branch-info-modal"
+      styles={{
+        mask: {
+          backdropFilter: "blur(8px)",
+          backgroundColor: "rgba(0, 0, 0, 0.2)",
+        },
+        content: {
+          borderRadius: "0px",
+          boxShadow:
+            "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+        },
+      }}
     >
       <div className="space-y-6">
         {/* Header Section */}

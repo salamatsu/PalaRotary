@@ -292,12 +292,6 @@ const Branch = () => {
         ),
       },
       {
-        title: "Location",
-        key: "location",
-        width: 180,
-        render: (_, record) => <LocationRenderer record={record} />,
-      },
-      {
         title: "Contact",
         key: "contact",
         width: 200,

@@ -85,11 +85,11 @@ const AddBranch = ({ open, onClose }) => {
       {/* Footer */}
       <div className="flex justify-end gap-3 px-6 py-4 bg-gray-50 border-t border-gray-100">
         <Button
-          onClick={handleClose}
+          onClick={() => form.resetFields()}
           className="h-9 px-6 text-sm font-medium text-gray-700 border-gray-300 hover:border-gray-400 hover:text-gray-700 focus:border-gray-400 focus:text-gray-700"
           disabled={addBranchApi.isPending}
         >
-          Cancel
+          Clear
         </Button>
         <Button
           type="primary"
