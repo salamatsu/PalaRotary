@@ -47,6 +47,7 @@ import {
 import dayjs from "dayjs";
 import {
   Bed,
+  BoxIcon,
   Building2,
   DollarSign,
   Gift,
@@ -3084,8 +3085,8 @@ const SuperAdminCMS = () => {
     },
     {
       key: "services",
-      icon: <ServerIcon />,
-      label: "Additional Services",
+      icon: <BoxIcon />,
+      label: "Services",
     },
   ];
 

@@ -24,11 +24,11 @@ import {
   useUpdateBranchStatusApi,
 } from "../../../services/requests/useBranches";
 import { DATE_FORMATS, formatDateTime } from "../../../utils/formatDate";
-import { useStyledTable } from "../ReusableComponents/Hooks/useStyleTable";
-import { StatusBadge } from "../ReusableComponents/StatusBadge";
+import { useStyledTable } from "../../../hooks/useStyleTable";
 import AddBranch from "./Components/AddBranch";
 import BranchInfoModal from "./Components/BranchInfoModal";
 import UpdateBranch from "./Components/UpdateBranch";
+import { StatusBadge } from "../../../components/ui/badges/StatusBadge";
 
 const { Title } = Typography;
 
