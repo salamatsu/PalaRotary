@@ -110,7 +110,6 @@ const AdminRoute = () => {
           {navigations
             .filter((page) => page.isShow) // Only create routes for visible pages
             .map((page) => {
-              // Use 'route' instead of 'link' and fix the path extraction
               const routePath = page.route.replace("/admin/", "");
 
               return (

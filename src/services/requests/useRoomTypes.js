@@ -19,143 +19,73 @@ export const ROOM_TYPES_QUERY_KEYS = {
 };
 
 // Get all room types
+
 export const useGetAllRoomTypesApi = () => {
   return useQuery({
-    queryKey: ROOM_TYPES_QUERY_KEYS.all,
+    queryKey: ["getAllRoomTypesApi"],
     queryFn: getAllRoomTypesApi,
     retry: 1,
-    // staleTime: 5 * 60 * 1000, // 5 minutes
-    // cacheTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 0,
+    cacheTime: 0,
     refetchOnWindowFocus: false,
     initialData: [],
+    placeholderData: [],
     onError: (error) => {
-      console.error("Failed to fetch room types:", error);
+      console.error("Failed to fetch user:", error);
     },
   });
 };
 
-// Get room type by ID
 export const useGetRoomTypeByIdApi = (roomTypeId) => {
   return useQuery({
-    queryKey: ROOM_TYPES_QUERY_KEYS.detail(roomTypeId),
+    queryKey: ["getRoomTypeByIdApi"],
     queryFn: () => getRoomTypeByIdApi(roomTypeId),
-    enabled: Boolean(roomTypeId),
     retry: 1,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 0,
+    cacheTime: 0,
     refetchOnWindowFocus: false,
+    initialData: {},
+    placeholderData: {},
     onError: (error) => {
-      console.error(`Failed to fetch room type ${roomTypeId}:`, error);
+      console.error("Failed to fetch user:", error);
     },
   });
 };
 
-// Get room types by branch ID
 export const useGetRoomTypesByBranchIdApi = (branchId) => {
   return useQuery({
-    queryKey: ROOM_TYPES_QUERY_KEYS.byBranch(branchId),
+    queryKey: ["getRoomTypesByBranchIdApi"],
     queryFn: () => getRoomTypesByBranchIdApi(branchId),
-    enabled: Boolean(branchId),
     retry: 1,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 0,
+    cacheTime: 0,
     refetchOnWindowFocus: false,
-    initialData: [],
+    initialData: {},
+    placeholderData: {},
     onError: (error) => {
-      console.error(
-        `Failed to fetch room types for branch ${branchId}:`,
-        error
-      );
+      console.error("Failed to fetch user:", error);
     },
   });
 };
 
-// Add room type mutation
 export const useAddRoomTypeApi = () => {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: addRoomTypeApi,
     retry: false,
-    onSuccess: (data) => {
-      // Invalidate and refetch room types queries
-      queryClient.invalidateQueries({ queryKey: ROOM_TYPES_QUERY_KEYS.all });
-
-      // If we know the branch, also invalidate branch-specific queries
-      if (data?.data?.branchId) {
-        queryClient.invalidateQueries({
-          queryKey: ROOM_TYPES_QUERY_KEYS.byBranch(data.data.branchId),
-        });
-      }
-    },
-    onError: (error) => {
-      console.error("Failed to add room type:", error);
-    },
   });
 };
 
-// Update room type mutation
 export const useUpdateRoomTypeApi = () => {
-  const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: ({ roomTypeId, payload }) =>
-      updateRoomTypeApi(roomTypeId, payload),
+    mutationFn: updateRoomTypeApi,
     retry: false,
-    onSuccess: (data, variables) => {
-      const { roomTypeId } = variables;
-
-      // Invalidate and refetch room types queries
-      queryClient.invalidateQueries({ queryKey: ROOM_TYPES_QUERY_KEYS.all });
-
-      // Update the specific room type cache
-      queryClient.invalidateQueries({
-        queryKey: ROOM_TYPES_QUERY_KEYS.detail(roomTypeId),
-      });
-
-      // If we know the branch, also invalidate branch-specific queries
-      if (data?.data?.branchId) {
-        queryClient.invalidateQueries({
-          queryKey: ROOM_TYPES_QUERY_KEYS.byBranch(data.data.branchId),
-        });
-      }
-    },
-    onError: (error, variables) => {
-      console.error("Failed to update room type:", error);
-    },
   });
 };
 
-// Update room type status mutation
 export const useUpdateRoomTypeStatusApi = () => {
-  const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: ({ roomTypeId, isActive }) =>
-      updateRoomTypeStatusApi(roomTypeId, { isActive }),
+    mutationFn: updateRoomTypeStatusApi,
     retry: false,
-    onSuccess: (data, variables) => {
-      const { roomTypeId } = variables;
-
-      // Invalidate and refetch room types queries
-      queryClient.invalidateQueries({ queryKey: ROOM_TYPES_QUERY_KEYS.all });
-
-      // Update the specific room type cache
-      queryClient.invalidateQueries({
-        queryKey: ROOM_TYPES_QUERY_KEYS.detail(roomTypeId),
-      });
-
-      // If we know the branch, also invalidate branch-specific queries
-      if (data?.data?.branchId) {
-        queryClient.invalidateQueries({
-          queryKey: ROOM_TYPES_QUERY_KEYS.byBranch(data.data.branchId),
-        });
-      }
-
-      // Call custom onSuccess if provided
-    },
-    onError: (error, variables) => {
-      console.error("Failed to update room type status:", error);
-    },
   });
 };
+

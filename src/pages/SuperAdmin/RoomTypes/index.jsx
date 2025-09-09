@@ -1,161 +1,43 @@
 import {
   DeleteOutlined,
   EditOutlined,
-  ExportOutlined,
   EyeOutlined,
-  FilterOutlined,
   PlusOutlined,
-  ReloadOutlined,
+  SwapOutlined,
 } from "@ant-design/icons";
 import {
+  App,
   Button,
   Card,
   Col,
   Form,
   Input,
-  InputNumber,
-  message,
   Modal,
   Popconfirm,
   Row,
   Select,
   Space,
-  Switch,
   Table,
   Tag,
   Tooltip,
   Typography,
 } from "antd";
-import { Bed } from "lucide-react";
-import { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import RoomTypeForm from "../../../components/forms/RoomTypeForm";
+import { StatusBadge } from "../../../components/ui/badges/StatusBadge";
 import { useModal } from "../../../hooks/useModal";
 import { useTableData } from "../../../hooks/useTableData";
+import { STATUS_FILTERS } from "../../../lib/constants";
+import { useGetAllBranchesApi } from "../../../services/requests/useBranches";
+import {
+  useAddRoomTypeApi,
+  useGetAllRoomTypesApi,
+  useUpdateRoomTypeApi,
+  useUpdateRoomTypeStatusApi,
+} from "../../../services/requests/useRoomTypes";
 import { parseJsonField } from "../../../utils/parseJsonField";
-import { StatusBadge } from "../../../components/ui/badges/StatusBadge";
-import RoomTypeForm from "../../../components/forms/RoomTypeForm";
-import { useGetAllRoomTypesApi } from "../../../services/requests/useRoomTypes";
 
 const { Title } = Typography;
-const { Option } = Select;
-
-// Mock Data - In a real app, this would come from your API
-const initialData = {
-  branches: [
-    {
-      branchId: 1,
-      branchCode: "BR001",
-      branchName: "Metro Manila Branch",
-      address: "123 EDSA, Quezon City",
-      city: "Quezon City",
-      region: "NCR",
-      contactNumber: "+63 2 1234 5678",
-      email: "metro@hotel.com",
-      operatingHours: "24/7",
-      amenities: JSON.stringify(["WiFi", "Parking", "Restaurant"]),
-      isActive: true,
-      createdAt: "2024-01-15T08:00:00Z",
-    },
-  ],
-  roomTypes: [
-    {
-      roomTypeId: 1,
-      roomTypeCode: "STD",
-      roomTypeName: "Standard Room",
-      description: "Comfortable standard room with basic amenities",
-      bedConfiguration: "Queen Bed",
-      maxOccupancy: 2,
-      roomSize: "25 sqm",
-      amenities: JSON.stringify(["AC", "TV", "WiFi"]),
-      features: JSON.stringify(["Private Bathroom", "Mini Fridge"]),
-      imageUrl: "/images/standard-room.jpg",
-      isActive: true,
-      branchId: 1,
-    },
-  ],
-  rateTypes: [
-    {
-      rateTypeId: 1,
-      rateTypeCode: "HR3",
-      rateTypeName: "3-Hour Rate",
-      duration: 3,
-      durationType: "hours",
-      dayType: "weekday",
-      description: "Standard 3-hour rate for weekdays",
-    },
-  ],
-  rates: [
-    {
-      rateId: 1,
-      roomTypeId: 1,
-      rateTypeId: 1,
-      branchId: 1,
-      baseRate: 1500.0,
-      currency: "PHP",
-      effectiveFrom: "2024-01-01",
-      effectiveTo: "2024-12-31",
-      isActive: true,
-    },
-  ],
-  rooms: [
-    {
-      roomId: 1,
-      branchId: 1,
-      roomNumber: "101",
-      floor: "1st Floor",
-      roomTypeId: 1,
-      roomStatus: "available",
-      lastCleaned: "2024-01-15T10:00:00Z",
-      maintenanceStatus: "none",
-      notes: "",
-      isActive: true,
-    },
-  ],
-  users: [
-    {
-      userId: 1,
-      username: "admin",
-      role: "superAdmin",
-      branchId: null,
-      firstName: "John",
-      lastName: "Doe",
-      email: "admin@hotel.com",
-      contactNumber: "+63 9123456789",
-      isActive: true,
-      lastLogin: "2024-01-15T08:30:00Z",
-      createdAt: "2024-01-01T00:00:00Z",
-    },
-  ],
-  promotions: [
-    {
-      promoId: 1,
-      promoCode: "WELCOME20",
-      promoName: "Welcome Discount",
-      promoType: "percentage",
-      discountValue: 20,
-      minimumStayHours: 3,
-      applicableRoomTypes: JSON.stringify([1]),
-      applicableBranches: JSON.stringify([1]),
-      validFrom: "2024-01-01T00:00:00Z",
-      validTo: "2024-12-31T23:59:59Z",
-      usageLimit: 100,
-      currentUsage: 15,
-      dayTypeRestriction: null,
-      requiresVerification: false,
-      isActive: true,
-      createdAt: "2024-01-01T00:00:00Z",
-    },
-  ],
-  additionalServices: [
-    {
-      serviceId: 1,
-      serviceName: "Extra Guest",
-      serviceType: "extra_guest",
-      basePrice: 500.0,
-      isPerItem: true,
-      isActive: true,
-    },
-  ],
-};
 
 const FilterBar = ({ onSearch, onFilter, children }) => (
   <Card className="mb-4 shadow-sm">
@@ -172,9 +54,9 @@ const FilterBar = ({ onSearch, onFilter, children }) => (
       <Col>
         <Space>
           {children}
-          <Button icon={<FilterOutlined />}>Filters</Button>
+          {/* <Button icon={<FilterOutlined />}>Filters</Button>
           <Button icon={<ExportOutlined />}>Export</Button>
-          <Button icon={<ReloadOutlined />}>Refresh</Button>
+          <Button icon={<ReloadOutlined />}>Refresh</Button> */}
         </Space>
       </Col>
     </Row>
@@ -223,18 +105,39 @@ const ActionButtons = ({
   </Space>
 );
 
+const StatusRenderer = React.memo(({ isActive, onClick, loading = false }) => (
+  <Button
+    size="small"
+    onClick={onClick}
+    loading={loading}
+    className="flex items-center gap-1 border-none shadow-none p-0"
+    type="text"
+  >
+    <StatusBadge status={isActive ? "Active" : "Inactive"} />
+    <SwapOutlined className="text-xs text-gray-400 hover:text-gray-600" />
+  </Button>
+));
+
 const RoomTypes = () => {
+  const { message, modal } = App.useApp();
+
   const getAllRoomTypesApi = useGetAllRoomTypesApi();
-  console.log("useGetAllRoomTypesApi", getAllRoomTypesApi.data);
+  const getAllBranchesApi = useGetAllBranchesApi();
+  const addRoomTypeApi = useAddRoomTypeApi();
+  const updateRoomTypeApi = useUpdateRoomTypeApi();
+  const updateRoomTypeStatusApi = useUpdateRoomTypeStatusApi();
 
   const [roomTypes, setRoomTypes] = useState(getAllRoomTypesApi.data);
-  const [branches] = useState(initialData.branches);
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({});
   const { isVisible, editingRecord, showModal, hideModal } = useModal();
   const [form] = Form.useForm();
 
-  const filteredRoomTypes = useTableData(roomTypes, searchTerm, filters);
+  const filteredRoomTypes = useTableData(
+    getAllRoomTypesApi.data,
+    searchTerm,
+    filters
+  );
   const columns = [
     {
       title: "Code",
@@ -250,7 +153,9 @@ const RoomTypes = () => {
       render: (name, record) => (
         <div>
           <div className="font-medium">{name}</div>
-          <div className="text-gray-500 text-sm">{record.description}</div>
+          <div className="text-gray-500 text-sm  line-clamp-1">
+            {record.description}
+          </div>
         </div>
       ),
     },
@@ -259,12 +164,9 @@ const RoomTypes = () => {
       key: "configuration",
       render: (_, record) => (
         <div>
-          <div className="flex items-center gap-1">
-            <Bed className="w-4 h-4" />
-            <span>{record.bedConfiguration}</span>
-          </div>
+          <span>{record.bedConfiguration}</span>
           <div className="text-gray-500 text-sm">
-            Max {record.maxOccupancy} guests • {record.roomSize}
+            {record.maxOccupancy} Max • {record.roomSize}sqm
           </div>
         </div>
       ),
@@ -290,21 +192,24 @@ const RoomTypes = () => {
     },
     {
       title: "Branch",
-      dataIndex: "branchId",
-      key: "branchId",
-      render: (branchId) => {
-        const branch = branches.find((b) => b.branchId === branchId);
-        return branch ? branch.branchName : "All Branches";
-      },
+      dataIndex: "branchName",
+      key: "branchName",
     },
     {
       title: "Status",
       dataIndex: "isActive",
       key: "isActive",
-      width: 100,
-      render: (isActive) => (
-        <StatusBadge status={isActive ? "Active" : "Inactive"} />
+      width: 120,
+      render: (isActive, record) => (
+        <StatusRenderer
+          isActive={isActive}
+          onClick={() =>
+            handleToggleStatus({ roomTypeId: record.roomTypeId, isActive })
+          }
+        />
       ),
+      filters: STATUS_FILTERS,
+      onFilter: (value, record) => record.isActive === value,
     },
     {
       title: "Actions",
@@ -321,28 +226,88 @@ const RoomTypes = () => {
     },
   ];
 
-  const handleSubmitRoomType = (values) => {
+  const handleSubmitRoomType = ({ isActive, ...values }) => {
     if (editingRecord) {
-      setRoomTypes((prev) =>
-        prev.map((rt) =>
-          rt.roomTypeId === editingRecord.roomTypeId ? { ...rt, ...values } : rt
-        )
+      console.log({ isActive });
+
+      updateRoomTypeApi.mutate(
+        {
+          roomTypeId: editingRecord.roomTypeId,
+          ...values,
+          isActive: isActive ? 1 : 0,
+        },
+        {
+          onSuccess: (data) => {
+            console.log(data);
+            message.success("Room type updated successfully");
+            hideModal();
+            getAllRoomTypesApi.refetch();
+          },
+          onError: (error) => {
+            message.error(
+              error.response?.data?.message || `Failed to ${actionText} branch`
+            );
+          },
+        }
       );
-      message.success("Room type updated successfully");
     } else {
-      const newRoomType = {
-        ...values,
-        roomTypeId: Date.now(),
-        createdAt: new Date().toISOString(),
-      };
-      setRoomTypes((prev) => [...prev, newRoomType]);
-      message.success("Room type created successfully");
+      addRoomTypeApi.mutate(
+        { ...values, isActive: isActive ? 1 : 0 },
+        {
+          onSuccess: (data) => {
+            message.success("Room type created successfully");
+            hideModal();
+            getAllRoomTypesApi.refetch();
+          },
+          onError: (error) => {
+            message.error(
+              error.response?.data?.message || `Failed to ${actionText} branch`
+            );
+          },
+        }
+      );
     }
 
     console.log(values);
     // hideModal();
     // form.resetFields();
   };
+
+  const handleToggleStatus = ({ roomTypeId, isActive }) => {
+    const actionText = isActive ? "deactivate" : "activate";
+
+    modal.confirm({
+      title: "Confirm Status Change",
+      content: `Are you sure you want to ${actionText} this room type?`,
+      okText: "Yes",
+      cancelText: "No",
+      okButtonProps: {
+        className: isActive
+          ? "bg-red-500 hover:bg-red-600"
+          : "bg-green-500 hover:bg-green-600",
+      },
+      onOk: () => {
+        updateRoomTypeStatusApi.mutate(
+          {
+            roomTypeId,
+            isActive: isActive === 0 ? 1 : 0,
+          },
+          {
+            onSuccess: () => {
+              message.success(`Branch ${actionText}d successfully`);
+              getAllRoomTypesApi.refetch();
+            },
+            onError: (error) => {
+              message.error(
+                error.response?.data?.message ||
+                `Failed to ${actionText} branch`
+              );
+            },
+          }
+        );
+      },
+    });
+  }
 
   const handleDeleteRoomType = (record) => {
     setRoomTypes((prev) =>
@@ -355,6 +320,7 @@ const RoomTypes = () => {
     if (editingRecord) {
       form.setFieldsValue({
         ...editingRecord,
+        isActive: editingRecord.isActive === 1,
         amenities: parseJsonField(editingRecord.amenities),
         features: parseJsonField(editingRecord.features),
       });
@@ -387,13 +353,11 @@ const RoomTypes = () => {
             setFilters((prev) => ({ ...prev, branchId: value }))
           }
           className="w-48"
-        >
-          {branches.map((branch) => (
-            <Option key={branch.branchId} value={branch.branchId}>
-              {branch.branchName}
-            </Option>
-          ))}
-        </Select>
+          options={getAllBranchesApi.data.map((branch) => ({
+            label: branch.branchName,
+            value: branch.branchId,
+          }))}
+        />
       </FilterBar>
 
       <Card className="shadow-sm">
@@ -423,7 +387,7 @@ const RoomTypes = () => {
           onFinish={handleSubmitRoomType}
           className="mt-4"
         >
-          <RoomTypeForm />
+          <RoomTypeForm branches={getAllBranchesApi.data} />
           <Form.Item className="mb-0">
             <Space className="w-full justify-end">
               <Button onClick={hideModal}>Cancel</Button>

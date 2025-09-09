@@ -11,7 +11,6 @@ export const useGetAllBranchesApi = () => {
   return useQuery({
     queryKey: ["getAllBranchesApi"],
     queryFn: getAllBranchesApi,
-    placeholderData: null,
     retry: 1,
     staleTime: 0,
     cacheTime: 0,
@@ -28,7 +27,6 @@ export const useGetBranchByIdApi = (branchId) => {
   return useQuery({
     queryKey: ["getBranchByIdApi"],
     queryFn: () => getBranchByIdApi(branchId),
-    placeholderData: null,
     retry: 1,
     staleTime: 0,
     cacheTime: 0,

@@ -29,6 +29,7 @@ import AddBranch from "./Components/AddBranch";
 import BranchInfoModal from "./Components/BranchInfoModal";
 import UpdateBranch from "./Components/UpdateBranch";
 import { StatusBadge } from "../../../components/ui/badges/StatusBadge";
+import { STATUS_FILTERS } from "../../../lib/constants";
 
 const { Title } = Typography;
 
@@ -40,10 +41,6 @@ const PAGINATION_CONFIG = {
   pageSizeOptions: ["10", "25", "50", "100"],
 };
 
-const STATUS_FILTERS = [
-  { text: "Active", value: true },
-  { text: "Inactive", value: false },
-];
 
 // Utility functions
 const filterTableData = (dataSource, searchTerm, filters) => {

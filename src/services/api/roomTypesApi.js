@@ -2,13 +2,14 @@ import { handleApiError } from "../../utils/handlers";
 import { createAxiosInstanceWithInterceptor } from "./axios";
 
 const axiosDefault = createAxiosInstanceWithInterceptor("data");
+const axiosMultipartDefault = createAxiosInstanceWithInterceptor("data");
 
 // GET /roomTypes - Get all room types
 export const getAllRoomTypesApi = async () => {
   console.log("result1");
   try {
     const result = await axiosDefault.get(`/api/roomTypes`);
-    console.log("result");
+    console.log("result", result);
     return result.data;
   } catch (error) {
     console.log("errresult");
@@ -39,18 +40,9 @@ export const getRoomTypesByBranchIdApi = async (branchId) => {
 // POST /roomTypes - Add new room type
 export const addRoomTypeApi = async (payload) => {
   try {
-    // Check if payload contains file data
-    const isFormData = payload instanceof FormData;
 
-    const config = isFormData
-      ? {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      : {};
 
-    const result = await axiosDefault.post("/api/roomTypes", payload, config);
+    const result = await axiosMultipartDefault.post("/api/roomTypes/add", payload);
     return result.data;
   } catch (error) {
     throw handleApiError(error);
@@ -58,23 +50,11 @@ export const addRoomTypeApi = async (payload) => {
 };
 
 // PUT /roomTypes/:roomTypeId - Update room type
-export const updateRoomTypeApi = async (roomTypeId, payload) => {
+export const updateRoomTypeApi = async ({ roomTypeId, ...payload }) => {
   try {
-    // Check if payload contains file data
-    const isFormData = payload instanceof FormData;
-
-    const config = isFormData
-      ? {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      : {};
-
-    const result = await axiosDefault.put(
-      `/api/roomTypes/${roomTypeId}`,
+    const result = await axiosMultipartDefault.put(
+      `/api/roomTypes/${roomTypeId}/update`,
       payload,
-      config
     );
     return result.data;
   } catch (error) {
@@ -83,7 +63,7 @@ export const updateRoomTypeApi = async (roomTypeId, payload) => {
 };
 
 // PATCH /roomTypes/:roomTypeId/status - Update room type status
-export const updateRoomTypeStatusApi = async (roomTypeId, payload) => {
+export const updateRoomTypeStatusApi = async ({ roomTypeId, ...payload }) => {
   try {
     const result = await axiosDefault.patch(
       `/api/roomTypes/${roomTypeId}/status`,

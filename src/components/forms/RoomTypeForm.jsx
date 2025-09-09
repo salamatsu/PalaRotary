@@ -1,10 +1,7 @@
 import { Form, Input, InputNumber, Select, Switch } from "antd";
-import React from "react";
 import { AMENITIES, BED_CONFIGURATIONS } from "../../lib/constants";
-import { useGetAllBranchesApi } from "../../services/requests/useBranches";
 const { Option } = Select;
-const RoomTypeForm = () => {
-  const getAllBranchesApi = useGetAllBranchesApi();
+const RoomTypeForm = ({ branches = [] }) => {
   return (
     <>
       <Form.Item
@@ -20,7 +17,7 @@ const RoomTypeForm = () => {
         <Select
           placeholder="Select branch (optional for all branches)"
           allowClear
-          options={getAllBranchesApi.data.map((branch) => ({
+          options={branches.map((branch) => ({
             label: branch.branchName,
             value: branch.branchId,
           }))}
@@ -61,7 +58,7 @@ const RoomTypeForm = () => {
         </Form.Item>
 
         <Form.Item name="isActive" label="Status" valuePropName="checked">
-          <Switch checkedChildren="Active" unCheckedChildren="Inactive" />
+          <Switch checkedChildren="Active" unCheckedChildren="Inactive" defaultChecked />
         </Form.Item>
       </div>
 

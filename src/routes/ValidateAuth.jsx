@@ -3,6 +3,8 @@ import { useEffect } from "react";
 
 import { useCurrentActiveUserToken } from "../store/hotelStore";
 export const Auth = ({ store, redirect }) => {
+  // return <Outlet />;
+
   const { userData, token } = store();
   const { setToken, setUser } = useCurrentActiveUserToken();
 
@@ -20,6 +22,8 @@ export const Auth = ({ store, redirect }) => {
 };
 
 export const UnAuth = ({ store, redirect = "/" }) => {
+  // return <Outlet />;
+
   const { userData, token } = store();
 
   return userData && token ? <Navigate to={redirect} /> : <Outlet />;

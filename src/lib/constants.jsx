@@ -1,5 +1,10 @@
 import { AlertCircle, CheckCircle, Clock, XCircle } from "lucide-react";
 
+export const STATUS_FILTERS = [
+  { text: "Active", value: true },
+  { text: "Inactive", value: false },
+];
+
 export const ROOM_STATUSES = {
   AVAILABLE: "available",
   OCCUPIED: "occupied",

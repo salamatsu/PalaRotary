@@ -8,12 +8,11 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { Route, Routes } from "react-router";
-import Login from "../../pages/SuperAdmin/Login";
+import BasicLayout from "../../components/layout/BasicLayout";
 import * as SuperAdminCMS from "../../pages/SuperAdmin";
+import Login from "../../pages/SuperAdmin/Login";
 import { useSuperAdminAuthStore } from "../../store/hotelStore";
 import { Auth, UnAuth } from "../ValidateAuth";
-import BasicLayout from "../../components/layout/BasicLayout";
-import { BoxIcon, DollarSign, User } from "lucide-react";
 
 const SuperAdminRoute = () => {
   // ========== Navigation Configuration ==========
