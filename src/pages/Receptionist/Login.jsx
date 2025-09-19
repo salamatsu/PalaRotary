@@ -25,7 +25,7 @@ const Login = () => {
 
     mutate(values, {
       onSuccess: () => {
-        Modal.destroyAll()
+        Modal.destroyAll();
         form.resetFields();
       },
       onError: (error) => {

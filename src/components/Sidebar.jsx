@@ -5,13 +5,11 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { Layout, Menu, Typography } from "antd";
-import { useHotelStore } from "../store/hotelStore";
 
 const { Sider } = Layout;
 const { Text } = Typography;
 const Sidebar = () => {
-  const { selectedMenuItem, setSelectedMenuItem } = useHotelStore();
-
+  const { selectedMenuItem, setSelectedMenuItem } = useState('dashboard')
   const menuItems = [
     { key: "dashboard", icon: <HomeOutlined />, label: "Dashboard" },
     { key: "bookings", icon: <CalendarOutlined />, label: "Bookings" },

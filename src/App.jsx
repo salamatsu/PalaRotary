@@ -1,7 +1,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { App as AntProvider, ConfigProvider } from "antd";
 import RootRoutes from "./routes";
-import '@ant-design/v5-patch-for-react-19';
+import "@ant-design/v5-patch-for-react-19";
+
 // Create a query client
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -16,18 +17,9 @@ const queryClient = new QueryClient({
 const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <ConfigProvider
-        theme={{
-          token: {
-            colorPrimary: "#fe0808",
-            colorBgBase: "#fff",
-          },
-        }}
-      >
-        <AntProvider>
-          <RootRoutes />
-        </AntProvider>
-      </ConfigProvider>
+      <AntProvider>
+        <RootRoutes />
+      </AntProvider>
     </QueryClientProvider>
   );
 };

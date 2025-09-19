@@ -11,7 +11,7 @@ export const useCurrentActiveUserToken = create(
       reset: () => set({ token: null, user: null }),
     }),
     {
-      name: "sogo-hotel-active-user-auth",
+      name: "test-hotel-active-user-auth",
       storage: createJSONStorage(() => localStorage),
     }
   )
@@ -27,7 +27,7 @@ export const useSuperAdminAuthStore = create(
       reset: () => set({ userData: null, token: null }),
     }),
     {
-      name: "sogo-hotel-superadmin-auth",
+      name: "test-hotel-superadmin-auth",
       storage: createJSONStorage(() => localStorage),
     }
   )
@@ -43,7 +43,7 @@ export const useAdminAuthStore = create(
       reset: () => set({ userData: null, token: null }),
     }),
     {
-      name: "sogo-hotel-admin-auth",
+      name: "test-hotel-admin-auth",
       storage: createJSONStorage(() => localStorage),
     }
   )
@@ -59,32 +59,8 @@ export const useReceptionistAuthStore = create(
       reset: () => set({ userData: null, token: null }),
     }),
     {
-      name: "sogo-hotel-receptionist-auth",
+      name: "test-hotel-receptionist-auth",
       storage: createJSONStorage(() => localStorage),
     }
   )
 );
-
-export const useHotelStore = create((set) => ({
-  selectedBranchInfo: {
-    branchId: 1,
-    branchCode: "SOGO-EDSA-CUB",
-    branchName: "Hotel Sogo EDSA Cubao",
-    address: "1234 EDSA, Cubao, Quezon City",
-    city: "Quezon City",
-    region: "Metro Manila",
-    contactNumber: "+63-2-8123-4567",
-    email: "cubao@hotelsogo.com",
-    operatingHours: "24/7",
-    amenities: [
-      "Free WiFi",
-      "24-hour Front Desk",
-      "Room Service",
-      "Cable TV",
-      "Air Conditioning",
-    ],
-    isActive: true,
-  },
-  setSelectedBranchInfo: (branchInfo) =>
-    set({ selectedBranchInfo: branchInfo }),
-}));
