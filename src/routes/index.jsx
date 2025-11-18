@@ -2,11 +2,19 @@ import { Suspense, lazy } from "react";
 import { RouterProvider, createBrowserRouter } from "react-router";
 import LoadingFallback from "../components/LoadingFallback";
 
-// Lazy load route components for code splitting
-const LandingPage = lazy(() => import("../pages/LandingPage"));
-const AdminRoute = lazy(() => import("./pageRoutes/AdminRoute"));
-const ReceptionistRoute = lazy(() => import("./pageRoutes/ReceptionistRoute"));
-const SuperAdminRoute = lazy(() => import("./pageRoutes/SuperAdminRoute"));
+// Lazy load pages
+const PalarotaryLandingPage = lazy(() =>
+  import("../pages/Palarotary/LandingPage")
+);
+const ClubRegistration = lazy(() =>
+  import("../pages/Palarotary/ClubRegistration")
+);
+const MemberRegistration = lazy(() =>
+  import("../pages/Palarotary/MemberRegistration")
+);
+const PalarotaryAdminRoute = lazy(() =>
+  import("./pageRoutes/PalarotaryAdminRoute")
+);
 
 const RootRoutes = () => {
   const router = createBrowserRouter([
@@ -14,15 +22,23 @@ const RootRoutes = () => {
       path: "/",
       element: (
         <Suspense fallback={<LoadingFallback />}>
-          <LandingPage />
+          <PalarotaryLandingPage />
         </Suspense>
       ),
     },
     {
-      path: "/superadmin/*",
+      path: "/register-club",
       element: (
         <Suspense fallback={<LoadingFallback />}>
-          <SuperAdminRoute />
+          <ClubRegistration />
+        </Suspense>
+      ),
+    },
+    {
+      path: "/register-member",
+      element: (
+        <Suspense fallback={<LoadingFallback />}>
+          <MemberRegistration />
         </Suspense>
       ),
     },
@@ -30,15 +46,7 @@ const RootRoutes = () => {
       path: "/admin/*",
       element: (
         <Suspense fallback={<LoadingFallback />}>
-          <AdminRoute />
-        </Suspense>
-      ),
-    },
-    {
-      path: "/receptionist/*",
-      element: (
-        <Suspense fallback={<LoadingFallback />}>
-          <ReceptionistRoute />
+          <PalarotaryAdminRoute />
         </Suspense>
       ),
     },

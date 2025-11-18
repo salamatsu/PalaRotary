@@ -1,9 +1,7 @@
 import { AlertCircle, CheckCircle, Clock, XCircle } from "lucide-react";
 
 export const USER_ROLES = {
-  superadmin: "Super Admin",
   admin: "Admin",
-  receptionist: "Receptionist",
   guest: "Guest",
 };
 

@@ -1,11 +1,6 @@
 import { message } from "antd";
 import axios from "axios";
-import {
-  useAdminAuthStore,
-  useCurrentActiveUserToken,
-  useReceptionistAuthStore,
-  useSuperAdminAuthStore,
-} from "../../store/hotelStore";
+import { useAdminAuthStore } from "../../store/useAdminAuthStore";
 
 export const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_BASEURL,
@@ -15,27 +10,13 @@ export const axiosInstance = axios.create({
   },
 });
 
-// USER ROLES
-export const getUsersValues = {
-  superAdmin: "superAdmin",
-  admin: "admin",
-  receptionist: "receptionist",
-};
-
-export const tokens = {
-  [getUsersValues.admin]: useAdminAuthStore,
-  [getUsersValues.receptionist]: useReceptionistAuthStore,
-  [getUsersValues.superAdmin]: useSuperAdminAuthStore,
-};
-
-export const getUserToken = (user = getUsersValues.receptionist) => {
-  return tokens[user].getState();
-};
-
 export const createAxiosInstanceWithInterceptor = (type = "data") => {
-  const { token, user } = useCurrentActiveUserToken.getState();
+  const auth = useAdminAuthStore.getState();
+  const token = auth.token;
+
   if (!token) {
-    return message.warning("No user provided");
+    message.warning("Authentication required");
+    return null;
   }
 
   const headers = {
@@ -52,41 +33,42 @@ export const createAxiosInstanceWithInterceptor = (type = "data") => {
     headers,
   });
 
-  instance.interceptors.request.use(async (config) => {
-    try {
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      } else {
-        throw new Error("Authorization token not found.");
+  instance.interceptors.request.use(
+    async (config) => {
+      try {
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        } else {
+          throw new Error("Authorization token not found.");
+        }
+      } catch (error) {
+        console.error({ error });
       }
-    } catch (error) {
-      console.log({ error });
-    }
-    return config;
-  });
+      return config;
+    },
+    (error) => Promise.reject(error)
+  );
 
   instance.interceptors.response.use(
-    (response) => {
-      // Any status code that lie within the range of 2xx cause this function to trigger
-      // Do something with response data
-      return response;
-    },
-    function (error) {
-      const { reset } = getUserToken(user);
+    (response) => response,
+    (error) => {
       const errMessage = error.response?.data;
 
       if (
         errMessage?.message === "Invalid token." ||
-        errMessage.message === "No token provided" ||
+        errMessage?.message === "No token provided" ||
+        errMessage?.message === "Token expired" ||
         errMessage?.code == 300
       ) {
         message.warning(
           "Unable to process transaction. You have to login again."
         );
-        reset();
+
+        // Logout user
+        const auth = useAdminAuthStore.getState();
+        auth.logout();
       }
-      // Any status codes that falls outside the range of 2xx cause this function to trigger
-      // Do something with response error
+
       return Promise.reject(error);
     }
   );

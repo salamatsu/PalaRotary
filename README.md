@@ -1,279 +1,299 @@
-# React.js Optimized Template
+# PALAROTARY 2025 - Event Management System
 
-A production-ready React template with advanced optimizations, lazy loading, error tracking, real-time capabilities, and comprehensive validation.
+A complete event management system for **PALAROTARY 2025** - Radio Enthusiasts Convention.
 
-## 🚀 Features
+## Event Details
 
-### Core Optimizations
-- ✅ **Lazy Loading** - All routes and components lazy-loaded for optimal performance
-- ✅ **Code Splitting** - Intelligent vendor chunk splitting for better caching
-- ✅ **Error Boundary** - Global error handling with Sentry integration
-- ✅ **Real-time Support** - Socket.IO client pre-configured
-- ✅ **Type-safe Validation** - Zod schemas for all forms
-- ✅ **Utility Functions** - clsx for dynamic className management
+- **Event Name**: PALAROTARY 2025
+- **Date**: January 25, 2026
+- **Location**: Marikina Sports Center
+- **Time**: 8am-6pm
 
-### Tech Stack
-- **React 19** - Latest React with improved performance
-- **Vite 7** - Lightning-fast build tool
-- **Ant Design 5** - Enterprise-grade UI components
-- **TailwindCSS 4** - Utility-first CSS framework
-- **React Router 7** - Client-side routing
-- **TanStack Query** - Powerful data fetching and caching
-- **Zustand** - Lightweight state management
+## Features
 
-### Additional Packages
-- **Sentry** - Error tracking and performance monitoring
-- **Socket.IO** - Real-time bidirectional communication
-- **Zod** - TypeScript-first schema validation
-- **clsx** - Conditional className utility
-- **react-error-boundary** - Error boundary components
-- **@hookform/resolvers** - Form validation resolvers
+### Public Features
+- **Club Registration** (₱4,000 per club)
+  - Online registration form
+  - Payment proof upload
+  - Email notifications
+  - Payment methods: BDO Bank Transfer, GCash
+  - Special: Free Lechon for zones with complete payments!
 
-## 📦 Installation
+- **Member Registration** (FREE)
+  - Select registered club
+  - Fill registration form
+  - Instant digital badge with QR code
+  - Badge sent via email
+
+### Admin Features
+- **Dashboard & Analytics**
+  - Real-time metrics
+  - Club and member statistics
+  - Revenue tracking
+  - Zone completion status
+
+- **Club Management**
+  - View all club registrations
+  - Approve/reject registrations
+  - View payment proofs
+  - Track payment status
+
+- **Member Management**
+  - View all registered members
+  - View digital badges
+  - Delete members if needed
+
+## Tech Stack
+
+### Backend
+- **Runtime**: Node.js
+- **Framework**: Express.js
+- **Database**: SQLite3
+- **Email**: SendGrid
+- **Authentication**: JWT (jsonwebtoken)
+- **File Upload**: Multer
+- **QR Code**: qrcode
+- **Password Hashing**: bcryptjs
+
+### Frontend
+- **Framework**: React 19
+- **Build Tool**: Vite 7
+- **UI Library**: Ant Design 5
+- **Styling**: TailwindCSS 4
+- **State Management**: Zustand
+- **Data Fetching**: TanStack Query (React Query)
+- **Routing**: React Router 7
+- **Form Validation**: Zod
+- **HTTP Client**: Axios
+
+## Project Structure
+
+```
+PalaRotary/
+├── server/                 # Backend Node.js server
+│   ├── src/
+│   │   ├── config/        # Database & initialization
+│   │   ├── controllers/   # Route controllers
+│   │   ├── middleware/    # Auth, upload, error handlers
+│   │   ├── models/        # Database models
+│   │   ├── routes/        # API routes
+│   │   ├── services/      # Email, badge generation
+│   │   └── server.js      # Main server file
+│   ├── uploads/           # File uploads (payments, badges)
+│   ├── .env               # Environment variables
+│   └── package.json
+│
+├── src/                   # Frontend React app
+│   ├── pages/
+│   │   └── Palarotary/   # PALAROTARY pages
+│   │       ├── LandingPage.jsx
+│   │       ├── ClubRegistration.jsx
+│   │       ├── MemberRegistration.jsx
+│   │       ├── AdminLogin.jsx
+│   │       ├── AdminDashboard.jsx
+│   │       ├── AdminClubs.jsx
+│   │       └── AdminMembers.jsx
+│   ├── services/         # API services & React Query hooks
+│   ├── store/            # Zustand stores
+│   ├── routes/           # React Router configuration
+│   └── components/       # Reusable components
+│
+└── README.md
+```
+
+## Installation & Setup
+
+### Prerequisites
+- Node.js (v18 or higher)
+- npm or yarn
+- SendGrid account (for email notifications)
+
+### 1. Backend Setup
 
 ```bash
+# Navigate to server directory
+cd server
+
 # Install dependencies
 npm install
 
-# Copy environment variables
+# Create .env file (copy from .env.example)
 cp .env.example .env
 
-# Start development server
+# Edit .env and configure:
+# - SENDGRID_API_KEY (your SendGrid API key)
+# - JWT_SECRET (a strong secret key)
+# - Other environment variables as needed
+
+# Initialize database
+npm run init-db
+
+# Start the server
 npm run dev
 ```
 
-## 🔧 Configuration
+The backend server will start on `http://localhost:3000`
 
-### Environment Variables
+**Default Admin Credentials:**
+- Username: `admin`
+- Password: `admin123`
 
-Create a `.env` file in the root directory:
+⚠️ **Important:** Change the default password after first login!
 
-```env
-# API Configuration (Required)
-VITE_BASEURL=http://localhost:3000
-
-# Sentry Configuration (Optional)
-VITE_SENTRY_DSN=your-sentry-dsn
-
-# Socket.IO Configuration (Optional)
-VITE_SOCKET_URL=http://localhost:3000
-```
-
-## 📖 Documentation
-
-- **[OPTIMIZATIONS_SUMMARY.md](./OPTIMIZATIONS_SUMMARY.md)** - Quick overview of all optimizations
-- **[OPTIMIZATION_GUIDE.md](./OPTIMIZATION_GUIDE.md)** - Detailed usage guide and best practices
-- **[DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md)** - Pre-deployment checklist
-
-## 🎯 Quick Start Examples
-
-### Using Lazy Loading
-
-```jsx
-import { lazy, Suspense } from 'react';
-import { LoadingFallback } from './components/LoadingFallback';
-
-const MyComponent = lazy(() => import('./MyComponent'));
-
-function App() {
-  return (
-    <Suspense fallback={<LoadingFallback />}>
-      <MyComponent />
-    </Suspense>
-  );
-}
-```
-
-### Using Zod Validation
-
-```jsx
-import { loginSchema } from './schemas';
-import { validateFormWithZod } from './utils/zodValidator';
-
-const handleSubmit = async (values) => {
-  try {
-    const validatedData = await validateFormWithZod(loginSchema, values);
-    // Use validated data
-  } catch (error) {
-    // Handle validation errors
-  }
-};
-```
-
-### Using Socket.IO
-
-```jsx
-import { useSocket } from './contexts/SocketContext';
-
-function MyComponent() {
-  const { isConnected, emit, on } = useSocket();
-
-  useEffect(() => {
-    on('message', (data) => console.log(data));
-  }, []);
-
-  return <div>Socket: {isConnected ? 'Connected' : 'Disconnected'}</div>;
-}
-```
-
-### Using clsx for Dynamic Classes
-
-```jsx
-import { cn } from './utils/cn';
-
-function Button({ variant, isActive }) {
-  return (
-    <button
-      className={cn(
-        'px-4 py-2',
-        variant === 'primary' && 'bg-blue-500',
-        isActive && 'ring-2'
-      )}
-    >
-      Click me
-    </button>
-  );
-}
-```
-
-## 📜 Available Scripts
+### 2. Frontend Setup
 
 ```bash
-# Development server
+# Navigate to root directory (or frontend directory if separate)
+cd ..
+
+# Install dependencies
+npm install
+
+# Create .env file for frontend
+# Add VITE_BASEURL=http://localhost:3000
+
+# Start the development server
 npm run dev
-
-# Production build
-npm run build
-
-# Build with analysis
-npm run build:analyze
-
-# Preview production build
-npm run preview
-
-# Lint code
-npm run lint
-
-# Fix linting issues
-npm run lint:fix
-
-# Clean build cache
-npm run clean
-
-# Type checking
-npm run type-check
 ```
 
-## 📊 Performance Metrics
+The frontend will start on `http://localhost:5173`
 
-### Before Optimization
-- Initial Bundle: ~800KB
-- Time to Interactive: ~3.2s
-- No code splitting
+## Usage
 
-### After Optimization
-- Initial Bundle: ~250KB ⚡
-- Vendor Chunks: ~550KB (cached)
-- Time to Interactive: ~1.1s ⚡
-- Lazy loading: ✅
-- Code splitting: ✅
-- Error monitoring: ✅
+### Public Access
 
-## 🏗️ Project Structure
+1. **Register a Club**
+   - Visit `http://localhost:5173/register-club`
+   - Fill in club information
+   - Select payment method (BDO or GCash)
+   - Upload proof of payment
+   - Wait for admin approval
+   - Receive confirmation email
 
-```
-src/
-├── components/          # Reusable components
-│   ├── ErrorBoundary.jsx
-│   └── LoadingFallback.jsx
-├── config/             # Configuration files
-│   ├── sentry.js
-│   └── socket.js
-├── contexts/           # React contexts
-│   └── SocketContext.jsx
-├── examples/           # Usage examples
-├── hooks/              # Custom hooks
-│   ├── useSocketEvent.js
-│   └── index.js
-├── pages/              # Page components
-├── routes/             # Route definitions
-├── schemas/            # Zod validation schemas
-├── services/           # API services
-├── store/              # State management
-├── types/              # TypeScript types
-└── utils/              # Utility functions
-    ├── cn.js
-    ├── colorsutils.js
-    └── zodValidator.js
-```
+2. **Register as Member**
+   - Visit `http://localhost:5173/register-member`
+   - Select your approved club
+   - Fill in your information
+   - Receive digital badge instantly
+   - Check your email for badge
 
-## 🔒 Security
+### Admin Access
 
-- ✅ No hardcoded secrets
-- ✅ Environment variables for configuration
-- ✅ Input validation with Zod
-- ✅ XSS protection via React
-- ✅ CORS handled server-side
+1. **Login**
+   - Visit `http://localhost:5173/admin-login`
+   - Enter credentials
+   - Access admin dashboard
 
-## 🚀 Deployment
+2. **Manage Clubs**
+   - View all club registrations
+   - Review payment proofs
+   - Approve or reject registrations
+   - Send automatic email notifications
 
-### Build for Production
+3. **Manage Members**
+   - View all registered members
+   - View digital badges
+   - Filter by club
+   - Delete members if needed
 
+## Payment Information
+
+### BDO Bank Transfer
+- **Account Name**: Rotary Club of Marikina Hilltop
+- **Account Number**: 0021 5802 5770
+
+### GCash
+- **Account Name**: Karl Marcus Montaner
+- **Mobile Number**: 0917 522 5275
+
+## Email Notifications
+
+The system automatically sends the following emails:
+
+1. **Club Registration Confirmation** - Sent immediately after registration
+2. **Payment Reminder** - Sent 4 hours after registration if no payment proof
+3. **Approval Notification** - Sent when club is approved
+4. **Rejection Notification** - Sent when club is rejected
+5. **Member Badge Delivery** - Sent with digital badge after member registration
+
+## API Endpoints
+
+### Public Endpoints
+- `POST /api/clubs/register` - Register a club
+- `POST /api/clubs/:id/upload-payment` - Upload payment proof
+- `GET /api/clubs/payment-info` - Get payment information
+- `GET /api/clubs/approved` - Get approved clubs
+- `POST /api/members/register` - Register a member
+- `GET /api/members/:id/badge` - Get member badge
+
+### Admin Endpoints (Protected)
+- `POST /api/auth/login` - Admin login
+- `GET /api/admin/dashboard` - Dashboard metrics
+- `GET /api/admin/clubs` - List all clubs
+- `PUT /api/admin/clubs/:id/approve` - Approve club
+- `PUT /api/admin/clubs/:id/reject` - Reject club
+- `GET /api/admin/members` - List all members
+- `DELETE /api/admin/members/:id` - Delete member
+
+## Development
+
+### Backend Development
 ```bash
-npm run build
+cd server
+npm run dev  # Runs with nodemon for auto-reload
 ```
 
-The `dist/` folder will contain your production-ready application.
-
-### Deploy to Vercel
-
+### Frontend Development
 ```bash
-npm install -g vercel
-vercel
+npm run dev  # Runs Vite dev server
 ```
 
-### Deploy to Netlify
+## Production Deployment
 
-```bash
-npm install -g netlify-cli
-netlify deploy --prod
-```
+### Backend
+1. Set `NODE_ENV=production` in `.env`
+2. Configure production database path
+3. Set strong `JWT_SECRET`
+4. Configure SendGrid API key
+5. Run `npm run init-db`
+6. Run `npm start`
 
-### Environment Variables
+### Frontend
+1. Build the frontend: `npm run build`
+2. Serve the `dist` folder using a web server (nginx, Apache, etc.)
+3. Configure environment variables for production
 
-Don't forget to set environment variables in your hosting platform:
-- `VITE_BASEURL`
-- `VITE_SENTRY_DSN` (optional)
-- `VITE_SOCKET_URL` (optional)
+## Troubleshooting
 
-## 📝 License
+### Database Issues
+- Delete `palarotary.db` and run `npm run init-db` again
 
-This project is licensed under the MIT License.
+### Email Not Sending
+- Verify SendGrid API key is correct
+- Check SendGrid account is active
+- Verify sender email is verified in SendGrid
 
-## 🤝 Contributing
+### File Upload Errors
+- Check `uploads/` directory permissions
+- Verify file size is within limit (5MB)
+- Ensure file type is supported
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+### CORS Issues
+- Update `FRONTEND_URL` in backend `.env`
+- Ensure frontend is running on the correct port
 
-## 📞 Support
+## Contributing
 
-For issues or questions:
-- Create an issue in the repository
-- Refer to the documentation files
-- Check the examples folder
+This is a private event management system for PALAROTARY 2025.
 
-## 🎉 Acknowledgments
+## License
 
-Built with:
-- [React](https://react.dev)
-- [Vite](https://vitejs.dev)
-- [Ant Design](https://ant.design)
-- [TailwindCSS](https://tailwindcss.com)
-- [Zod](https://zod.dev)
-- [Socket.IO](https://socket.io)
-- [Sentry](https://sentry.io)
+MIT
+
+## Support
+
+For questions and support, please contact the PALAROTARY organizing committee.
 
 ---
 
-**Template Version:** 2.0.0 (Optimized)
-**Last Updated:** 2025-10-13
-**Status:** Production Ready ✅
+**PALAROTARY 2025** - Bringing radio enthusiasts together!

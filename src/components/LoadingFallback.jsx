@@ -4,7 +4,7 @@ import { Spin } from "antd";
 export const LoadingFallback = () => {
   return (
     <div className="flex items-center justify-center min-h-screen">
-      <Spin size="large" tip="Loading..." />
+      <Spin size="large" />
     </div>
   );
 };

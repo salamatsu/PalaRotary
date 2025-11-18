@@ -1,9 +1,6 @@
-import { createAxiosInstanceWithInterceptor, getUsersValues } from "./axios";
+import { createAxiosInstanceWithInterceptor } from "./axios";
 
-const axiosDefault = createAxiosInstanceWithInterceptor(
-  "data",
-  getUsersValues.receptionist
-);
+const axiosDefault = createAxiosInstanceWithInterceptor("data");
 
 // Enhanced error handler
 const handleApiError = (error) => {
