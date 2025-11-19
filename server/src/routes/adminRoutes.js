@@ -9,7 +9,8 @@ const {
   getAllMembers,
   deleteMember,
   getAnalytics,
-  getZones
+  getZones,
+  getAdvancedAnalytics
 } = require('../controllers/adminController');
 const { authenticateToken } = require('../middleware/auth');
 
@@ -19,6 +20,7 @@ router.use(authenticateToken);
 // Dashboard & Analytics
 router.get('/dashboard', getDashboard);
 router.get('/analytics', getAnalytics);
+router.get('/analytics/advanced', getAdvancedAnalytics);
 
 // Club Management
 router.get('/clubs', getAllClubs);

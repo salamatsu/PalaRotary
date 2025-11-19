@@ -17,6 +17,10 @@ import {
   getAdminMembers,
   deleteMember,
   getAdminZones,
+  scanQRCode,
+  getAttendanceStats,
+  getMemberAttendance,
+  exportAttendance,
 } from '../api/palarotaryApi';
 
 // ============================================
@@ -107,6 +111,14 @@ export const useAdminAnalytics = () => {
   });
 };
 
+export const useAdvancedAnalytics = () => {
+  return useQuery({
+    queryKey: ['advanced-analytics'],
+    queryFn: () => import('../api/palarotaryApi').then(m => m.getAdvancedAnalytics()),
+    refetchInterval: 60000, // Refetch every minute
+  });
+};
+
 // ============================================
 // ADMIN HOOKS - Club Management
 // ============================================
@@ -181,5 +193,41 @@ export const useAdminZones = () => {
   return useQuery({
     queryKey: ['admin-zones'],
     queryFn: getAdminZones,
+  });
+};
+
+// ============================================
+// SCANNER HOOKS - Attendance & QR Scanning
+// ============================================
+
+export const useScanQRCode = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: scanQRCode,
+    onSuccess: () => {
+      queryClient.invalidateQueries(['attendance-stats']);
+    },
+  });
+};
+
+export const useAttendanceStats = () => {
+  return useQuery({
+    queryKey: ['attendance-stats'],
+    queryFn: getAttendanceStats,
+    refetchInterval: 30000, // Refetch every 30 seconds
+  });
+};
+
+export const useMemberAttendance = (memberId, enabled = true) => {
+  return useQuery({
+    queryKey: ['member-attendance', memberId],
+    queryFn: () => getMemberAttendance(memberId),
+    enabled: !!memberId && enabled,
+  });
+};
+
+export const useExportAttendance = () => {
+  return useMutation({
+    mutationFn: exportAttendance,
   });
 };

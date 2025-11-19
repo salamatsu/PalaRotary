@@ -10,6 +10,7 @@ const authRoutes = require('./routes/authRoutes');
 const clubRoutes = require('./routes/clubRoutes');
 const memberRoutes = require('./routes/memberRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const scannerRoutes = require('./routes/scannerRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -45,6 +46,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/clubs', clubRoutes);
 app.use('/api/members', memberRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/scanner', scannerRoutes);
 
 // Error handling
 app.use(notFound);

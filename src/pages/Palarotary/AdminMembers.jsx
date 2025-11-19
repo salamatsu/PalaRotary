@@ -3,6 +3,8 @@ import {
   EyeOutlined,
   QrcodeOutlined,
   SearchOutlined,
+  CheckCircleOutlined,
+  ClockCircleOutlined,
 } from "@ant-design/icons";
 import {
   Button,
@@ -109,6 +111,27 @@ export default function AdminMembers() {
       dataIndex: "zone",
       key: "zone",
       render: (zone) => zone || "-",
+    },
+    {
+      title: "Attendance",
+      dataIndex: "has_attended",
+      key: "has_attended",
+      width: 120,
+      render: (hasAttended, record) => (
+        <Space>
+          {hasAttended ? (
+            <>
+              <CheckCircleOutlined style={{ color: "#52c41a" }} />
+              <span style={{ color: "#52c41a" }}>Checked In</span>
+            </>
+          ) : (
+            <>
+              <ClockCircleOutlined style={{ color: "#d9d9d9" }} />
+              <span style={{ color: "#999" }}>Not Yet</span>
+            </>
+          )}
+        </Space>
+      ),
     },
     {
       title: "Registered",
@@ -248,6 +271,22 @@ export default function AdminMembers() {
               <Descriptions.Item label="Registered On">
                 {new Date(selectedMember.created_at).toLocaleString()}
               </Descriptions.Item>
+              <Descriptions.Item label="Event Attendance">
+                {selectedMember.has_attended ? (
+                  <span style={{ color: "#52c41a" }}>
+                    <CheckCircleOutlined /> Checked In Today
+                  </span>
+                ) : (
+                  <span style={{ color: "#999" }}>
+                    <ClockCircleOutlined /> Not Yet Checked In
+                  </span>
+                )}
+              </Descriptions.Item>
+              {selectedMember.last_check_in && (
+                <Descriptions.Item label="Last Check-in Time">
+                  {new Date(selectedMember.last_check_in).toLocaleString()}
+                </Descriptions.Item>
+              )}
             </Descriptions>
 
             {selectedMember.qr_code_url && (

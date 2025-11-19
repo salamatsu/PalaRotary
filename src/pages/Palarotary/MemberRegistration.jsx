@@ -1,13 +1,5 @@
 import { CheckCircleOutlined, DownloadOutlined } from "@ant-design/icons";
-import {
-  Alert,
-  Button,
-  Card,
-  Form,
-  Input,
-  message,
-  Select,
-} from "antd";
+import { Alert, Button, Card, Form, Input, message, Select } from "antd";
 import { useState } from "react";
 import {
   useApprovedClubs,
@@ -65,7 +57,12 @@ export default function MemberRegistration() {
       a.href = badgeData.badge.qr_code_data_url;
       document.body.appendChild(a);
       a.click();
-      document.body.removeChild(a);
+
+      // Use setTimeout to ensure click event completes before removal
+      setTimeout(() => {
+        document.body.removeChild(a);
+      }, 100);
+
       message.success("QR Code downloaded!");
     }
   };
@@ -108,12 +105,12 @@ export default function MemberRegistration() {
                     src={badgeData.badge.qr_code_data_url}
                     alt="QR Code Badge"
                     style={{
-                      width: '256px',
-                      height: '256px',
-                      border: '2px solid #ddd',
-                      borderRadius: '8px',
-                      padding: '8px',
-                      background: 'white'
+                      width: "256px",
+                      height: "256px",
+                      border: "2px solid #ddd",
+                      borderRadius: "8px",
+                      padding: "8px",
+                      background: "white",
                     }}
                   />
                 )}

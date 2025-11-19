@@ -1,4 +1,4 @@
-import { HomeOutlined } from "@ant-design/icons";
+import { HomeOutlined, ScanOutlined, TeamOutlined, BankOutlined } from "@ant-design/icons";
 import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router";
 import BasicLayout from "../../components/layout/BasicLayout";
@@ -7,6 +7,7 @@ import {
   AdminClubs,
   AdminDashboard,
   AdminMembers,
+  Scanner,
 } from "../../pages/Palarotary";
 import { useAdminAuthStore } from "../../store/useAdminAuthStore";
 import { Auth, UnAuth } from "../ValidateAuth";
@@ -35,10 +36,23 @@ const PalarotaryAdminRoute = () => {
       isShow: true,
     },
     {
+      route: "/scanner",
+      name: "Scanner",
+      label: "Event Scanner",
+      icon: <ScanOutlined className="h-5 w-5" />,
+      component: (
+        <Suspense fallback={<ComponentLoader />}>
+          <Scanner />
+        </Suspense>
+      ),
+      isFilter: true,
+      isShow: true,
+    },
+    {
       route: "/clubs",
       name: "Clubs",
       label: "Clubs",
-      icon: <HomeOutlined className="h-5 w-5" />,
+      icon: <BankOutlined className="h-5 w-5" />,
       component: (
         <Suspense fallback={<ComponentLoader />}>
           <AdminClubs />
@@ -51,7 +65,7 @@ const PalarotaryAdminRoute = () => {
       route: "/members",
       name: "Members",
       label: "Members",
-      icon: <HomeOutlined className="h-5 w-5" />,
+      icon: <TeamOutlined className="h-5 w-5" />,
       component: (
         <Suspense fallback={<ComponentLoader />}>
           <AdminMembers />

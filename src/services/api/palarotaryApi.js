@@ -83,6 +83,11 @@ export const getAdminAnalytics = async () => {
   return response.data;
 };
 
+export const getAdvancedAnalytics = async () => {
+  const response = await axios.get("/api/admin/analytics/advanced");
+  return response.data;
+};
+
 // ============================================
 // ADMIN APIS - Club Management
 // ============================================
@@ -129,5 +134,31 @@ export const deleteMember = async (memberId) => {
 
 export const getAdminZones = async () => {
   const response = await axios.get("/api/admin/zones");
+  return response.data;
+};
+
+// ============================================
+// SCANNER APIS - Attendance & QR Scanning
+// ============================================
+
+export const scanQRCode = async (data) => {
+  const response = await axios.post("/api/scanner/scan", data);
+  return response.data;
+};
+
+export const getAttendanceStats = async () => {
+  const response = await axios.get("/api/scanner/stats");
+  return response.data;
+};
+
+export const getMemberAttendance = async (memberId) => {
+  const response = await axios.get(`/api/scanner/member/${memberId}`);
+  return response.data;
+};
+
+export const exportAttendance = async (date) => {
+  const response = await axios.get("/api/scanner/export", {
+    params: { date },
+  });
   return response.data;
 };

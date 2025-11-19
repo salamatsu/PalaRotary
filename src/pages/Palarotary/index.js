@@ -4,3 +4,4 @@ export { default as AdminLogin } from './AdminLogin';
 export { default as AdminDashboard } from './AdminDashboard';
 export { default as AdminClubs } from './AdminClubs';
 export { default as AdminMembers } from './AdminMembers';
+export { default as Scanner } from './Scanner';

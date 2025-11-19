@@ -265,42 +265,59 @@ const rejectClub = async (req, res, next) => {
 const getAllMembers = async (req, res, next) => {
   try {
     const { club_id, search, page = 1, limit = 50 } = req.query;
+    const today = new Date().toISOString().split('T')[0];
 
-    let query = `
-      SELECT m.*, c.club_name, c.zone
-      FROM members m
-      JOIN clubs c ON m.club_id = c.id
-      WHERE 1=1
-    `;
-    const params = [];
+    // Build WHERE clause for filtering
+    let whereClause = 'WHERE 1=1';
+    const filterParams = [];
 
     if (club_id) {
-      query += ' AND m.club_id = ?';
-      params.push(club_id);
+      whereClause += ' AND m.club_id = ?';
+      filterParams.push(club_id);
     }
 
     if (search) {
-      query += ' AND (m.first_name LIKE ? OR m.last_name LIKE ? OR m.email LIKE ? OR m.badge_number LIKE ?)';
+      whereClause += ' AND (m.first_name LIKE ? OR m.last_name LIKE ? OR m.email LIKE ? OR m.badge_number LIKE ?)';
       const searchTerm = `%${search}%`;
-      params.push(searchTerm, searchTerm, searchTerm, searchTerm);
+      filterParams.push(searchTerm, searchTerm, searchTerm, searchTerm);
     }
 
-    // Get total count
-    const countQuery = query.replace('SELECT m.*, c.club_name, c.zone', 'SELECT COUNT(*) as count');
-    const totalResult = await dbGet(countQuery, params);
+    // Get total count (simple query without subqueries)
+    const countQuery = `
+      SELECT COUNT(*) as count
+      FROM members m
+      JOIN clubs c ON m.club_id = c.id
+      ${whereClause}
+    `;
+    const totalResult = await dbGet(countQuery, filterParams);
     const total = totalResult.count;
 
-    // Add pagination
+    // Get members with attendance data
+    const query = `
+      SELECT m.*, c.club_name, c.zone,
+        (SELECT COUNT(*) FROM attendance_logs a
+         WHERE a.member_id = m.id AND a.scan_type = 'check-in' AND DATE(a.scanned_at) = ?) as checked_in_today,
+        (SELECT MAX(scanned_at) FROM attendance_logs a
+         WHERE a.member_id = m.id AND a.scan_type = 'check-in' AND DATE(a.scanned_at) = ?) as last_check_in
+      FROM members m
+      JOIN clubs c ON m.club_id = c.id
+      ${whereClause}
+      ORDER BY m.created_at DESC
+      LIMIT ? OFFSET ?
+    `;
+
     const offset = (page - 1) * limit;
-    query += ' ORDER BY m.created_at DESC LIMIT ? OFFSET ?';
-    params.push(parseInt(limit), offset);
+    const params = [today, today, ...filterParams, parseInt(limit), offset];
 
     const members = await dbAll(query, params);
 
     res.json({
       success: true,
       data: {
-        members,
+        members: members.map(member => ({
+          ...member,
+          has_attended: member.checked_in_today > 0
+        })),
         pagination: {
           page: parseInt(page),
           limit: parseInt(limit),
@@ -426,6 +443,174 @@ const getZones = async (req, res, next) => {
   }
 };
 
+// Get advanced analytics for comprehensive dashboard
+const getAdvancedAnalytics = async (req, res, next) => {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+
+    // 1. Hourly scan pattern (today)
+    const hourlyScan = await dbAll(
+      `SELECT
+        CAST(strftime('%H', scanned_at) AS INTEGER) as hour,
+        COUNT(*) as count
+       FROM attendance_logs
+       WHERE DATE(scanned_at) = ? AND scan_type = 'check-in'
+       GROUP BY hour
+       ORDER BY hour ASC`,
+      [today]
+    );
+
+    // Fill in missing hours with 0
+    const hourlyScans = Array.from({ length: 24 }, (_, i) => {
+      const existing = hourlyScan.find(h => h.hour === i);
+      return {
+        hour: i,
+        time: `${i.toString().padStart(2, '0')}:00`,
+        scans: existing ? existing.count : 0
+      };
+    });
+
+    // 2. Top 5 clubs by attendance
+    const topClubs = await dbAll(
+      `SELECT
+        c.club_name,
+        c.zone,
+        COUNT(DISTINCT m.id) as total_members,
+        COUNT(DISTINCT a.member_id) as checked_in,
+        ROUND(CAST(COUNT(DISTINCT a.member_id) AS FLOAT) / NULLIF(COUNT(DISTINCT m.id), 0) * 100, 2) as attendance_rate
+       FROM clubs c
+       LEFT JOIN members m ON c.id = m.club_id
+       LEFT JOIN attendance_logs a ON m.id = a.member_id AND DATE(a.scanned_at) = ? AND a.scan_type = 'check-in'
+       WHERE c.payment_status = 'approved'
+       GROUP BY c.id
+       HAVING total_members > 0
+       ORDER BY checked_in DESC, attendance_rate DESC
+       LIMIT 5`,
+      [today]
+    );
+
+    // 3. Top 5 zones by attendance
+    const topZones = await dbAll(
+      `SELECT
+        c.zone,
+        COUNT(DISTINCT m.id) as total_members,
+        COUNT(DISTINCT a.member_id) as checked_in,
+        ROUND(CAST(COUNT(DISTINCT a.member_id) AS FLOAT) / NULLIF(COUNT(DISTINCT m.id), 0) * 100, 2) as attendance_rate
+       FROM clubs c
+       LEFT JOIN members m ON c.id = m.club_id
+       LEFT JOIN attendance_logs a ON m.id = a.member_id AND DATE(a.scanned_at) = ? AND a.scan_type = 'check-in'
+       WHERE c.payment_status = 'approved' AND c.zone IS NOT NULL
+       GROUP BY c.zone
+       HAVING total_members > 0
+       ORDER BY checked_in DESC, attendance_rate DESC
+       LIMIT 5`,
+      [today]
+    );
+
+    // 4. Registration trend (last 30 days)
+    const registrationTrend = await dbAll(
+      `SELECT
+        DATE(created_at) as date,
+        COUNT(*) as count
+       FROM members
+       WHERE created_at >= date('now', '-30 days')
+       GROUP BY DATE(created_at)
+       ORDER BY date ASC`
+    );
+
+    // 5. Attendance trend (last 7 days)
+    const attendanceTrend = await dbAll(
+      `SELECT
+        DATE(scanned_at) as date,
+        COUNT(DISTINCT member_id) as count
+       FROM attendance_logs
+       WHERE scanned_at >= date('now', '-7 days') AND scan_type = 'check-in'
+       GROUP BY DATE(scanned_at)
+       ORDER BY date ASC`
+    );
+
+    // 6. Peak hours analysis
+    const peakHours = await dbAll(
+      `SELECT
+        CAST(strftime('%H', scanned_at) AS INTEGER) as hour,
+        COUNT(*) as count
+       FROM attendance_logs
+       WHERE scan_type = 'check-in'
+       GROUP BY hour
+       ORDER BY count DESC
+       LIMIT 3`
+    );
+
+    // 7. Club participation breakdown
+    const clubParticipation = await dbAll(
+      `SELECT
+        CASE
+          WHEN COALESCE(attendance_rate, 0) >= 75 THEN 'High (75%+)'
+          WHEN COALESCE(attendance_rate, 0) >= 50 THEN 'Medium (50-74%)'
+          WHEN COALESCE(attendance_rate, 0) >= 25 THEN 'Low (25-49%)'
+          ELSE 'Very Low (<25%)'
+        END as category,
+        COUNT(*) as count
+       FROM (
+         SELECT
+           c.id,
+           ROUND(CAST(COUNT(DISTINCT a.member_id) AS FLOAT) / NULLIF(COUNT(DISTINCT m.id), 0) * 100, 2) as attendance_rate
+         FROM clubs c
+         LEFT JOIN members m ON c.id = m.club_id
+         LEFT JOIN attendance_logs a ON m.id = a.member_id AND DATE(a.scanned_at) = ? AND a.scan_type = 'check-in'
+         WHERE c.payment_status = 'approved'
+         GROUP BY c.id
+       )
+       GROUP BY category
+       ORDER BY category DESC`,
+      [today]
+    );
+
+    // 8. Overall statistics
+    const totalMembers = await dbGet('SELECT COUNT(*) as count FROM members');
+    const totalClubs = await dbGet("SELECT COUNT(*) as count FROM clubs WHERE payment_status = 'approved'");
+    const checkedInToday = await dbGet(
+      `SELECT COUNT(DISTINCT member_id) as count FROM attendance_logs
+       WHERE scan_type = 'check-in' AND DATE(scanned_at) = ?`,
+      [today]
+    );
+
+    const totalScansToday = await dbGet(
+      `SELECT COUNT(*) as count FROM attendance_logs
+       WHERE scan_type = 'check-in' AND DATE(scanned_at) = ?`,
+      [today]
+    );
+
+    res.json({
+      success: true,
+      data: {
+        overview: {
+          total_members: totalMembers.count,
+          total_clubs: totalClubs.count,
+          checked_in_today: checkedInToday.count,
+          total_scans_today: totalScansToday.count,
+          attendance_rate: totalMembers.count > 0
+            ? ((checkedInToday.count / totalMembers.count) * 100).toFixed(2)
+            : 0
+        },
+        hourly_scans: hourlyScans,
+        top_clubs: topClubs,
+        top_zones: topZones,
+        registration_trend: registrationTrend,
+        attendance_trend: attendanceTrend,
+        peak_hours: peakHours.map(p => ({
+          hour: p.hour,
+          time: `${p.hour.toString().padStart(2, '0')}:00`,
+          count: p.count
+        })),
+        club_participation: clubParticipation
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getDashboard,
   getAllClubs,
@@ -435,5 +620,6 @@ module.exports = {
   getAllMembers,
   deleteMember,
   getAnalytics,
-  getZones
+  getZones,
+  getAdvancedAnalytics
 };

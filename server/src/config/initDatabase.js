@@ -114,12 +114,31 @@ const initDatabase = async () => {
     `);
     console.log('✓ Admins table created');
 
+    // Create attendance_logs table for event check-ins
+    await dbRun(`
+      CREATE TABLE IF NOT EXISTS attendance_logs (
+        id TEXT PRIMARY KEY,
+        member_id TEXT NOT NULL,
+        scan_type TEXT DEFAULT 'check-in' CHECK(scan_type IN ('check-in', 'check-out', 'verify')),
+        scanned_by TEXT,
+        scan_location TEXT,
+        notes TEXT,
+        scanned_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (member_id) REFERENCES members(id) ON DELETE CASCADE,
+        FOREIGN KEY (scanned_by) REFERENCES admins(id) ON DELETE SET NULL
+      )
+    `);
+    console.log('✓ Attendance logs table created');
+
     // Create indexes
     await dbRun('CREATE INDEX IF NOT EXISTS idx_clubs_payment_status ON clubs(payment_status)');
     await dbRun('CREATE INDEX IF NOT EXISTS idx_clubs_zone ON clubs(zone)');
     await dbRun('CREATE INDEX IF NOT EXISTS idx_members_club_id ON members(club_id)');
     await dbRun('CREATE INDEX IF NOT EXISTS idx_members_email ON members(email)');
+    await dbRun('CREATE INDEX IF NOT EXISTS idx_members_badge_number ON members(badge_number)');
     await dbRun('CREATE INDEX IF NOT EXISTS idx_email_logs_type ON email_logs(email_type)');
+    await dbRun('CREATE INDEX IF NOT EXISTS idx_attendance_member_id ON attendance_logs(member_id)');
+    await dbRun('CREATE INDEX IF NOT EXISTS idx_attendance_scanned_at ON attendance_logs(scanned_at)');
     console.log('✓ Indexes created');
 
     // Insert default payment information
