@@ -182,7 +182,7 @@ export default function AdminDashboard() {
   return (
     <div style={{ padding: "24px", background: "#f0f2f5", minHeight: "100vh" }}>
       <div style={{ marginBottom: "24px" }}>
-        <h1 style={{ fontSize: "28px", marginBottom: "8px", color: "#fe0808" }}>
+        <h1 style={{ fontSize: "28px", marginBottom: "8px", color: "#1E3A71" }}>
           PALAROTARY 2025 - Analytics Dashboard
         </h1>
         <p style={{ color: "#666" }}>
@@ -233,7 +233,7 @@ export default function AdminDashboard() {
               value={attendance.attendance_rate || 0}
               suffix="%"
               prefix={<BarChartOutlined />}
-              valueStyle={{ color: "#fe0808" }}
+              valueStyle={{ color: "#1E3A71" }}
             />
           </Card>
         </Col>

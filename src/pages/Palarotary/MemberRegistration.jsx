@@ -161,8 +161,8 @@ export default function MemberRegistration() {
                 block
                 size="large"
                 style={{
-                  background: "#fe0808",
-                  borderColor: "#fe0808",
+                  background: "#1E3A71",
+                  borderColor: "#1E3A71",
                   marginBottom: "8px",
                 }}
               >
@@ -220,7 +220,7 @@ export default function MemberRegistration() {
       <Card>
         <div style={{ textAlign: "center", marginBottom: "32px" }}>
           <h1
-            style={{ color: "#fe0808", fontSize: "32px", marginBottom: "8px" }}
+            style={{ color: "#1E3A71", fontSize: "32px", marginBottom: "8px" }}
           >
             PALAROTARY 2025
           </h1>
@@ -321,7 +321,7 @@ export default function MemberRegistration() {
               size="large"
               block
               loading={registerMember.isPending}
-              style={{ background: "#fe0808", borderColor: "#fe0808" }}
+              style={{ background: "#1E3A71", borderColor: "#1E3A71" }}
             >
               Register & Get Digital Badge
             </Button>

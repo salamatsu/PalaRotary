@@ -15,7 +15,7 @@ createRoot(document.getElementById("root")).render(
       <ConfigProvider
         theme={{
           token: {
-            colorPrimary: "#fe0808",
+            colorPrimary: "#1E3A71",
             colorBgBase: "#fff",
           },
         }}

@@ -2,8 +2,8 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary-color: #fe0808;
-  --color-primaryColor: #fe0808;
+  --color-primary-color: #1E3A71;
+  --color-primaryColor: #1E3A71;
   --color-text-color: #565656;
 }
 
@@ -23,7 +23,7 @@
   left: 0;
   bottom: 0;
   width: 0;
-  background: #fe0808;
+  background: #1E3A71;
   transition: width 0.2s;
 }
 

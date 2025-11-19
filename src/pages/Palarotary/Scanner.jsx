@@ -193,7 +193,7 @@ const Scanner = () => {
         >
           <h1
             style={{
-              color: "#fe0808",
+              color: "#1E3A71",
               fontSize: "24px",
               marginBottom: "4px",
               margin: 0,
@@ -209,14 +209,14 @@ const Scanner = () => {
         {/* Scan Mode Toggle */}
         <Card style={{ marginBottom: "12px", textAlign: "center" }}>
           <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "12px" }}>
-            <CameraOutlined style={{ fontSize: "18px", color: scanMode === "camera" ? "#fe0808" : "#999" }} />
+            <CameraOutlined style={{ fontSize: "18px", color: scanMode === "camera" ? "#1E3A71" : "#999" }} />
             <Switch
               checked={scanMode === "input"}
               onChange={handleScanModeChange}
               checkedChildren="Input"
               unCheckedChildren="Camera"
             />
-            <BarcodeOutlined style={{ fontSize: "18px", color: scanMode === "input" ? "#fe0808" : "#999" }} />
+            <BarcodeOutlined style={{ fontSize: "18px", color: scanMode === "input" ? "#1E3A71" : "#999" }} />
           </div>
           <p style={{ fontSize: "12px", color: "#999", margin: "8px 0 0 0" }}>
             {scanMode === "camera" ? "Camera Scanner Mode" : "Scanner Gun / Keyboard Input Mode"}
@@ -244,7 +244,7 @@ const Scanner = () => {
                   {/* Input Scanner Mode */}
                   <div style={{ padding: "20px 0" }}>
                     <div style={{ textAlign: "center", marginBottom: "16px" }}>
-                      <BarcodeOutlined style={{ fontSize: "48px", color: "#fe0808", marginBottom: "8px" }} />
+                      <BarcodeOutlined style={{ fontSize: "48px", color: "#1E3A71", marginBottom: "8px" }} />
                       <p style={{ color: "#666", fontSize: "14px", margin: 0 }}>
                         Ready to scan with barcode scanner or keyboard input
                       </p>
@@ -344,7 +344,7 @@ const Scanner = () => {
                           style={{
                             fontSize: "18px",
                             fontWeight: "bold",
-                            color: "#fe0808",
+                            color: "#1E3A71",
                             margin: 0,
                             textTransform: "uppercase",
                           }}
@@ -491,8 +491,8 @@ const Scanner = () => {
                       onClick={handleContinueScanning}
                       block
                       style={{
-                        background: "#fe0808",
-                        borderColor: "#fe0808",
+                        background: "#1E3A71",
+                        borderColor: "#1E3A71",
                         height: "48px",
                         fontSize: "16px",
                         fontWeight: "600",

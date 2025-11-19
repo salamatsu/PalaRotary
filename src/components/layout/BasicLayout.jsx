@@ -46,10 +46,10 @@ const BasicLayout = ({ navigations = [], store }) => {
       />
       <Layout className="site-layout">
         <Header
-          style={{ backgroundColor: "#fe0808" }}
+          style={{ backgroundColor: "#1E3A71", padding: "0 16px" }}
           className="site-layout-background flex justify-between items-center h-[55px] bg-primaryColor text-white px-3 md:pr-7"
         >
-          <div className="flex h-full items-center gap-3">
+          <div className="flex h-full items-center gap-3 text-white">
             {collapsed ? (
               <MenuFoldOutlined
                 className=" text-2xl"
@@ -112,13 +112,12 @@ const BasicLayout = ({ navigations = [], store }) => {
                 <div className=" flex justify-center items-center ">
                   <div className="justify-start items-center gap-3 flex">
                     <Avatar size={40} icon={<UserOutlined />} />
-                    <div className="justify-start items-start gap-2 flex">
+                    {/* <div className="justify-start items-start gap-2 flex">
                       <div className="text-white text-base font-normal  leading-normal">
                         {userData &&
                           [userData.firstName, userData.lastName].join(" ")}
                       </div>
-                    </div>
-                    {userOpen ? <UpOutlined /> : <DownOutlined />}
+                    </div> */}
                   </div>
                 </div>
               </Popover>
