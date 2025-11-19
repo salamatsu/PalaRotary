@@ -6,382 +6,730 @@ import {
   EnvironmentOutlined,
   ClockCircleOutlined,
   LoginOutlined,
-  GiftOutlined,
+  ArrowRightOutlined,
+  CheckCircleOutlined,
+  MobileOutlined,
+  QrcodeOutlined,
+  SafetyOutlined,
 } from "@ant-design/icons";
+import { motion, useScroll, useTransform, useInView } from "framer-motion";
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const { Title, Paragraph } = Typography;
 
 export default function PalarotaryLandingPage() {
   const navigate = useNavigate();
+  const containerRef = useRef(null);
+  const heroRef = useRef(null);
+  const floatingElementsRef = useRef([]);
+  const cardsRef = useRef(null);
+  const featuresRef = useRef(null);
+
+  const { scrollYProgress } = useScroll();
+  const yHero = useTransform(scrollYProgress, [0, 1], [0, -200]);
+  const opacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
+
+  // Advanced GSAP animations on mount
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Hero section entrance
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+      tl.fromTo(
+        heroRef.current.querySelector(".hero-title"),
+        { opacity: 0, y: 50, scale: 0.9 },
+        { opacity: 1, y: 0, scale: 1, duration: 1 }
+      )
+      .fromTo(
+        heroRef.current.querySelector(".hero-subtitle"),
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 0.8 },
+        "-=0.6"
+      )
+      .fromTo(
+        heroRef.current.querySelectorAll(".info-badge"),
+        { opacity: 0, scale: 0.8, rotationY: -90 },
+        {
+          opacity: 1,
+          scale: 1,
+          rotationY: 0,
+          duration: 0.6,
+          stagger: 0.15,
+          ease: "back.out(1.5)",
+        },
+        "-=0.5"
+      );
+
+      // Floating elements animation
+      floatingElementsRef.current.forEach((el, i) => {
+        if (el) {
+          gsap.to(el, {
+            y: "random(-30, 30)",
+            x: "random(-25, 25)",
+            rotation: "random(-25, 25)",
+            scale: "random(0.8, 1.2)",
+            duration: "random(4, 7)",
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut",
+            delay: i * 0.2,
+          });
+        }
+      });
+
+      // Cards scroll animation
+      if (cardsRef.current) {
+        gsap.fromTo(
+          cardsRef.current.querySelectorAll(".registration-card"),
+          {
+            opacity: 0,
+            y: 60,
+            rotationX: -20,
+          },
+          {
+            opacity: 1,
+            y: 0,
+            rotationX: 0,
+            duration: 0.8,
+            stagger: 0.2,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: cardsRef.current,
+              start: "top 80%",
+              toggleActions: "play none none reverse",
+            },
+          }
+        );
+      }
+
+      // Features animation
+      if (featuresRef.current) {
+        gsap.fromTo(
+          featuresRef.current.querySelectorAll(".feature-item"),
+          {
+            opacity: 0,
+            x: -30,
+          },
+          {
+            opacity: 1,
+            x: 0,
+            duration: 0.6,
+            stagger: 0.1,
+            scrollTrigger: {
+              trigger: featuresRef.current,
+              start: "top 85%",
+              toggleActions: "play none none reverse",
+            },
+          }
+        );
+      }
+    }, containerRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 50, rotateX: -15 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      rotateX: 0,
+      transition: {
+        type: "spring",
+        stiffness: 100,
+        damping: 15,
+      },
+    },
+    hover: {
+      y: -10,
+      scale: 1.02,
+      rotateY: 2,
+      boxShadow: "0 20px 50px rgba(0,0,0,0.2)",
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 20,
+      },
+    },
+  };
+
+  const buttonVariants = {
+    rest: { scale: 1 },
+    hover: {
+      scale: 1.05,
+      boxShadow: "0 8px 30px rgba(0,0,0,0.3)",
+      transition: {
+        type: "spring",
+        stiffness: 400,
+        damping: 10,
+      },
+    },
+    tap: { scale: 0.95 },
+  };
+
+  const iconVariants = {
+    initial: { scale: 1, rotate: 0 },
+    animate: {
+      scale: [1, 1.2, 1],
+      rotate: [0, 10, -10, 0],
+      transition: {
+        duration: 2,
+        repeat: Infinity,
+        repeatDelay: 3,
+      },
+    },
+  };
 
   return (
     <div
+      ref={containerRef}
       style={{
         minHeight: "100vh",
         background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-        padding: "40px 20px",
+        position: "relative",
+        overflow: "hidden",
       }}
     >
-      <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-        {/* Header */}
-        <div
-          style={{ textAlign: "center", marginBottom: "60px", color: "white" }}
-        >
-          <Title
-            level={1}
-            style={{
-              color: "white",
-              fontSize: "56px",
-              marginBottom: "16px",
-              fontWeight: "bold",
-            }}
-          >
-            PALAROTARY 2025
-          </Title>
-          <Title
-            level={3}
-            style={{
-              color: "white",
-              fontWeight: "normal",
-              marginBottom: "24px",
-            }}
-          >
-            Radio Enthusiasts Convention
-          </Title>
+      {/* Animated floating background elements */}
+      {[...Array(15)].map((_, i) => (
+        <motion.div
+          key={i}
+          ref={(el) => (floatingElementsRef.current[i] = el)}
+          style={{
+            position: "absolute",
+            width: `${Math.random() * 120 + 60}px`,
+            height: `${Math.random() * 120 + 60}px`,
+            borderRadius: i % 3 === 0 ? "50%" : i % 3 === 1 ? "20%" : "30%",
+            background: `rgba(255, 255, 255, ${Math.random() * 0.12 + 0.03})`,
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+            pointerEvents: "none",
+            filter: "blur(2px)",
+          }}
+          animate={{
+            opacity: [0.2, 0.5, 0.2],
+            scale: [1, 1.3, 1],
+          }}
+          transition={{
+            duration: Math.random() * 5 + 4,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+      ))}
 
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              gap: "24px",
-              flexWrap: "wrap",
-              marginTop: "32px",
-            }}
-          >
+      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "40px 20px", position: "relative", zIndex: 1 }}>
+        {/* Hero Section */}
+        <motion.div
+          ref={heroRef}
+          style={{ y: yHero, opacity }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <div style={{ textAlign: "center", marginBottom: "60px", color: "white" }}>
+            <motion.div
+              className="hero-title"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <Title
+                level={1}
+                style={{
+                  color: "white",
+                  fontSize: "clamp(40px, 8vw, 72px)",
+                  marginBottom: "16px",
+                  fontWeight: "900",
+                  textShadow: "0 4px 20px rgba(0,0,0,0.3)",
+                  letterSpacing: "2px",
+                }}
+              >
+                <motion.span
+                  animate={{
+                    textShadow: [
+                      "0 4px 20px rgba(0,0,0,0.3)",
+                      "0 8px 40px rgba(255,255,255,0.4)",
+                      "0 4px 20px rgba(0,0,0,0.3)",
+                    ],
+                  }}
+                  transition={{ duration: 3, repeat: Infinity }}
+                >
+                  PALAROTARY 2025
+                </motion.span>
+              </Title>
+            </motion.div>
+
+            <motion.div
+              className="hero-subtitle"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <Title
+                level={3}
+                style={{
+                  color: "rgba(255,255,255,0.95)",
+                  fontWeight: "400",
+                  marginBottom: "24px",
+                  fontSize: "clamp(18px, 3vw, 28px)",
+                }}
+              >
+                Radio Enthusiasts Convention
+              </Title>
+            </motion.div>
+
             <div
               style={{
-                background: "rgba(255,255,255,0.2)",
-                padding: "16px 24px",
-                borderRadius: "8px",
-                backdropFilter: "blur(10px)",
+                display: "flex",
+                justifyContent: "center",
+                gap: "16px",
+                flexWrap: "wrap",
+                marginTop: "40px",
               }}
             >
-              <CalendarOutlined
-                style={{ fontSize: "24px", marginRight: "8px" }}
-              />
-              <strong>January 25, 2026</strong>
-            </div>
-            <div
-              style={{
-                background: "rgba(255,255,255,0.2)",
-                padding: "16px 24px",
-                borderRadius: "8px",
-                backdropFilter: "blur(10px)",
-              }}
-            >
-              <ClockCircleOutlined
-                style={{ fontSize: "24px", marginRight: "8px" }}
-              />
-              <strong>8am - 6pm</strong>
-            </div>
-            <div
-              style={{
-                background: "rgba(255,255,255,0.2)",
-                padding: "16px 24px",
-                borderRadius: "8px",
-                backdropFilter: "blur(10px)",
-              }}
-            >
-              <EnvironmentOutlined
-                style={{ fontSize: "24px", marginRight: "8px" }}
-              />
-              <strong>Marikina Sports Center</strong>
+              {[
+                { icon: CalendarOutlined, text: "January 25, 2026", delay: 0 },
+                { icon: ClockCircleOutlined, text: "8am - 6pm", delay: 0.1 },
+                { icon: EnvironmentOutlined, text: "Marikina Sports Center", delay: 0.2 },
+              ].map((item, index) => (
+                <motion.div
+                  key={index}
+                  className="info-badge"
+                  whileHover={{
+                    scale: 1.1,
+                    y: -5,
+                    boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
+                  }}
+                  whileTap={{ scale: 0.95 }}
+                  style={{
+                    background: "rgba(255,255,255,0.25)",
+                    padding: "16px 28px",
+                    borderRadius: "16px",
+                    backdropFilter: "blur(10px)",
+                    border: "1px solid rgba(255,255,255,0.3)",
+                    boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+                    cursor: "pointer",
+                  }}
+                >
+                  <motion.div
+                    variants={iconVariants}
+                    initial="initial"
+                    animate="animate"
+                  >
+                    <item.icon style={{ fontSize: "24px", marginRight: "12px" }} />
+                  </motion.div>
+                  <strong style={{ fontSize: "16px" }}>{item.text}</strong>
+                </motion.div>
+              ))}
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Registration Cards */}
-        <Row gutter={[24, 24]} style={{ marginBottom: "40px" }}>
-          <Col xs={24} md={12}>
-            <Card
-              hoverable
-              style={{
-                height: "100%",
-                borderRadius: "12px",
-                boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-              }}
-            >
-              <div style={{ textAlign: "center", padding: "20px" }}>
-                <BankOutlined
-                  style={{
-                    fontSize: "64px",
-                    color: "#fe0808",
-                    marginBottom: "20px",
-                  }}
-                />
-                <Title level={2} style={{ marginBottom: "16px" }}>
-                  Club Registration
-                </Title>
-                <Paragraph
-                  style={{
-                    fontSize: "16px",
-                    color: "#666",
-                    marginBottom: "24px",
-                  }}
-                >
-                  Register your club for PALAROTARY 2025
-                </Paragraph>
-
-                <div
-                  style={{
-                    background: "#f0f2f5",
-                    padding: "16px",
-                    borderRadius: "8px",
-                    marginBottom: "24px",
-                  }}
-                >
-                  <Title level={4} style={{ margin: 0, color: "#fe0808" }}>
-                    ₱4,000.00
-                  </Title>
-                  <Paragraph
-                    style={{
-                      margin: "8px 0 0 0",
-                      fontSize: "14px",
-                      color: "#666",
-                    }}
-                  >
-                    Registration Fee per Club
-                  </Paragraph>
-                </div>
-
-                <div
-                  style={{
-                    textAlign: "left",
-                    marginBottom: "24px",
-                    padding: "0 20px",
-                  }}
-                >
-                  <Paragraph style={{ fontSize: "14px", marginBottom: "8px" }}>
-                    ✓ Official club registration
-                  </Paragraph>
-                  <Paragraph style={{ fontSize: "14px", marginBottom: "8px" }}>
-                    ✓ Upload proof of payment
-                  </Paragraph>
-                  <Paragraph style={{ fontSize: "14px", marginBottom: "8px" }}>
-                    ✓ Admin approval process
-                  </Paragraph>
-                </div>
-
-                <Button
-                  type="primary"
-                  size="large"
-                  block
-                  onClick={() => navigate("/register-club")}
-                  style={{
-                    background: "#fe0808",
-                    borderColor: "#fe0808",
-                    height: "50px",
-                    fontSize: "16px",
-                  }}
-                >
-                  Register Your Club
-                </Button>
-              </div>
-            </Card>
-          </Col>
-
-          <Col xs={24} md={12}>
-            <Card
-              hoverable
-              style={{
-                height: "100%",
-                borderRadius: "12px",
-                boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-              }}
-            >
-              <div style={{ textAlign: "center", padding: "20px" }}>
-                <TeamOutlined
-                  style={{
-                    fontSize: "64px",
-                    color: "#52c41a",
-                    marginBottom: "20px",
-                  }}
-                />
-                <Title level={2} style={{ marginBottom: "16px" }}>
-                  Member Registration
-                </Title>
-                <Paragraph
-                  style={{
-                    fontSize: "16px",
-                    color: "#666",
-                    marginBottom: "24px",
-                  }}
-                >
-                  Join as an individual member
-                </Paragraph>
-
-                <div
-                  style={{
-                    background: "#f6ffed",
-                    padding: "16px",
-                    borderRadius: "8px",
-                    marginBottom: "24px",
-                    border: "1px solid #b7eb8f",
-                  }}
-                >
-                  <Title level={4} style={{ margin: 0, color: "#52c41a" }}>
-                    FREE
-                  </Title>
-                  <Paragraph
-                    style={{
-                      margin: "8px 0 0 0",
-                      fontSize: "14px",
-                      color: "#666",
-                    }}
-                  >
-                    No registration fee for members
-                  </Paragraph>
-                </div>
-
-                <div
-                  style={{
-                    textAlign: "left",
-                    marginBottom: "24px",
-                    padding: "0 20px",
-                  }}
-                >
-                  <Paragraph style={{ fontSize: "14px", marginBottom: "8px" }}>
-                    ✓ Select your registered club
-                  </Paragraph>
-                  <Paragraph style={{ fontSize: "14px", marginBottom: "8px" }}>
-                    ✓ Fill in your information
-                  </Paragraph>
-                  <Paragraph style={{ fontSize: "14px", marginBottom: "8px" }}>
-                    ✓ Get your digital badge instantly
-                  </Paragraph>
-                  <Paragraph style={{ fontSize: "14px", marginBottom: "8px" }}>
-                    ✓ Badge with QR code sent via email
-                  </Paragraph>
-                </div>
-
-                <Button
-                  type="primary"
-                  size="large"
-                  block
-                  onClick={() => navigate("/register-member")}
-                  style={{
-                    background: "#52c41a",
-                    borderColor: "#52c41a",
-                    height: "50px",
-                    fontSize: "16px",
-                  }}
-                >
-                  Register as Member
-                </Button>
-              </div>
-            </Card>
-          </Col>
-        </Row>
-
-        {/* Payment Information */}
-        <Card style={{ marginBottom: "40px", borderRadius: "12px" }}>
-          <Title
-            level={3}
-            style={{ textAlign: "center", marginBottom: "24px" }}
-          >
-            Payment Information
-          </Title>
-          <Row gutter={[24, 24]}>
-            <Col xs={24} md={12}>
-              <div
-                style={{
-                  background: "#f0f2f5",
-                  padding: "20px",
-                  borderRadius: "8px",
-                  height: "100%",
-                }}
+        <div ref={cardsRef}>
+          <Row gutter={[32, 32]} style={{ marginBottom: "60px" }}>
+            {/* Club Registration Card */}
+            <Col xs={24} lg={12}>
+              <motion.div
+                className="registration-card"
+                variants={cardVariants}
+                initial="hidden"
+                whileInView="visible"
+                whileHover="hover"
+                viewport={{ once: true }}
               >
-                <Title level={4} style={{ marginBottom: "16px" }}>
-                  🏦 BDO Bank Transfer
-                </Title>
-                <Paragraph style={{ margin: "8px 0", fontSize: "16px" }}>
-                  <strong>Account Name:</strong>
-                  <br />
-                  Rotary Club of Marikina Hilltop
-                </Paragraph>
-                <Paragraph style={{ margin: "8px 0", fontSize: "16px" }}>
-                  <strong>Account Number:</strong>
-                  <br />
-                  0021 5802 5770
-                </Paragraph>
-              </div>
+                <Card
+                  style={{
+                    height: "100%",
+                    borderRadius: "24px",
+                    boxShadow: "0 10px 40px rgba(0,0,0,0.15)",
+                    border: "none",
+                    overflow: "hidden",
+                    background: "linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%)",
+                  }}
+                >
+                  <div style={{ padding: "20px" }}>
+                    <motion.div
+                      style={{ textAlign: "center", marginBottom: "24px" }}
+                      whileHover={{ scale: 1.1, rotate: [0, -10, 10, 0] }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <div
+                        style={{
+                          width: "100px",
+                          height: "100px",
+                          borderRadius: "50%",
+                          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          margin: "0 auto 20px",
+                          boxShadow: "0 10px 30px rgba(102, 126, 234, 0.3)",
+                        }}
+                      >
+                        <BankOutlined style={{ fontSize: "48px", color: "white" }} />
+                      </div>
+                    </motion.div>
+
+                    <Title level={2} style={{ marginBottom: "12px", textAlign: "center", fontSize: "28px" }}>
+                      Club Registration
+                    </Title>
+                    <Paragraph
+                      style={{
+                        fontSize: "16px",
+                        color: "#666",
+                        marginBottom: "24px",
+                        textAlign: "center",
+                      }}
+                    >
+                      Register your club for PALAROTARY 2025
+                    </Paragraph>
+
+                    <motion.div
+                      whileHover={{ scale: 1.03 }}
+                      style={{
+                        background: "linear-gradient(135deg, #667eea15 0%, #764ba215 100%)",
+                        padding: "20px",
+                        borderRadius: "16px",
+                        marginBottom: "24px",
+                        border: "2px solid #667eea30",
+                      }}
+                    >
+                      <Title level={3} style={{ margin: 0, color: "#667eea", fontSize: "32px" }}>
+                        ₱4,000.00
+                      </Title>
+                      <Paragraph style={{ margin: "8px 0 0 0", fontSize: "14px", color: "#666" }}>
+                        Registration Fee per Club
+                      </Paragraph>
+                    </motion.div>
+
+                    <div style={{ marginBottom: "28px" }}>
+                      {[
+                        "Official club registration",
+                        "Upload proof of payment",
+                        "Admin approval process",
+                        "Register unlimited members",
+                      ].map((text, i) => (
+                        <motion.div
+                          key={i}
+                          className="feature-item"
+                          initial={{ opacity: 0, x: -20 }}
+                          whileInView={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.1 }}
+                          viewport={{ once: true }}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "12px",
+                            marginBottom: "12px",
+                          }}
+                        >
+                          <CheckCircleOutlined style={{ fontSize: "18px", color: "#667eea" }} />
+                          <span style={{ fontSize: "15px", color: "#333" }}>{text}</span>
+                        </motion.div>
+                      ))}
+                    </div>
+
+                    <motion.div variants={buttonVariants} initial="rest" whileHover="hover" whileTap="tap">
+                      <Button
+                        type="primary"
+                        size="large"
+                        block
+                        icon={<ArrowRightOutlined />}
+                        onClick={() => navigate("/register-club")}
+                        style={{
+                          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                          border: "none",
+                          height: "56px",
+                          fontSize: "17px",
+                          fontWeight: "600",
+                          borderRadius: "12px",
+                          boxShadow: "0 6px 20px rgba(102, 126, 234, 0.4)",
+                        }}
+                      >
+                        Register Your Club
+                      </Button>
+                    </motion.div>
+                  </div>
+                </Card>
+              </motion.div>
             </Col>
-            <Col xs={24} md={12}>
-              <div
-                style={{
-                  background: "#f0f2f5",
-                  padding: "20px",
-                  borderRadius: "8px",
-                  height: "100%",
-                }}
+
+            {/* Member Registration Card */}
+            <Col xs={24} lg={12}>
+              <motion.div
+                className="registration-card"
+                variants={cardVariants}
+                initial="hidden"
+                whileInView="visible"
+                whileHover="hover"
+                viewport={{ once: true }}
               >
-                <Title level={4} style={{ marginBottom: "16px" }}>
-                  📱 GCash Payment
-                </Title>
-                <Paragraph style={{ margin: "8px 0", fontSize: "16px" }}>
-                  <strong>Account Name:</strong>
-                  <br />
-                  Karl Marcus Montaner
-                </Paragraph>
-                <Paragraph style={{ margin: "8px 0", fontSize: "16px" }}>
-                  <strong>Mobile Number:</strong>
-                  <br />
-                  0917 522 5275
-                </Paragraph>
-              </div>
+                <Card
+                  style={{
+                    height: "100%",
+                    borderRadius: "24px",
+                    boxShadow: "0 10px 40px rgba(0,0,0,0.15)",
+                    border: "none",
+                    overflow: "hidden",
+                    background: "linear-gradient(135deg, #ffffff 0%, #f0fff4 100%)",
+                  }}
+                >
+                  <div style={{ padding: "20px" }}>
+                    <motion.div
+                      style={{ textAlign: "center", marginBottom: "24px" }}
+                      whileHover={{ scale: 1.1, rotate: [0, -10, 10, 0] }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <div
+                        style={{
+                          width: "100px",
+                          height: "100px",
+                          borderRadius: "50%",
+                          background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          margin: "0 auto 20px",
+                          boxShadow: "0 10px 30px rgba(16, 185, 129, 0.3)",
+                        }}
+                      >
+                        <TeamOutlined style={{ fontSize: "48px", color: "white" }} />
+                      </div>
+                    </motion.div>
+
+                    <Title level={2} style={{ marginBottom: "12px", textAlign: "center", fontSize: "28px" }}>
+                      Member Registration
+                    </Title>
+                    <Paragraph
+                      style={{
+                        fontSize: "16px",
+                        color: "#666",
+                        marginBottom: "24px",
+                        textAlign: "center",
+                      }}
+                    >
+                      Join as an individual member
+                    </Paragraph>
+
+                    <motion.div
+                      whileHover={{ scale: 1.03 }}
+                      animate={{
+                        boxShadow: [
+                          "0 4px 15px rgba(16, 185, 129, 0.2)",
+                          "0 8px 25px rgba(16, 185, 129, 0.3)",
+                          "0 4px 15px rgba(16, 185, 129, 0.2)",
+                        ],
+                      }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                      style={{
+                        background: "linear-gradient(135deg, #10b98120 0%, #05966920 100%)",
+                        padding: "20px",
+                        borderRadius: "16px",
+                        marginBottom: "24px",
+                        border: "2px solid #10b98140",
+                      }}
+                    >
+                      <Title level={3} style={{ margin: 0, color: "#10b981", fontSize: "32px" }}>
+                        FREE
+                      </Title>
+                      <Paragraph style={{ margin: "8px 0 0 0", fontSize: "14px", color: "#666" }}>
+                        No registration fee for members
+                      </Paragraph>
+                    </motion.div>
+
+                    <div style={{ marginBottom: "28px" }}>
+                      {[
+                        "Select your registered club",
+                        "Fill in your information",
+                        "Get digital badge instantly",
+                        "QR code sent via email",
+                      ].map((text, i) => (
+                        <motion.div
+                          key={i}
+                          className="feature-item"
+                          initial={{ opacity: 0, x: -20 }}
+                          whileInView={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.1 }}
+                          viewport={{ once: true }}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "12px",
+                            marginBottom: "12px",
+                          }}
+                        >
+                          <CheckCircleOutlined style={{ fontSize: "18px", color: "#10b981" }} />
+                          <span style={{ fontSize: "15px", color: "#333" }}>{text}</span>
+                        </motion.div>
+                      ))}
+                    </div>
+
+                    <motion.div variants={buttonVariants} initial="rest" whileHover="hover" whileTap="tap">
+                      <Button
+                        type="primary"
+                        size="large"
+                        block
+                        icon={<ArrowRightOutlined />}
+                        onClick={() => navigate("/register-member")}
+                        style={{
+                          background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                          border: "none",
+                          height: "56px",
+                          fontSize: "17px",
+                          fontWeight: "600",
+                          borderRadius: "12px",
+                          boxShadow: "0 6px 20px rgba(16, 185, 129, 0.4)",
+                        }}
+                      >
+                        Register as Member
+                      </Button>
+                    </motion.div>
+                  </div>
+                </Card>
+              </motion.div>
             </Col>
           </Row>
-        </Card>
+        </div>
 
-        {/* Admin Login */}
-        <div style={{ textAlign: "center" }}>
-          <Button
-            type="default"
-            size="large"
-            icon={<LoginOutlined />}
-            onClick={() => navigate("/admin-login")}
+        {/* Payment Information */}
+        <motion.div
+          ref={featuresRef}
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+        >
+          <Card
             style={{
-              background: "white",
-              borderColor: "white",
-              color: "#667eea",
-              height: "50px",
-              padding: "0 40px",
-              fontSize: "16px",
+              marginBottom: "60px",
+              borderRadius: "24px",
+              boxShadow: "0 10px 40px rgba(0,0,0,0.15)",
+              border: "none",
+              overflow: "hidden",
             }}
           >
-            Admin Login
-          </Button>
-        </div>
+            <Title level={3} style={{ textAlign: "center", marginBottom: "32px", fontSize: "32px" }}>
+              💳 Payment Information
+            </Title>
+            <Row gutter={[24, 24]}>
+              <Col xs={24} md={12}>
+                <motion.div
+                  className="feature-item"
+                  whileHover={{ scale: 1.03, y: -5 }}
+                  style={{
+                    background: "linear-gradient(135deg, #667eea08 0%, #764ba208 100%)",
+                    padding: "28px",
+                    borderRadius: "16px",
+                    height: "100%",
+                    border: "2px solid #667eea20",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
+                    <motion.div
+                      animate={{ rotate: [0, 360] }}
+                      transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                      style={{
+                        width: "50px",
+                        height: "50px",
+                        borderRadius: "50%",
+                        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <BankOutlined style={{ fontSize: "24px", color: "white" }} />
+                    </motion.div>
+                    <Title level={4} style={{ margin: 0, fontSize: "22px" }}>
+                      BDO Bank Transfer
+                    </Title>
+                  </div>
+                  <Paragraph style={{ margin: "12px 0", fontSize: "16px", color: "#333" }}>
+                    <strong>Account Name:</strong>
+                    <br />
+                    <span style={{ color: "#667eea", fontWeight: "600" }}>
+                      Rotary Club of Marikina Hilltop
+                    </span>
+                  </Paragraph>
+                  <Paragraph style={{ margin: "12px 0", fontSize: "16px", color: "#333" }}>
+                    <strong>Account Number:</strong>
+                    <br />
+                    <span style={{ color: "#667eea", fontWeight: "600", fontSize: "20px", letterSpacing: "1px" }}>
+                      0021 5802 5770
+                    </span>
+                  </Paragraph>
+                </motion.div>
+              </Col>
+              <Col xs={24} md={12}>
+                <motion.div
+                  className="feature-item"
+                  whileHover={{ scale: 1.03, y: -5 }}
+                  style={{
+                    background: "linear-gradient(135deg, #10b98108 0%, #05966908 100%)",
+                    padding: "28px",
+                    borderRadius: "16px",
+                    height: "100%",
+                    border: "2px solid #10b98120",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
+                    <motion.div
+                      animate={{ rotate: [0, 360] }}
+                      transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                      style={{
+                        width: "50px",
+                        height: "50px",
+                        borderRadius: "50%",
+                        background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <MobileOutlined style={{ fontSize: "24px", color: "white" }} />
+                    </motion.div>
+                    <Title level={4} style={{ margin: 0, fontSize: "22px" }}>
+                      GCash Payment
+                    </Title>
+                  </div>
+                  <Paragraph style={{ margin: "12px 0", fontSize: "16px", color: "#333" }}>
+                    <strong>Account Name:</strong>
+                    <br />
+                    <span style={{ color: "#10b981", fontWeight: "600" }}>Karl Marcus Montaner</span>
+                  </Paragraph>
+                  <Paragraph style={{ margin: "12px 0", fontSize: "16px", color: "#333" }}>
+                    <strong>Mobile Number:</strong>
+                    <br />
+                    <span style={{ color: "#10b981", fontWeight: "600", fontSize: "20px", letterSpacing: "1px" }}>
+                      0917 522 5275
+                    </span>
+                  </Paragraph>
+                </motion.div>
+              </Col>
+            </Row>
+          </Card>
+        </motion.div>
 
         {/* Footer */}
-        <div style={{ textAlign: "center", marginTop: "60px", color: "white" }}>
-          <Paragraph
-            style={{ fontSize: "14px", color: "rgba(255,255,255,0.8)" }}
-          >
-            For questions and inquiries, please contact the organizing
-            committee.
+        <motion.div
+          style={{ textAlign: "center", marginTop: "60px", color: "white" }}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+        >
+          <Paragraph style={{ fontSize: "15px", color: "rgba(255,255,255,0.9)", marginBottom: "12px" }}>
+            For questions and inquiries, please contact the organizing committee.
           </Paragraph>
-          <Paragraph
-            style={{
-              fontSize: "12px",
-              color: "rgba(255,255,255,0.6)",
-              marginTop: "16px",
-            }}
-          >
+          <Paragraph style={{ fontSize: "13px", color: "rgba(255,255,255,0.7)", marginTop: "16px" }}>
             © 2025 PALAROTARY. All rights reserved.
           </Paragraph>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
