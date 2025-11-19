@@ -171,16 +171,6 @@ export default function PalarotaryLandingPage() {
                   <Paragraph style={{ fontSize: "14px", marginBottom: "8px" }}>
                     ✓ Admin approval process
                   </Paragraph>
-                  <Paragraph
-                    style={{
-                      fontSize: "14px",
-                      marginBottom: "8px",
-                      color: "#fe0808",
-                    }}
-                  >
-                    <GiftOutlined /> Free Lechon for zones with complete
-                    payments!
-                  </Paragraph>
                 </div>
 
                 <Button

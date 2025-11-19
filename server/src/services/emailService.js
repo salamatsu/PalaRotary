@@ -162,7 +162,6 @@ const getPaymentInstructions = () => {
     </div>
 
     <p><strong>Important:</strong> Please upload your proof of payment within 4 hours to secure your registration.</p>
-    <p><em>Note: Free Lechon for zones with complete payments!</em></p>
   `;
 };
 

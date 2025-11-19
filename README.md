@@ -12,12 +12,13 @@ A complete event management system for **PALAROTARY 2025** - Radio Enthusiasts C
 ## Features
 
 ### Public Features
+
 - **Club Registration** (₱4,000 per club)
+
   - Online registration form
   - Payment proof upload
   - Email notifications
   - Payment methods: BDO Bank Transfer, GCash
-  - Special: Free Lechon for zones with complete payments!
 
 - **Member Registration** (FREE)
   - Select registered club
@@ -26,13 +27,16 @@ A complete event management system for **PALAROTARY 2025** - Radio Enthusiasts C
   - Badge sent via email
 
 ### Admin Features
+
 - **Dashboard & Analytics**
+
   - Real-time metrics
   - Club and member statistics
   - Revenue tracking
   - Zone completion status
 
 - **Club Management**
+
   - View all club registrations
   - Approve/reject registrations
   - View payment proofs
@@ -46,6 +50,7 @@ A complete event management system for **PALAROTARY 2025** - Radio Enthusiasts C
 ## Tech Stack
 
 ### Backend
+
 - **Runtime**: Node.js
 - **Framework**: Express.js
 - **Database**: SQLite3
@@ -56,6 +61,7 @@ A complete event management system for **PALAROTARY 2025** - Radio Enthusiasts C
 - **Password Hashing**: bcryptjs
 
 ### Frontend
+
 - **Framework**: React 19
 - **Build Tool**: Vite 7
 - **UI Library**: Ant Design 5
@@ -104,6 +110,7 @@ PalaRotary/
 ## Installation & Setup
 
 ### Prerequisites
+
 - Node.js (v18 or higher)
 - npm or yarn
 - SendGrid account (for email notifications)
@@ -135,6 +142,7 @@ npm run dev
 The backend server will start on `http://localhost:3000`
 
 **Default Admin Credentials:**
+
 - Username: `admin`
 - Password: `admin123`
 
@@ -163,6 +171,7 @@ The frontend will start on `http://localhost:5173`
 ### Public Access
 
 1. **Register a Club**
+
    - Visit `http://localhost:5173/register-club`
    - Fill in club information
    - Select payment method (BDO or GCash)
@@ -180,11 +189,13 @@ The frontend will start on `http://localhost:5173`
 ### Admin Access
 
 1. **Login**
+
    - Visit `http://localhost:5173/admin-login`
    - Enter credentials
    - Access admin dashboard
 
 2. **Manage Clubs**
+
    - View all club registrations
    - Review payment proofs
    - Approve or reject registrations
@@ -199,10 +210,12 @@ The frontend will start on `http://localhost:5173`
 ## Payment Information
 
 ### BDO Bank Transfer
+
 - **Account Name**: Rotary Club of Marikina Hilltop
 - **Account Number**: 0021 5802 5770
 
 ### GCash
+
 - **Account Name**: Karl Marcus Montaner
 - **Mobile Number**: 0917 522 5275
 
@@ -219,6 +232,7 @@ The system automatically sends the following emails:
 ## API Endpoints
 
 ### Public Endpoints
+
 - `POST /api/clubs/register` - Register a club
 - `POST /api/clubs/:id/upload-payment` - Upload payment proof
 - `GET /api/clubs/payment-info` - Get payment information
@@ -227,6 +241,7 @@ The system automatically sends the following emails:
 - `GET /api/members/:id/badge` - Get member badge
 
 ### Admin Endpoints (Protected)
+
 - `POST /api/auth/login` - Admin login
 - `GET /api/admin/dashboard` - Dashboard metrics
 - `GET /api/admin/clubs` - List all clubs
@@ -238,12 +253,14 @@ The system automatically sends the following emails:
 ## Development
 
 ### Backend Development
+
 ```bash
 cd server
 npm run dev  # Runs with nodemon for auto-reload
 ```
 
 ### Frontend Development
+
 ```bash
 npm run dev  # Runs Vite dev server
 ```
@@ -251,6 +268,7 @@ npm run dev  # Runs Vite dev server
 ## Production Deployment
 
 ### Backend
+
 1. Set `NODE_ENV=production` in `.env`
 2. Configure production database path
 3. Set strong `JWT_SECRET`
@@ -259,6 +277,7 @@ npm run dev  # Runs Vite dev server
 6. Run `npm start`
 
 ### Frontend
+
 1. Build the frontend: `npm run build`
 2. Serve the `dist` folder using a web server (nginx, Apache, etc.)
 3. Configure environment variables for production
@@ -266,19 +285,23 @@ npm run dev  # Runs Vite dev server
 ## Troubleshooting
 
 ### Database Issues
+
 - Delete `palarotary.db` and run `npm run init-db` again
 
 ### Email Not Sending
+
 - Verify SendGrid API key is correct
 - Check SendGrid account is active
 - Verify sender email is verified in SendGrid
 
 ### File Upload Errors
+
 - Check `uploads/` directory permissions
 - Verify file size is within limit (5MB)
 - Ensure file type is supported
 
 ### CORS Issues
+
 - Update `FRONTEND_URL` in backend `.env`
 - Ensure frontend is running on the correct port
 
