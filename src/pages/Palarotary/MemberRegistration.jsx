@@ -18,6 +18,7 @@ export default function MemberRegistration() {
   const [form] = Form.useForm();
   const [registrationComplete, setRegistrationComplete] = useState(false);
   const [badgeData, setBadgeData] = useState(null);
+  const [formLoadTime] = useState(Date.now());
 
   const containerRef = useRef(null);
   const formRef = useRef(null);
@@ -105,7 +106,33 @@ export default function MemberRegistration() {
 
   const onFinish = async (values) => {
     try {
-      const response = await registerMember.mutateAsync(values);
+      // Bot detection: Check honeypot fields
+      if (values.captcha || values.website) {
+        // Silent rejection - honeypot fields should be empty
+        console.warn("Bot detected: Honeypot field filled");
+        message.error("An error occurred. Please try again.");
+        return;
+      }
+
+      // Bot detection: Check submission time
+      const timeSinceLoad = (Date.now() - formLoadTime) / 1000; // in seconds
+      if (timeSinceLoad < 3) {
+        // Submission too fast (less than 3 seconds)
+        console.warn("Bot detected: Submission too fast");
+        message.error("Please take your time filling out the form.");
+        return;
+      }
+
+      // Remove honeypot fields from payload
+      const { captcha, website, ...cleanValues } = values;
+
+      // Add static origin value "P" for pre-registered
+      const payload = {
+        ...cleanValues,
+        origin: "P",
+      };
+
+      const response = await registerMember.mutateAsync(payload);
 
       // Animate form exit with GSAP
       gsap.to(formRef.current, {
@@ -129,10 +156,10 @@ export default function MemberRegistration() {
   };
 
   const downloadQRCode = () => {
-    if (badgeData?.badge?.qr_code_data_url) {
+    if (badgeData?.badgeUrl) {
       const a = document.createElement("a");
-      a.download = `PALAROTARY-${badgeData.badge_number}.png`;
-      a.href = badgeData.badge.qr_code_data_url;
+      a.download = `PALAROTARY-${badgeData.attendeeId}.png`;
+      a.href = `/api${badgeData.badgeUrl}`;
       document.body.appendChild(a);
       a.click();
 
@@ -263,7 +290,7 @@ export default function MemberRegistration() {
                     marginBottom: "20px",
                   }}
                 >
-                  {badgeData.badge.qr_code_data_url && (
+                  {badgeData.badgeUrl && (
                     <motion.img
                       initial={{ rotate: -10, scale: 0.8 }}
                       animate={{ rotate: 0, scale: 1 }}
@@ -272,7 +299,7 @@ export default function MemberRegistration() {
                         stiffness: 200,
                         delay: 0.5,
                       }}
-                      src={badgeData.badge.qr_code_data_url}
+                      src={`/api${badgeData.badgeUrl}`}
                       alt="QR Code Badge"
                       style={{
                         width: "220px",
@@ -308,9 +335,9 @@ export default function MemberRegistration() {
                       fontSize: "14px",
                     }}
                   >
-                    <strong style={{ color: "#475569" }}>Badge:</strong>
+                    <strong style={{ color: "#475569" }}>Attendee ID:</strong>
                     <span style={{ color: "#1e293b", fontWeight: "600" }}>
-                      {badgeData.badge_number}
+                      {badgeData.attendeeId}
                     </span>
 
                     <strong style={{ color: "#475569" }}>Name:</strong>
@@ -318,7 +345,7 @@ export default function MemberRegistration() {
                       style={{ color: "#1e293b", fontWeight: "600" }}
                       className="uppercase"
                     >
-                      {badgeData.badge.member_name}
+                      {badgeData.fullName}
                     </span>
 
                     <strong style={{ color: "#475569" }}>Club:</strong>
@@ -326,26 +353,13 @@ export default function MemberRegistration() {
                       style={{ color: "#1e293b", fontWeight: "600" }}
                       className="uppercase"
                     >
-                      {badgeData.badge.club_name}
+                      {badgeData.clubName}
                     </span>
 
-                    {badgeData.badge.callsign && (
-                      <>
-                        <strong style={{ color: "#475569" }}>Callsign:</strong>
-                        <span style={{ color: "#1e293b", fontWeight: "600" }}>
-                          {badgeData.badge.callsign}
-                        </span>
-                      </>
-                    )}
-
-                    {badgeData.badge.position && (
-                      <>
-                        <strong style={{ color: "#475569" }}>Position:</strong>
-                        <span style={{ color: "#1e293b", fontWeight: "600" }}>
-                          {badgeData.badge.position}
-                        </span>
-                      </>
-                    )}
+                    <strong style={{ color: "#475569" }}>Email:</strong>
+                    <span style={{ color: "#1e293b", fontWeight: "600" }}>
+                      {badgeData.email}
+                    </span>
                   </div>
                 </motion.div>
 
@@ -431,16 +445,16 @@ export default function MemberRegistration() {
                   }}
                 >
                   <p style={{ margin: "4px 0" }}>
-                    <strong>Event:</strong> {badgeData.badge.event_name}
+                    <strong>Event:</strong> PALAROTARY 2025
                   </p>
                   <p style={{ margin: "4px 0" }}>
-                    <strong>Date:</strong> {badgeData.badge.event_date}
+                    <strong>Date:</strong> January 25, 2026
                   </p>
                   <p style={{ margin: "4px 0" }}>
-                    <strong>Time:</strong> {badgeData.badge.event_time}
+                    <strong>Time:</strong> 8:00 AM - 6:00 PM
                   </p>
                   <p style={{ margin: "4px 0" }}>
-                    <strong>Venue:</strong> {badgeData.badge.event_location}
+                    <strong>Venue:</strong> Marikina Sports Center
                   </p>
                 </div>
               </motion.div>
@@ -580,7 +594,7 @@ export default function MemberRegistration() {
                     Select Your Club
                   </span>
                 }
-                name="club_id"
+                name="clubId"
                 rules={[{ required: true, message: "Required" }]}
               >
                 <Select
@@ -614,7 +628,7 @@ export default function MemberRegistration() {
                       First Name
                     </span>
                   }
-                  name="first_name"
+                  name="firstName"
                   rules={[{ required: true, message: "Required" }]}
                 >
                   <Input
@@ -627,10 +641,25 @@ export default function MemberRegistration() {
                 <Form.Item
                   label={
                     <span style={{ fontWeight: "600", color: "#333" }}>
+                      Middle Name
+                    </span>
+                  }
+                  name="middleName"
+                >
+                  <Input
+                    placeholder="Middle name (optional)"
+                    size="large"
+                    style={{ borderRadius: "12px" }}
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  label={
+                    <span style={{ fontWeight: "600", color: "#333" }}>
                       Last Name
                     </span>
                   }
-                  name="last_name"
+                  name="lastName"
                   rules={[{ required: true, message: "Required" }]}
                 >
                   <Input
@@ -641,20 +670,15 @@ export default function MemberRegistration() {
                 </Form.Item>
 
                 <Form.Item
-                  style={{ gridColumn: "1 / -1" }}
                   label={
                     <span style={{ fontWeight: "600", color: "#333" }}>
-                      Contact Number
+                      Suffix
                     </span>
                   }
-                  name="contact_number"
-                  rules={[
-                    { required: true, message: "Required" },
-                    { pattern: /^[0-9+\-\s()]+$/, message: "Invalid" },
-                  ]}
+                  name="suffix"
                 >
                   <Input
-                    placeholder="0917 123 4567"
+                    placeholder="Jr., Sr., III (optional)"
                     size="large"
                     style={{ borderRadius: "12px" }}
                   />
@@ -681,15 +705,20 @@ export default function MemberRegistration() {
                 </Form.Item>
 
                 <Form.Item
+                  style={{ gridColumn: "1 / -1" }}
                   label={
                     <span style={{ fontWeight: "600", color: "#333" }}>
-                      Callsign (Optional)
+                      Mobile Number
                     </span>
                   }
-                  name="callsign"
+                  name="mobileNumber"
+                  rules={[
+                    { required: true, message: "Required" },
+                    { pattern: /^[0-9+\-\s()]+$/, message: "Invalid" },
+                  ]}
                 >
                   <Input
-                    placeholder="Radio callsign"
+                    placeholder="0917 123 4567"
                     size="large"
                     style={{ borderRadius: "12px" }}
                   />
@@ -698,15 +727,50 @@ export default function MemberRegistration() {
                 <Form.Item
                   label={
                     <span style={{ fontWeight: "600", color: "#333" }}>
-                      Position (Optional)
+                      Company Name
                     </span>
                   }
-                  name="position"
+                  name="companyName"
                 >
                   <Input
-                    placeholder="Your position"
+                    placeholder="Company (optional)"
                     size="large"
                     style={{ borderRadius: "12px" }}
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  label={
+                    <span style={{ fontWeight: "600", color: "#333" }}>
+                      Designation
+                    </span>
+                  }
+                  name="designation"
+                >
+                  <Input
+                    placeholder="Job title (optional)"
+                    size="large"
+                    style={{ borderRadius: "12px" }}
+                  />
+                </Form.Item>
+              </div>
+
+              {/* Honeypot fields - hidden from users, visible to bots */}
+              <div style={{ position: "absolute", left: "-9999px", opacity: 0, pointerEvents: "none" }}>
+                <Form.Item name="captcha">
+                  <Input
+                    type="text"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    placeholder="Leave this field blank"
+                  />
+                </Form.Item>
+                <Form.Item name="website">
+                  <Input
+                    type="text"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    placeholder="Leave this field blank"
                   />
                 </Form.Item>
               </div>

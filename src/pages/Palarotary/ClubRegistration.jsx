@@ -511,14 +511,14 @@ export default function ClubRegistration() {
                   form={form}
                   layout="vertical"
                   onFinish={onFinishStep1}
-                  initialValues={{ payment_method: "BDO" }}
+                  initialValues={{ paymentChannel: "BDO" }}
                   requiredMark={false}
                 >
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
                     <Form.Item
                       style={{ gridColumn: "1 / -1" }}
                       label={<span style={{ fontWeight: "600", color: "#333" }}>Club Name</span>}
-                      name="club_name"
+                      name="clubName"
                       rules={[{ required: true, message: "Required" }]}
                     >
                       <Input
@@ -529,22 +529,35 @@ export default function ClubRegistration() {
                     </Form.Item>
 
                     <Form.Item
-                      label={<span style={{ fontWeight: "600", color: "#333" }}>Contact Person</span>}
-                      name="contact_person"
-                      rules={[{ required: true, message: "Required" }]}
+                      label={<span style={{ fontWeight: "600", color: "#333" }}>Zone</span>}
+                      name="zone"
                     >
-                      <Input placeholder="Full name" size="large" style={{ borderRadius: "12px" }} />
+                      <Input placeholder="Zone (optional)" size="large" style={{ borderRadius: "12px" }} />
                     </Form.Item>
 
                     <Form.Item
-                      label={<span style={{ fontWeight: "600", color: "#333" }}>Contact Number</span>}
-                      name="contact_number"
-                      rules={[
-                        { required: true, message: "Required" },
-                        { pattern: /^[0-9+\-\s()]+$/, message: "Invalid" },
-                      ]}
+                      label={<span style={{ fontWeight: "600", color: "#333" }}>Payment Channel</span>}
+                      name="paymentChannel"
+                      rules={[{ required: true, message: "Required" }]}
                     >
-                      <Input placeholder="0917 123 4567" size="large" style={{ borderRadius: "12px" }} />
+                      <Select size="large" style={{ borderRadius: "12px" }}>
+                        <Select.Option value="BDO">BDO</Select.Option>
+                        <Select.Option value="GCASH">GCASH</Select.Option>
+                      </Select>
+                    </Form.Item>
+
+                    <Form.Item
+                      label={<span style={{ fontWeight: "600", color: "#333" }}>First Name</span>}
+                      name="firstName"
+                    >
+                      <Input placeholder="First name (optional)" size="large" style={{ borderRadius: "12px" }} />
+                    </Form.Item>
+
+                    <Form.Item
+                      label={<span style={{ fontWeight: "600", color: "#333" }}>Last Name</span>}
+                      name="lastName"
+                    >
+                      <Input placeholder="Last name (optional)" size="large" style={{ borderRadius: "12px" }} />
                     </Form.Item>
 
                     <Form.Item
@@ -564,21 +577,14 @@ export default function ClubRegistration() {
                     </Form.Item>
 
                     <Form.Item
-                      label={<span style={{ fontWeight: "600", color: "#333" }}>Zone (Optional)</span>}
-                      name="zone"
+                      style={{ gridColumn: "1 / -1" }}
+                      label={<span style={{ fontWeight: "600", color: "#333" }}>Mobile Number</span>}
+                      name="mobileNumber"
+                      rules={[
+                        { pattern: /^[0-9+\-\s()]+$/, message: "Invalid" },
+                      ]}
                     >
-                      <Input placeholder="Your zone" size="large" style={{ borderRadius: "12px" }} />
-                    </Form.Item>
-
-                    <Form.Item
-                      label={<span style={{ fontWeight: "600", color: "#333" }}>Payment Method</span>}
-                      name="payment_method"
-                      rules={[{ required: true, message: "Required" }]}
-                    >
-                      <Select size="large" style={{ borderRadius: "12px" }}>
-                        <Select.Option value="BDO">BDO Bank</Select.Option>
-                        <Select.Option value="G-cash">GCash</Select.Option>
-                      </Select>
+                      <Input placeholder="0917 123 4567 (optional)" size="large" style={{ borderRadius: "12px" }} />
                     </Form.Item>
                   </div>
 
@@ -802,7 +808,7 @@ export default function ClubRegistration() {
                   All Set!
                 </motion.h2>
                 <motion.p variants={itemVariants} style={{ fontSize: "16px", color: "#666", marginBottom: "24px" }}>
-                  <strong>{clubData?.club_name}</strong> registered successfully
+                  <strong>{clubData?.clubName}</strong> registered successfully
                 </motion.p>
 
                 <motion.div

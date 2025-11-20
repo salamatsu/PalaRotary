@@ -2,6 +2,14 @@ import { axiosInstance, createAxiosInstanceWithInterceptor } from "./axios";
 
 const axios = createAxiosInstanceWithInterceptor("data");
 // ============================================
+// CSRF TOKEN API
+// ============================================
+
+export const getCsrfToken = async () => {
+  return await axiosInstance.get("/api/v1/users/csrf-token");
+};
+
+// ============================================
 // ADMIN AUTH
 // ============================================
 
