@@ -1,10 +1,10 @@
-# PALAROTARY 2025 - Event Management System
+# PALAROTARY 2026 - Event Management System
 
-A complete event management system for **PALAROTARY 2025** - Radio Enthusiasts Convention.
+A complete event management system for **PALAROTARY 2026** - Radio Enthusiasts Convention.
 
 ## Event Details
 
-- **Event Name**: PALAROTARY 2025
+- **Event Name**: PALAROTARY 2026
 - **Date**: January 25, 2026
 - **Location**: Marikina Sports Center
 - **Time**: 8am-6pm
@@ -307,7 +307,7 @@ npm run dev  # Runs Vite dev server
 
 ## Contributing
 
-This is a private event management system for PALAROTARY 2025.
+This is a private event management system for PALAROTARY 2026.
 
 ## License
 
@@ -319,4 +319,4 @@ For questions and support, please contact the PALAROTARY organizing committee.
 
 ---
 
-**PALAROTARY 2025** - Bringing radio enthusiasts together!
+**PALAROTARY 2026** - Bringing radio enthusiasts together!

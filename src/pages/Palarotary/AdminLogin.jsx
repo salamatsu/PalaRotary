@@ -41,7 +41,7 @@ export default function AdminLogin() {
           <h1
             style={{ color: "#fe0808", fontSize: "28px", marginBottom: "8px" }}
           >
-            PALAROTARY 2025
+            PALAROTARY 2026
           </h1>
           <h2 style={{ fontSize: "18px", color: "#666", fontWeight: "normal" }}>
             Admin Login

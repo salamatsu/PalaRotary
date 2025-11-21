@@ -183,7 +183,7 @@ export default function AdminDashboard() {
     <div style={{ padding: "24px", background: "#f0f2f5", minHeight: "100vh" }}>
       <div style={{ marginBottom: "24px" }}>
         <h1 style={{ fontSize: "28px", marginBottom: "8px", color: "#1E3A71" }}>
-          PALAROTARY 2025 - Analytics Dashboard
+          PALAROTARY 2026 - Analytics Dashboard
         </h1>
         <p style={{ color: "#666" }}>
           January 25, 2026 | Marikina Sports Center | Comprehensive Event

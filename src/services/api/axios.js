@@ -1,14 +1,29 @@
 import { message } from "antd";
 import axios from "axios";
 import { useAdminAuthStore } from "../../store/useAdminAuthStore";
+import { useCsrfStore } from "../../store/useCsrfStore";
 
 export const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_BASEURL,
   headers: {
     "Content-Type": "application/json",
     "Access-Control-Allow-Origin": "*",
   },
 });
+
+// Add CSRF token interceptor to axiosInstance
+axiosInstance.interceptors.request.use(
+  (config) => {
+    // Skip CSRF token for the CSRF endpoint itself
+    if (!config.url?.includes("/csrf-token")) {
+      const csrfToken = useCsrfStore.getState().csrfToken;
+      if (csrfToken) {
+        config.headers["x-csrf-token"] = csrfToken;
+      }
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 export const createAxiosInstanceWithInterceptor = (type = "data") => {
   const auth = useAdminAuthStore.getState();
@@ -40,6 +55,14 @@ export const createAxiosInstanceWithInterceptor = (type = "data") => {
           config.headers.Authorization = `Bearer ${token}`;
         } else {
           throw new Error("Authorization token not found.");
+        }
+
+        // Add CSRF token to authenticated requests (skip for CSRF endpoint)
+        if (!config.url?.includes("/csrf-token")) {
+          const csrfToken = useCsrfStore.getState().csrfToken;
+          if (csrfToken) {
+            config.headers["x-csrf-token"] = csrfToken;
+          }
         }
       } catch (error) {
         console.error({ error });

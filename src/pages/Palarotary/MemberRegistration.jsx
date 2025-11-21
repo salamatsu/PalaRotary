@@ -156,10 +156,10 @@ export default function MemberRegistration() {
   };
 
   const downloadQRCode = () => {
-    if (badgeData?.badgeUrl) {
+    if (badgeData?.badge?.qr_code_data_url) {
       const a = document.createElement("a");
-      a.download = `PALAROTARY-${badgeData.attendeeId}.png`;
-      a.href = `/api${badgeData.badgeUrl}`;
+      a.download = `PALAROTARY-${badgeData.badge_number}.png`;
+      a.href = badgeData.badge.qr_code_data_url;
       document.body.appendChild(a);
       a.click();
 
@@ -290,7 +290,7 @@ export default function MemberRegistration() {
                     marginBottom: "20px",
                   }}
                 >
-                  {badgeData.badgeUrl && (
+                  {badgeData.badge.qr_code_data_url && (
                     <motion.img
                       initial={{ rotate: -10, scale: 0.8 }}
                       animate={{ rotate: 0, scale: 1 }}
@@ -299,7 +299,7 @@ export default function MemberRegistration() {
                         stiffness: 200,
                         delay: 0.5,
                       }}
-                      src={`/api${badgeData.badgeUrl}`}
+                      src={badgeData.badge.qr_code_data_url}
                       alt="QR Code Badge"
                       style={{
                         width: "220px",
@@ -335,9 +335,9 @@ export default function MemberRegistration() {
                       fontSize: "14px",
                     }}
                   >
-                    <strong style={{ color: "#475569" }}>Attendee ID:</strong>
+                    <strong style={{ color: "#475569" }}>Badge:</strong>
                     <span style={{ color: "#1e293b", fontWeight: "600" }}>
-                      {badgeData.attendeeId}
+                      {badgeData.badge_number}
                     </span>
 
                     <strong style={{ color: "#475569" }}>Name:</strong>
@@ -345,7 +345,7 @@ export default function MemberRegistration() {
                       style={{ color: "#1e293b", fontWeight: "600" }}
                       className="uppercase"
                     >
-                      {badgeData.fullName}
+                      {badgeData.badge.member_name}
                     </span>
 
                     <strong style={{ color: "#475569" }}>Club:</strong>
@@ -353,13 +353,26 @@ export default function MemberRegistration() {
                       style={{ color: "#1e293b", fontWeight: "600" }}
                       className="uppercase"
                     >
-                      {badgeData.clubName}
+                      {badgeData.badge.club_name}
                     </span>
 
-                    <strong style={{ color: "#475569" }}>Email:</strong>
-                    <span style={{ color: "#1e293b", fontWeight: "600" }}>
-                      {badgeData.email}
-                    </span>
+                    {badgeData.badge.callsign && (
+                      <>
+                        <strong style={{ color: "#475569" }}>Callsign:</strong>
+                        <span style={{ color: "#1e293b", fontWeight: "600" }}>
+                          {badgeData.badge.callsign}
+                        </span>
+                      </>
+                    )}
+
+                    {badgeData.badge.position && (
+                      <>
+                        <strong style={{ color: "#475569" }}>Position:</strong>
+                        <span style={{ color: "#1e293b", fontWeight: "600" }}>
+                          {badgeData.badge.position}
+                        </span>
+                      </>
+                    )}
                   </div>
                 </motion.div>
 
@@ -445,16 +458,16 @@ export default function MemberRegistration() {
                   }}
                 >
                   <p style={{ margin: "4px 0" }}>
-                    <strong>Event:</strong> PALAROTARY 2025
+                    <strong>Event:</strong> {badgeData.badge.event_name}
                   </p>
                   <p style={{ margin: "4px 0" }}>
-                    <strong>Date:</strong> January 25, 2026
+                    <strong>Date:</strong> {badgeData.badge.event_date}
                   </p>
                   <p style={{ margin: "4px 0" }}>
-                    <strong>Time:</strong> 8:00 AM - 6:00 PM
+                    <strong>Time:</strong> {badgeData.badge.event_time}
                   </p>
                   <p style={{ margin: "4px 0" }}>
-                    <strong>Venue:</strong> Marikina Sports Center
+                    <strong>Venue:</strong> {badgeData.badge.event_location}
                   </p>
                 </div>
               </motion.div>
@@ -539,7 +552,7 @@ export default function MemberRegistration() {
                 letterSpacing: "1px",
               }}
             >
-              PALAROTARY 2025
+              PALAROTARY 2026
             </h1>
             <h2
               style={{
@@ -612,6 +625,31 @@ export default function MemberRegistration() {
                       {club.club_name} {club.zone && `(${club.zone})`}
                     </Select.Option>
                   ))}
+                </Select>
+              </Form.Item>
+
+              <Form.Item
+                label={
+                  <span style={{ fontWeight: "600", color: "#333" }}>
+                    Category
+                  </span>
+                }
+                name="category"
+                rules={[{ required: true, message: "Required" }]}
+              >
+                <Select
+                  placeholder="Select category"
+                  size="large"
+                  style={{ borderRadius: "12px" }}
+                >
+                  <Select.Option value="Rotary">Rotary</Select.Option>
+                  <Select.Option value="Spouse / Partner">
+                    Spouse / Partner
+                  </Select.Option>
+                  <Select.Option value="Child">Child</Select.Option>
+                  <Select.Option value="Rotaract / Interact">
+                    Rotaract / Interact
+                  </Select.Option>
                 </Select>
               </Form.Item>
 
@@ -724,7 +762,7 @@ export default function MemberRegistration() {
                   />
                 </Form.Item>
 
-                <Form.Item
+                {/* <Form.Item
                   label={
                     <span style={{ fontWeight: "600", color: "#333" }}>
                       Company Name
@@ -752,11 +790,18 @@ export default function MemberRegistration() {
                     size="large"
                     style={{ borderRadius: "12px" }}
                   />
-                </Form.Item>
+                </Form.Item> */}
               </div>
 
               {/* Honeypot fields - hidden from users, visible to bots */}
-              <div style={{ position: "absolute", left: "-9999px", opacity: 0, pointerEvents: "none" }}>
+              <div
+                style={{
+                  position: "absolute",
+                  left: "-9999px",
+                  opacity: 0,
+                  pointerEvents: "none",
+                }}
+              >
                 <Form.Item name="captcha">
                   <Input
                     type="text"

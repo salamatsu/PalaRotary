@@ -199,7 +199,7 @@ const Scanner = () => {
               margin: 0,
             }}
           >
-            PALAROTARY 2025
+            PALAROTARY 2026
           </h1>
           <p style={{ fontSize: "14px", color: "#666", margin: 0 }}>
             Event Scanner
@@ -208,18 +208,37 @@ const Scanner = () => {
 
         {/* Scan Mode Toggle */}
         <Card style={{ marginBottom: "12px", textAlign: "center" }}>
-          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "12px" }}>
-            <CameraOutlined style={{ fontSize: "18px", color: scanMode === "camera" ? "#1E3A71" : "#999" }} />
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "12px",
+            }}
+          >
+            <CameraOutlined
+              style={{
+                fontSize: "18px",
+                color: scanMode === "camera" ? "#1E3A71" : "#999",
+              }}
+            />
             <Switch
               checked={scanMode === "input"}
               onChange={handleScanModeChange}
               checkedChildren="Input"
               unCheckedChildren="Camera"
             />
-            <BarcodeOutlined style={{ fontSize: "18px", color: scanMode === "input" ? "#1E3A71" : "#999" }} />
+            <BarcodeOutlined
+              style={{
+                fontSize: "18px",
+                color: scanMode === "input" ? "#1E3A71" : "#999",
+              }}
+            />
           </div>
           <p style={{ fontSize: "12px", color: "#999", margin: "8px 0 0 0" }}>
-            {scanMode === "camera" ? "Camera Scanner Mode" : "Scanner Gun / Keyboard Input Mode"}
+            {scanMode === "camera"
+              ? "Camera Scanner Mode"
+              : "Scanner Gun / Keyboard Input Mode"}
           </p>
         </Card>
 
@@ -244,7 +263,13 @@ const Scanner = () => {
                   {/* Input Scanner Mode */}
                   <div style={{ padding: "20px 0" }}>
                     <div style={{ textAlign: "center", marginBottom: "16px" }}>
-                      <BarcodeOutlined style={{ fontSize: "48px", color: "#1E3A71", marginBottom: "8px" }} />
+                      <BarcodeOutlined
+                        style={{
+                          fontSize: "48px",
+                          color: "#1E3A71",
+                          marginBottom: "8px",
+                        }}
+                      />
                       <p style={{ color: "#666", fontSize: "14px", margin: 0 }}>
                         Ready to scan with barcode scanner or keyboard input
                       </p>
@@ -263,7 +288,14 @@ const Scanner = () => {
                         height: "56px",
                       }}
                     />
-                    <p style={{ fontSize: "12px", color: "#999", textAlign: "center", marginTop: "12px" }}>
+                    <p
+                      style={{
+                        fontSize: "12px",
+                        color: "#999",
+                        textAlign: "center",
+                        marginTop: "12px",
+                      }}
+                    >
                       Press Enter after scanning or typing
                     </p>
                   </div>

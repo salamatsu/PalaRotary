@@ -1,4 +1,4 @@
-import { Button, Card, Col, Row, Typography } from "antd";
+import { Button, Card, Col, Row, Typography, Modal, Image } from "antd";
 import {
   TeamOutlined,
   BankOutlined,
@@ -13,10 +13,11 @@ import {
   SafetyOutlined,
 } from "@ant-design/icons";
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { shirtTemplate } from "../../assets/images/Other";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -29,6 +30,7 @@ export default function PalarotaryLandingPage() {
   const floatingElementsRef = useRef([]);
   const cardsRef = useRef(null);
   const featuresRef = useRef(null);
+  const [previewVisible, setPreviewVisible] = useState(false);
 
   const { scrollYProgress } = useScroll();
   const yHero = useTransform(scrollYProgress, [0, 1], [0, -200]);
@@ -45,25 +47,25 @@ export default function PalarotaryLandingPage() {
         { opacity: 0, y: 50, scale: 0.9 },
         { opacity: 1, y: 0, scale: 1, duration: 1 }
       )
-      .fromTo(
-        heroRef.current.querySelector(".hero-subtitle"),
-        { opacity: 0, y: 30 },
-        { opacity: 1, y: 0, duration: 0.8 },
-        "-=0.6"
-      )
-      .fromTo(
-        heroRef.current.querySelectorAll(".info-badge"),
-        { opacity: 0, scale: 0.8, rotationY: -90 },
-        {
-          opacity: 1,
-          scale: 1,
-          rotationY: 0,
-          duration: 0.6,
-          stagger: 0.15,
-          ease: "back.out(1.5)",
-        },
-        "-=0.5"
-      );
+        .fromTo(
+          heroRef.current.querySelector(".hero-subtitle"),
+          { opacity: 0, y: 30 },
+          { opacity: 1, y: 0, duration: 0.8 },
+          "-=0.6"
+        )
+        .fromTo(
+          heroRef.current.querySelectorAll(".info-badge"),
+          { opacity: 0, scale: 0.8, rotationY: -90 },
+          {
+            opacity: 1,
+            scale: 1,
+            rotationY: 0,
+            duration: 0.6,
+            stagger: 0.15,
+            ease: "back.out(1.5)",
+          },
+          "-=0.5"
+        );
 
       // Floating elements animation
       floatingElementsRef.current.forEach((el, i) => {
@@ -190,7 +192,7 @@ export default function PalarotaryLandingPage() {
       ref={containerRef}
       style={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        background: "linear-gradient(135deg, #1c3c6d 0%, #0f2847 100%)",
         position: "relative",
         overflow: "hidden",
       }}
@@ -223,7 +225,15 @@ export default function PalarotaryLandingPage() {
         />
       ))}
 
-      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "40px 20px", position: "relative", zIndex: 1 }}>
+      <div
+        style={{
+          maxWidth: "1200px",
+          margin: "0 auto",
+          padding: "40px 20px",
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
         {/* Hero Section */}
         <motion.div
           ref={heroRef}
@@ -231,7 +241,13 @@ export default function PalarotaryLandingPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
-          <div style={{ textAlign: "center", marginBottom: "60px", color: "white" }}>
+          <div
+            style={{
+              textAlign: "center",
+              marginBottom: "60px",
+              color: "white",
+            }}
+          >
             <motion.div
               className="hero-title"
               initial={{ opacity: 0, y: 50 }}
@@ -258,7 +274,7 @@ export default function PalarotaryLandingPage() {
                   }}
                   transition={{ duration: 3, repeat: Infinity }}
                 >
-                  PALAROTARY 2025
+                  PALAROTARY 2026
                 </motion.span>
               </Title>
             </motion.div>
@@ -294,7 +310,11 @@ export default function PalarotaryLandingPage() {
               {[
                 { icon: CalendarOutlined, text: "January 25, 2026", delay: 0 },
                 { icon: ClockCircleOutlined, text: "8am - 6pm", delay: 0.1 },
-                { icon: EnvironmentOutlined, text: "Marikina Sports Center", delay: 0.2 },
+                {
+                  icon: EnvironmentOutlined,
+                  text: "Marikina Sports Center",
+                  delay: 0.2,
+                },
               ].map((item, index) => (
                 <motion.div
                   key={index}
@@ -320,7 +340,9 @@ export default function PalarotaryLandingPage() {
                     initial="initial"
                     animate="animate"
                   >
-                    <item.icon style={{ fontSize: "24px", marginRight: "12px" }} />
+                    <item.icon
+                      style={{ fontSize: "24px", marginRight: "12px" }}
+                    />
                   </motion.div>
                   <strong style={{ fontSize: "16px" }}>{item.text}</strong>
                 </motion.div>
@@ -332,133 +354,6 @@ export default function PalarotaryLandingPage() {
         {/* Registration Cards */}
         <div ref={cardsRef}>
           <Row gutter={[32, 32]} style={{ marginBottom: "60px" }}>
-            {/* Club Registration Card */}
-            <Col xs={24} lg={12}>
-              <motion.div
-                className="registration-card"
-                variants={cardVariants}
-                initial="hidden"
-                whileInView="visible"
-                whileHover="hover"
-                viewport={{ once: true }}
-              >
-                <Card
-                  style={{
-                    height: "100%",
-                    borderRadius: "24px",
-                    boxShadow: "0 10px 40px rgba(0,0,0,0.15)",
-                    border: "none",
-                    overflow: "hidden",
-                    background: "linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%)",
-                  }}
-                >
-                  <div style={{ padding: "20px" }}>
-                    <motion.div
-                      style={{ textAlign: "center", marginBottom: "24px" }}
-                      whileHover={{ scale: 1.1, rotate: [0, -10, 10, 0] }}
-                      transition={{ duration: 0.5 }}
-                    >
-                      <div
-                        style={{
-                          width: "100px",
-                          height: "100px",
-                          borderRadius: "50%",
-                          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          margin: "0 auto 20px",
-                          boxShadow: "0 10px 30px rgba(102, 126, 234, 0.3)",
-                        }}
-                      >
-                        <BankOutlined style={{ fontSize: "48px", color: "white" }} />
-                      </div>
-                    </motion.div>
-
-                    <Title level={2} style={{ marginBottom: "12px", textAlign: "center", fontSize: "28px" }}>
-                      Club Registration
-                    </Title>
-                    <Paragraph
-                      style={{
-                        fontSize: "16px",
-                        color: "#666",
-                        marginBottom: "24px",
-                        textAlign: "center",
-                      }}
-                    >
-                      Register your club for PALAROTARY 2025
-                    </Paragraph>
-
-                    <motion.div
-                      whileHover={{ scale: 1.03 }}
-                      style={{
-                        background: "linear-gradient(135deg, #667eea15 0%, #764ba215 100%)",
-                        padding: "20px",
-                        borderRadius: "16px",
-                        marginBottom: "24px",
-                        border: "2px solid #667eea30",
-                      }}
-                    >
-                      <Title level={3} style={{ margin: 0, color: "#667eea", fontSize: "32px" }}>
-                        ₱4,000.00
-                      </Title>
-                      <Paragraph style={{ margin: "8px 0 0 0", fontSize: "14px", color: "#666" }}>
-                        Registration Fee per Club
-                      </Paragraph>
-                    </motion.div>
-
-                    <div style={{ marginBottom: "28px" }}>
-                      {[
-                        "Official club registration",
-                        "Upload proof of payment",
-                        "Admin approval process",
-                        "Register unlimited members",
-                      ].map((text, i) => (
-                        <motion.div
-                          key={i}
-                          className="feature-item"
-                          initial={{ opacity: 0, x: -20 }}
-                          whileInView={{ opacity: 1, x: 0 }}
-                          transition={{ delay: i * 0.1 }}
-                          viewport={{ once: true }}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "12px",
-                            marginBottom: "12px",
-                          }}
-                        >
-                          <CheckCircleOutlined style={{ fontSize: "18px", color: "#667eea" }} />
-                          <span style={{ fontSize: "15px", color: "#333" }}>{text}</span>
-                        </motion.div>
-                      ))}
-                    </div>
-
-                    <motion.div variants={buttonVariants} initial="rest" whileHover="hover" whileTap="tap">
-                      <Button
-                        type="primary"
-                        size="large"
-                        block
-                        icon={<ArrowRightOutlined />}
-                        onClick={() => navigate("/register-club")}
-                        style={{
-                          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                          border: "none",
-                          height: "56px",
-                          fontSize: "17px",
-                          fontWeight: "600",
-                          borderRadius: "12px",
-                          boxShadow: "0 6px 20px rgba(102, 126, 234, 0.4)",
-                        }}
-                      >
-                        Register Your Club
-                      </Button>
-                    </motion.div>
-                  </div>
-                </Card>
-              </motion.div>
-            </Col>
-
             {/* Member Registration Card */}
             <Col xs={24} lg={12}>
               <motion.div
@@ -476,7 +371,8 @@ export default function PalarotaryLandingPage() {
                     boxShadow: "0 10px 40px rgba(0,0,0,0.15)",
                     border: "none",
                     overflow: "hidden",
-                    background: "linear-gradient(135deg, #ffffff 0%, #f0fff4 100%)",
+                    background:
+                      "linear-gradient(135deg, #ffffff 0%, #f0fff4 100%)",
                   }}
                 >
                   <div style={{ padding: "20px" }}>
@@ -490,7 +386,8 @@ export default function PalarotaryLandingPage() {
                           width: "100px",
                           height: "100px",
                           borderRadius: "50%",
-                          background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                          background:
+                            "linear-gradient(135deg, #10b981 0%, #059669 100%)",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
@@ -498,11 +395,20 @@ export default function PalarotaryLandingPage() {
                           boxShadow: "0 10px 30px rgba(16, 185, 129, 0.3)",
                         }}
                       >
-                        <TeamOutlined style={{ fontSize: "48px", color: "white" }} />
+                        <TeamOutlined
+                          style={{ fontSize: "48px", color: "white" }}
+                        />
                       </div>
                     </motion.div>
 
-                    <Title level={2} style={{ marginBottom: "12px", textAlign: "center", fontSize: "28px" }}>
+                    <Title
+                      level={2}
+                      style={{
+                        marginBottom: "12px",
+                        textAlign: "center",
+                        fontSize: "28px",
+                      }}
+                    >
                       Member Registration
                     </Title>
                     <Paragraph
@@ -527,17 +433,31 @@ export default function PalarotaryLandingPage() {
                       }}
                       transition={{ duration: 2, repeat: Infinity }}
                       style={{
-                        background: "linear-gradient(135deg, #10b98120 0%, #05966920 100%)",
+                        background:
+                          "linear-gradient(135deg, #10b98120 0%, #05966920 100%)",
                         padding: "20px",
                         borderRadius: "16px",
                         marginBottom: "24px",
                         border: "2px solid #10b98140",
                       }}
                     >
-                      <Title level={3} style={{ margin: 0, color: "#10b981", fontSize: "32px" }}>
+                      <Title
+                        level={3}
+                        style={{
+                          margin: 0,
+                          color: "#10b981",
+                          fontSize: "32px",
+                        }}
+                      >
                         FREE
                       </Title>
-                      <Paragraph style={{ margin: "8px 0 0 0", fontSize: "14px", color: "#666" }}>
+                      <Paragraph
+                        style={{
+                          margin: "8px 0 0 0",
+                          fontSize: "14px",
+                          color: "#666",
+                        }}
+                      >
                         No registration fee for members
                       </Paragraph>
                     </motion.div>
@@ -563,13 +483,22 @@ export default function PalarotaryLandingPage() {
                             marginBottom: "12px",
                           }}
                         >
-                          <CheckCircleOutlined style={{ fontSize: "18px", color: "#10b981" }} />
-                          <span style={{ fontSize: "15px", color: "#333" }}>{text}</span>
+                          <CheckCircleOutlined
+                            style={{ fontSize: "18px", color: "#10b981" }}
+                          />
+                          <span style={{ fontSize: "15px", color: "#333" }}>
+                            {text}
+                          </span>
                         </motion.div>
                       ))}
                     </div>
 
-                    <motion.div variants={buttonVariants} initial="rest" whileHover="hover" whileTap="tap">
+                    <motion.div
+                      variants={buttonVariants}
+                      initial="rest"
+                      whileHover="hover"
+                      whileTap="tap"
+                    >
                       <Button
                         type="primary"
                         size="large"
@@ -577,7 +506,8 @@ export default function PalarotaryLandingPage() {
                         icon={<ArrowRightOutlined />}
                         onClick={() => navigate("/register-member")}
                         style={{
-                          background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                          background:
+                            "linear-gradient(135deg, #10b981 0%, #059669 100%)",
                           border: "none",
                           height: "56px",
                           fontSize: "17px",
@@ -593,127 +523,166 @@ export default function PalarotaryLandingPage() {
                 </Card>
               </motion.div>
             </Col>
+
+            {/* Club Registration Card */}
+            <Col xs={24} lg={12}>
+              <motion.div
+                className="registration-card"
+                variants={cardVariants}
+                initial="hidden"
+                whileInView="visible"
+                whileHover="hover"
+                viewport={{ once: true }}
+              >
+                <Card
+                  style={{
+                    height: "100%",
+                    borderRadius: "24px",
+                    boxShadow: "0 10px 40px rgba(0,0,0,0.15)",
+                    border: "none",
+                    overflow: "hidden",
+                    background:
+                      "linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%)",
+                  }}
+                >
+                  <div style={{ padding: "20px" }}>
+                    <motion.div
+                      style={{ textAlign: "center", marginBottom: "24px" }}
+                      whileHover={{ scale: 1.05, y: -5 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <img
+                        src={shirtTemplate}
+                        alt="Shirt Template"
+                        onClick={() => setPreviewVisible(true)}
+                        style={{
+                          width: "100%",
+                          maxWidth: "280px",
+                          height: "auto",
+                          margin: "0 auto 20px",
+                          borderRadius: "12px",
+                          boxShadow: "0 10px 30px rgba(28, 60, 109, 0.2)",
+                          cursor: "pointer",
+                        }}
+                      />
+                    </motion.div>
+
+                    <Title
+                      level={2}
+                      style={{
+                        marginBottom: "12px",
+                        textAlign: "center",
+                        fontSize: "28px",
+                      }}
+                    >
+                      Order Customized Shirt
+                    </Title>
+                    <Paragraph
+                      style={{
+                        fontSize: "16px",
+                        color: "#666",
+                        marginBottom: "24px",
+                        textAlign: "center",
+                      }}
+                    >
+                      Get your personalized PALAROTARY 2026 shirt
+                    </Paragraph>
+
+                    <motion.div
+                      whileHover={{ scale: 1.03 }}
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #1c3c6d15 0%, #0f284715 100%)",
+                        padding: "20px",
+                        borderRadius: "16px",
+                        marginBottom: "24px",
+                        border: "2px solid #1c3c6d30",
+                      }}
+                    >
+                      <Title
+                        level={3}
+                        style={{
+                          margin: 0,
+                          color: "#1c3c6d",
+                          fontSize: "32px",
+                        }}
+                      >
+                        Starting at ₱500
+                      </Title>
+                      <Paragraph
+                        style={{
+                          margin: "8px 0 0 0",
+                          fontSize: "14px",
+                          color: "#666",
+                        }}
+                      >
+                        Customized shirt with your callsign
+                      </Paragraph>
+                    </motion.div>
+
+                    <div style={{ marginBottom: "28px" }}>
+                      {[
+                        "Choose your size and color",
+                        "Add your callsign and name",
+                        "Secure online payment",
+                        "Pick up at the event",
+                      ].map((text, i) => (
+                        <motion.div
+                          key={i}
+                          className="feature-item"
+                          initial={{ opacity: 0, x: -20 }}
+                          whileInView={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.1 }}
+                          viewport={{ once: true }}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "12px",
+                            marginBottom: "12px",
+                          }}
+                        >
+                          <CheckCircleOutlined
+                            style={{ fontSize: "18px", color: "#1c3c6d" }}
+                          />
+                          <span style={{ fontSize: "15px", color: "#333" }}>
+                            {text}
+                          </span>
+                        </motion.div>
+                      ))}
+                    </div>
+
+                    <motion.div
+                      variants={buttonVariants}
+                      initial="rest"
+                      whileHover="hover"
+                      whileTap="tap"
+                    >
+                      <Button
+                        type="primary"
+                        size="large"
+                        block
+                        icon={<ArrowRightOutlined />}
+                        onClick={() => navigate("/shirt-order")}
+                        style={{
+                          background:
+                            "linear-gradient(135deg, #1c3c6d 0%, #0f2847 100%)",
+                          border: "none",
+                          height: "56px",
+                          fontSize: "17px",
+                          fontWeight: "600",
+                          borderRadius: "12px",
+                          boxShadow: "0 6px 20px rgba(28, 60, 109, 0.4)",
+                        }}
+                      >
+                        Order Now
+                      </Button>
+                    </motion.div>
+                  </div>
+                </Card>
+              </motion.div>
+            </Col>
           </Row>
         </div>
-
-        {/* Payment Information */}
-        <motion.div
-          ref={featuresRef}
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-        >
-          <Card
-            style={{
-              marginBottom: "60px",
-              borderRadius: "24px",
-              boxShadow: "0 10px 40px rgba(0,0,0,0.15)",
-              border: "none",
-              overflow: "hidden",
-            }}
-          >
-            <Title level={3} style={{ textAlign: "center", marginBottom: "32px", fontSize: "32px" }}>
-              💳 Payment Information
-            </Title>
-            <Row gutter={[24, 24]}>
-              <Col xs={24} md={12}>
-                <motion.div
-                  className="feature-item"
-                  whileHover={{ scale: 1.03, y: -5 }}
-                  style={{
-                    background: "linear-gradient(135deg, #667eea08 0%, #764ba208 100%)",
-                    padding: "28px",
-                    borderRadius: "16px",
-                    height: "100%",
-                    border: "2px solid #667eea20",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
-                    <motion.div
-                      animate={{ rotate: [0, 360] }}
-                      transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                      style={{
-                        width: "50px",
-                        height: "50px",
-                        borderRadius: "50%",
-                        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <BankOutlined style={{ fontSize: "24px", color: "white" }} />
-                    </motion.div>
-                    <Title level={4} style={{ margin: 0, fontSize: "22px" }}>
-                      BDO Bank Transfer
-                    </Title>
-                  </div>
-                  <Paragraph style={{ margin: "12px 0", fontSize: "16px", color: "#333" }}>
-                    <strong>Account Name:</strong>
-                    <br />
-                    <span style={{ color: "#667eea", fontWeight: "600" }}>
-                      Rotary Club of Marikina Hilltop
-                    </span>
-                  </Paragraph>
-                  <Paragraph style={{ margin: "12px 0", fontSize: "16px", color: "#333" }}>
-                    <strong>Account Number:</strong>
-                    <br />
-                    <span style={{ color: "#667eea", fontWeight: "600", fontSize: "20px", letterSpacing: "1px" }}>
-                      0021 5802 5770
-                    </span>
-                  </Paragraph>
-                </motion.div>
-              </Col>
-              <Col xs={24} md={12}>
-                <motion.div
-                  className="feature-item"
-                  whileHover={{ scale: 1.03, y: -5 }}
-                  style={{
-                    background: "linear-gradient(135deg, #10b98108 0%, #05966908 100%)",
-                    padding: "28px",
-                    borderRadius: "16px",
-                    height: "100%",
-                    border: "2px solid #10b98120",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
-                    <motion.div
-                      animate={{ rotate: [0, 360] }}
-                      transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                      style={{
-                        width: "50px",
-                        height: "50px",
-                        borderRadius: "50%",
-                        background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <MobileOutlined style={{ fontSize: "24px", color: "white" }} />
-                    </motion.div>
-                    <Title level={4} style={{ margin: 0, fontSize: "22px" }}>
-                      GCash Payment
-                    </Title>
-                  </div>
-                  <Paragraph style={{ margin: "12px 0", fontSize: "16px", color: "#333" }}>
-                    <strong>Account Name:</strong>
-                    <br />
-                    <span style={{ color: "#10b981", fontWeight: "600" }}>Karl Marcus Montaner</span>
-                  </Paragraph>
-                  <Paragraph style={{ margin: "12px 0", fontSize: "16px", color: "#333" }}>
-                    <strong>Mobile Number:</strong>
-                    <br />
-                    <span style={{ color: "#10b981", fontWeight: "600", fontSize: "20px", letterSpacing: "1px" }}>
-                      0917 522 5275
-                    </span>
-                  </Paragraph>
-                </motion.div>
-              </Col>
-            </Row>
-          </Card>
-        </motion.div>
 
         {/* Footer */}
         <motion.div
@@ -723,14 +692,52 @@ export default function PalarotaryLandingPage() {
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
-          <Paragraph style={{ fontSize: "15px", color: "rgba(255,255,255,0.9)", marginBottom: "12px" }}>
-            For questions and inquiries, please contact the organizing committee.
+          <Paragraph
+            style={{
+              fontSize: "15px",
+              color: "rgba(255,255,255,0.9)",
+              marginBottom: "12px",
+            }}
+          >
+            For questions and inquiries, please contact the organizing
+            committee.
           </Paragraph>
-          <Paragraph style={{ fontSize: "13px", color: "rgba(255,255,255,0.7)", marginTop: "16px" }}>
-            © 2025 PALAROTARY. All rights reserved.
+          <Paragraph
+            style={{
+              fontSize: "13px",
+              color: "rgba(255,255,255,0.7)",
+              marginTop: "16px",
+            }}
+          >
+            © 2026 PALAROTARY. All rights reserved.
           </Paragraph>
         </motion.div>
       </div>
+
+      {/* Image Preview Modal */}
+      <Modal
+        open={previewVisible}
+        footer={null}
+        onCancel={() => setPreviewVisible(false)}
+        width="90%"
+        style={{ maxWidth: "800px" }}
+        centered
+      >
+        <div style={{ textAlign: "center", padding: "20px" }}>
+          <Title level={3} style={{ marginBottom: "20px" }}>
+            Shirt Template Preview
+          </Title>
+          <img
+            src={shirtTemplate}
+            alt="Shirt Template Preview"
+            style={{
+              width: "100%",
+              height: "auto",
+              borderRadius: "8px",
+            }}
+          />
+        </div>
+      </Modal>
     </div>
   );
 }

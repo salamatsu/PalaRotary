@@ -140,7 +140,8 @@ export default function Scanner() {
       // Show invalid scan result
       setScanResult({
         isValid: false,
-        error: error.response?.data?.message || "Invalid QR code or scan failed",
+        error:
+          error.response?.data?.message || "Invalid QR code or scan failed",
       });
     }
   };
@@ -178,8 +179,10 @@ export default function Scanner() {
           animate={{ opacity: 1, y: 0 }}
           style={{ textAlign: "center", marginBottom: "24px" }}
         >
-          <h1 style={{ color: "#fe0808", fontSize: "32px", marginBottom: "8px" }}>
-            PALAROTARY 2025 - Event Scanner
+          <h1
+            style={{ color: "#fe0808", fontSize: "32px", marginBottom: "8px" }}
+          >
+            PALAROTARY 2026 - Event Scanner
           </h1>
           <p style={{ fontSize: "16px", color: "#666" }}>
             Scan QR codes to check in attendees
@@ -373,7 +376,9 @@ export default function Scanner() {
                   >
                     {scanResult.isValid ? (
                       <Result
-                        status={scanResult.alreadyCheckedIn ? "warning" : "success"}
+                        status={
+                          scanResult.alreadyCheckedIn ? "warning" : "success"
+                        }
                         icon={
                           <motion.div
                             initial={{ scale: 0 }}
@@ -412,7 +417,11 @@ export default function Scanner() {
                         extra={[
                           <div
                             key="details"
-                            style={{ textAlign: "left", maxWidth: "400px", margin: "0 auto" }}
+                            style={{
+                              textAlign: "left",
+                              maxWidth: "400px",
+                              margin: "0 auto",
+                            }}
                           >
                             <div
                               style={{
@@ -455,7 +464,12 @@ export default function Scanner() {
                                 }}
                               >
                                 <div>
-                                  <p style={{ color: "#666", margin: "0 0 4px 0" }}>
+                                  <p
+                                    style={{
+                                      color: "#666",
+                                      margin: "0 0 4px 0",
+                                    }}
+                                  >
                                     Badge Number
                                   </p>
                                   <p style={{ fontWeight: "600", margin: 0 }}>
@@ -463,7 +477,12 @@ export default function Scanner() {
                                   </p>
                                 </div>
                                 <div>
-                                  <p style={{ color: "#666", margin: "0 0 4px 0" }}>
+                                  <p
+                                    style={{
+                                      color: "#666",
+                                      margin: "0 0 4px 0",
+                                    }}
+                                  >
                                     Club
                                   </p>
                                   <p style={{ fontWeight: "600", margin: 0 }}>
@@ -471,7 +490,12 @@ export default function Scanner() {
                                   </p>
                                 </div>
                                 <div>
-                                  <p style={{ color: "#666", margin: "0 0 4px 0" }}>
+                                  <p
+                                    style={{
+                                      color: "#666",
+                                      margin: "0 0 4px 0",
+                                    }}
+                                  >
                                     Zone
                                   </p>
                                   <p style={{ fontWeight: "600", margin: 0 }}>
@@ -480,7 +504,12 @@ export default function Scanner() {
                                 </div>
                                 {scanResult.member.callsign && (
                                   <div>
-                                    <p style={{ color: "#666", margin: "0 0 4px 0" }}>
+                                    <p
+                                      style={{
+                                        color: "#666",
+                                        margin: "0 0 4px 0",
+                                      }}
+                                    >
                                       Callsign
                                     </p>
                                     <p style={{ fontWeight: "600", margin: 0 }}>
@@ -490,7 +519,12 @@ export default function Scanner() {
                                 )}
                                 {scanResult.member.position && (
                                   <div style={{ gridColumn: "1 / -1" }}>
-                                    <p style={{ color: "#666", margin: "0 0 4px 0" }}>
+                                    <p
+                                      style={{
+                                        color: "#666",
+                                        margin: "0 0 4px 0",
+                                      }}
+                                    >
                                       Position
                                     </p>
                                     <p style={{ fontWeight: "600", margin: 0 }}>
@@ -552,7 +586,9 @@ export default function Scanner() {
                             Invalid QR Code!
                           </span>
                         }
-                        subTitle={scanResult.error || "This QR code is not valid"}
+                        subTitle={
+                          scanResult.error || "This QR code is not valid"
+                        }
                         extra={[
                           <Button
                             key="retry"
@@ -603,7 +639,13 @@ export default function Scanner() {
                       />
                       <div style={{ textAlign: "right" }}>
                         <Tag color="green">{item.scan_type}</Tag>
-                        <div style={{ fontSize: "12px", color: "#999", marginTop: "4px" }}>
+                        <div
+                          style={{
+                            fontSize: "12px",
+                            color: "#999",
+                            marginTop: "4px",
+                          }}
+                        >
                           {new Date(item.scanned_at).toLocaleTimeString()}
                         </div>
                       </div>

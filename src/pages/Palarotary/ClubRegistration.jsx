@@ -46,18 +46,18 @@ export default function ClubRegistration() {
         { opacity: 0, scale: 0.95 },
         { opacity: 1, scale: 1, duration: 0.6 }
       )
-      .fromTo(
-        headerRef.current,
-        { y: -50, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.5 },
-        "-=0.3"
-      )
-      .fromTo(
-        progressBarRef.current,
-        { scaleX: 0, opacity: 0 },
-        { scaleX: 1, opacity: 1, duration: 0.6, transformOrigin: "left" },
-        "-=0.2"
-      );
+        .fromTo(
+          headerRef.current,
+          { y: -50, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.5 },
+          "-=0.3"
+        )
+        .fromTo(
+          progressBarRef.current,
+          { scaleX: 0, opacity: 0 },
+          { scaleX: 1, opacity: 1, duration: 0.6, transformOrigin: "left" },
+          "-=0.2"
+        );
 
       // Floating elements animation
       floatingElementsRef.current.forEach((el, i) => {
@@ -103,36 +103,37 @@ export default function ClubRegistration() {
           },
         }
       )
-      .fromTo(
-        labels,
-        { opacity: 0, x: -10 },
-        {
-          opacity: 1,
-          x: 0,
-          duration: 0.3,
-          stagger: 0.05,
-        },
-        "-=0.5"
-      )
-      .fromTo(
-        inputs,
-        { scale: 0.95, opacity: 0 },
-        {
-          scale: 1,
-          opacity: 1,
-          duration: 0.4,
-          stagger: 0.05,
-          ease: "back.out(1.5)",
-        },
-        "-=0.4"
-      );
+        .fromTo(
+          labels,
+          { opacity: 0, x: -10 },
+          {
+            opacity: 1,
+            x: 0,
+            duration: 0.3,
+            stagger: 0.05,
+          },
+          "-=0.5"
+        )
+        .fromTo(
+          inputs,
+          { scale: 0.95, opacity: 0 },
+          {
+            scale: 1,
+            opacity: 1,
+            duration: 0.4,
+            stagger: 0.05,
+            ease: "back.out(1.5)",
+          },
+          "-=0.4"
+        );
     }
   }, [currentStep]);
 
   // Animate step indicators with GSAP timeline
   useEffect(() => {
     if (stepIndicatorRef.current) {
-      const circles = stepIndicatorRef.current.querySelectorAll(".step-circle-inner");
+      const circles =
+        stepIndicatorRef.current.querySelectorAll(".step-circle-inner");
       const labels = stepIndicatorRef.current.querySelectorAll(".step-label");
 
       gsap.fromTo(
@@ -183,7 +184,9 @@ export default function ClubRegistration() {
           scale: 0.9,
           duration: 0.3,
           onComplete: () => {
-            message.success("Club registered successfully! Please proceed to payment.");
+            message.success(
+              "Club registered successfully! Please proceed to payment."
+            );
             setCurrentStep(1);
           },
         },
@@ -208,8 +211,7 @@ export default function ClubRegistration() {
           scale: 1.05,
           duration: 0.2,
           ease: "power2.out",
-        })
-        .to(formRef.current, {
+        }).to(formRef.current, {
           scale: 0.95,
           opacity: 0,
           duration: 0.4,
@@ -349,12 +351,18 @@ export default function ClubRegistration() {
           damping: 15,
           duration: 0.8,
         }}
-        style={{ width: "100%", maxWidth: "650px", position: "relative", zIndex: 1 }}
+        style={{
+          width: "100%",
+          maxWidth: "650px",
+          position: "relative",
+          zIndex: 1,
+        }}
       >
         <Card
           style={{
             borderRadius: "24px",
-            boxShadow: "0 20px 60px rgba(0,0,0,0.3), 0 0 100px rgba(102, 126, 234, 0.2)",
+            boxShadow:
+              "0 20px 60px rgba(0,0,0,0.3), 0 0 100px rgba(102, 126, 234, 0.2)",
             overflow: "hidden",
             background: "rgba(255, 255, 255, 0.98)",
             backdropFilter: "blur(10px)",
@@ -387,7 +395,7 @@ export default function ClubRegistration() {
                 ease: "linear",
               }}
             >
-              PALAROTARY 2025
+              PALAROTARY 2026
             </motion.h1>
             <motion.p
               style={{ fontSize: "14px", color: "#666", margin: 0 }}
@@ -464,7 +472,14 @@ export default function ClubRegistration() {
                   >
                     {index < currentStep ? "✓" : index + 1}
                   </motion.div>
-                  <span className="step-label" style={{ fontSize: "12px", fontWeight: "500", color: "#666" }}>
+                  <span
+                    className="step-label"
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: "500",
+                      color: "#666",
+                    }}
+                  >
                     {step}
                   </span>
                 </motion.div>
@@ -487,7 +502,8 @@ export default function ClubRegistration() {
                   variants={itemVariants}
                   whileHover={{ scale: 1.02 }}
                   style={{
-                    background: "linear-gradient(135deg, #667eea15 0%, #764ba215 100%)",
+                    background:
+                      "linear-gradient(135deg, #667eea15 0%, #764ba215 100%)",
                     padding: "12px 16px",
                     borderRadius: "12px",
                     marginBottom: "20px",
@@ -498,12 +514,20 @@ export default function ClubRegistration() {
                 >
                   <motion.div
                     animate={{ rotate: [0, 10, -10, 0] }}
-                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      repeatDelay: 3,
+                    }}
                   >
-                    <InfoCircleOutlined style={{ fontSize: "20px", color: "#667eea" }} />
+                    <InfoCircleOutlined
+                      style={{ fontSize: "20px", color: "#667eea" }}
+                    />
                   </motion.div>
                   <div>
-                    <strong style={{ color: "#667eea" }}>Registration Fee: ₱4,000.00</strong>
+                    <strong style={{ color: "#667eea" }}>
+                      Registration Fee: ₱4,000.00
+                    </strong>
                   </div>
                 </motion.div>
 
@@ -514,10 +538,20 @@ export default function ClubRegistration() {
                   initialValues={{ paymentChannel: "BDO" }}
                   requiredMark={false}
                 >
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: "16px",
+                    }}
+                  >
                     <Form.Item
                       style={{ gridColumn: "1 / -1" }}
-                      label={<span style={{ fontWeight: "600", color: "#333" }}>Club Name</span>}
+                      label={
+                        <span style={{ fontWeight: "600", color: "#333" }}>
+                          Club Name
+                        </span>
+                      }
                       name="clubName"
                       rules={[{ required: true, message: "Required" }]}
                     >
@@ -529,14 +563,26 @@ export default function ClubRegistration() {
                     </Form.Item>
 
                     <Form.Item
-                      label={<span style={{ fontWeight: "600", color: "#333" }}>Zone</span>}
+                      label={
+                        <span style={{ fontWeight: "600", color: "#333" }}>
+                          Zone
+                        </span>
+                      }
                       name="zone"
                     >
-                      <Input placeholder="Zone (optional)" size="large" style={{ borderRadius: "12px" }} />
+                      <Input
+                        placeholder="Zone (optional)"
+                        size="large"
+                        style={{ borderRadius: "12px" }}
+                      />
                     </Form.Item>
 
                     <Form.Item
-                      label={<span style={{ fontWeight: "600", color: "#333" }}>Payment Channel</span>}
+                      label={
+                        <span style={{ fontWeight: "600", color: "#333" }}>
+                          Payment Channel
+                        </span>
+                      }
                       name="paymentChannel"
                       rules={[{ required: true, message: "Required" }]}
                     >
@@ -547,22 +593,42 @@ export default function ClubRegistration() {
                     </Form.Item>
 
                     <Form.Item
-                      label={<span style={{ fontWeight: "600", color: "#333" }}>First Name</span>}
+                      label={
+                        <span style={{ fontWeight: "600", color: "#333" }}>
+                          First Name
+                        </span>
+                      }
                       name="firstName"
                     >
-                      <Input placeholder="First name (optional)" size="large" style={{ borderRadius: "12px" }} />
+                      <Input
+                        placeholder="First name (optional)"
+                        size="large"
+                        style={{ borderRadius: "12px" }}
+                      />
                     </Form.Item>
 
                     <Form.Item
-                      label={<span style={{ fontWeight: "600", color: "#333" }}>Last Name</span>}
+                      label={
+                        <span style={{ fontWeight: "600", color: "#333" }}>
+                          Last Name
+                        </span>
+                      }
                       name="lastName"
                     >
-                      <Input placeholder="Last name (optional)" size="large" style={{ borderRadius: "12px" }} />
+                      <Input
+                        placeholder="Last name (optional)"
+                        size="large"
+                        style={{ borderRadius: "12px" }}
+                      />
                     </Form.Item>
 
                     <Form.Item
                       style={{ gridColumn: "1 / -1" }}
-                      label={<span style={{ fontWeight: "600", color: "#333" }}>Email Address</span>}
+                      label={
+                        <span style={{ fontWeight: "600", color: "#333" }}>
+                          Email Address
+                        </span>
+                      }
                       name="email"
                       rules={[
                         { required: true, message: "Required" },
@@ -578,18 +644,31 @@ export default function ClubRegistration() {
 
                     <Form.Item
                       style={{ gridColumn: "1 / -1" }}
-                      label={<span style={{ fontWeight: "600", color: "#333" }}>Mobile Number</span>}
+                      label={
+                        <span style={{ fontWeight: "600", color: "#333" }}>
+                          Mobile Number
+                        </span>
+                      }
                       name="mobileNumber"
                       rules={[
                         { pattern: /^[0-9+\-\s()]+$/, message: "Invalid" },
                       ]}
                     >
-                      <Input placeholder="0917 123 4567 (optional)" size="large" style={{ borderRadius: "12px" }} />
+                      <Input
+                        placeholder="0917 123 4567 (optional)"
+                        size="large"
+                        style={{ borderRadius: "12px" }}
+                      />
                     </Form.Item>
                   </div>
 
                   <Form.Item style={{ marginTop: "8px", marginBottom: 0 }}>
-                    <motion.div variants={buttonVariants} initial="rest" whileHover="hover" whileTap="tap">
+                    <motion.div
+                      variants={buttonVariants}
+                      initial="rest"
+                      whileHover="hover"
+                      whileTap="tap"
+                    >
                       <Button
                         type="primary"
                         htmlType="submit"
@@ -597,7 +676,8 @@ export default function ClubRegistration() {
                         block
                         loading={registerClub.isPending}
                         style={{
-                          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                          background:
+                            "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
                           border: "none",
                           height: "48px",
                           borderRadius: "12px",
@@ -630,7 +710,8 @@ export default function ClubRegistration() {
                   animate={{ scale: 1, rotate: 0 }}
                   transition={{ type: "spring", stiffness: 200, damping: 15 }}
                   style={{
-                    background: "linear-gradient(135deg, #10b98115 0%, #0f766e15 100%)",
+                    background:
+                      "linear-gradient(135deg, #10b98115 0%, #0f766e15 100%)",
                     padding: "16px",
                     borderRadius: "16px",
                     marginBottom: "20px",
@@ -642,35 +723,68 @@ export default function ClubRegistration() {
                     transition={{ duration: 0.8 }}
                   >
                     <CheckCircleOutlined
-                      style={{ fontSize: "32px", color: "#10b981", marginBottom: "8px" }}
+                      style={{
+                        fontSize: "32px",
+                        color: "#10b981",
+                        marginBottom: "8px",
+                      }}
                     />
                   </motion.div>
-                  <h3 style={{ margin: 0, color: "#10b981", fontSize: "18px", fontWeight: "700" }}>
+                  <h3
+                    style={{
+                      margin: 0,
+                      color: "#10b981",
+                      fontSize: "18px",
+                      fontWeight: "700",
+                    }}
+                  >
                     Club Registered!
                   </h3>
-                  <p style={{ margin: "4px 0 0 0", color: "#666", fontSize: "14px" }}>
+                  <p
+                    style={{
+                      margin: "4px 0 0 0",
+                      color: "#666",
+                      fontSize: "14px",
+                    }}
+                  >
                     Complete payment to finalize registration
                   </p>
                 </motion.div>
 
-                <motion.div variants={containerVariants} initial="hidden" animate="visible" style={{ marginBottom: "20px" }}>
+                <motion.div
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                  style={{ marginBottom: "20px" }}
+                >
                   <motion.div
                     variants={itemVariants}
                     whileHover={{ scale: 1.02, rotate: [0, -1, 1, 0] }}
                     transition={{ rotate: { duration: 0.5 } }}
                     style={{
-                      background: "linear-gradient(135deg, #667eea08 0%, #764ba208 100%)",
+                      background:
+                        "linear-gradient(135deg, #667eea08 0%, #764ba208 100%)",
                       padding: "16px",
                       borderRadius: "12px",
                       marginBottom: "12px",
                       border: "2px solid #667eea20",
                     }}
                   >
-                    <div style={{ fontSize: "14px", color: "#666", marginBottom: "4px" }}>
+                    <div
+                      style={{
+                        fontSize: "14px",
+                        color: "#666",
+                        marginBottom: "4px",
+                      }}
+                    >
                       Registration Fee
                     </div>
                     <motion.div
-                      style={{ fontSize: "28px", fontWeight: "800", color: "#667eea" }}
+                      style={{
+                        fontSize: "28px",
+                        fontWeight: "800",
+                        color: "#667eea",
+                      }}
                       animate={{ scale: [1, 1.05, 1] }}
                       transition={{ duration: 2, repeat: Infinity }}
                     >
@@ -692,17 +806,42 @@ export default function ClubRegistration() {
                         border: "1px solid #e9ecef",
                       }}
                     >
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          marginBottom: "8px",
+                        }}
+                      >
                         {method.payment_method === "BDO" ? (
-                          <BankOutlined style={{ fontSize: "20px", color: "#667eea" }} />
+                          <BankOutlined
+                            style={{ fontSize: "20px", color: "#667eea" }}
+                          />
                         ) : (
-                          <MobileOutlined style={{ fontSize: "20px", color: "#667eea" }} />
+                          <MobileOutlined
+                            style={{ fontSize: "20px", color: "#667eea" }}
+                          />
                         )}
-                        <h4 style={{ margin: 0, fontWeight: "700", color: "#333" }}>
-                          {method.payment_method === "BDO" ? "BDO Bank Transfer" : "GCash Payment"}
+                        <h4
+                          style={{
+                            margin: 0,
+                            fontWeight: "700",
+                            color: "#333",
+                          }}
+                        >
+                          {method.payment_method === "BDO"
+                            ? "BDO Bank Transfer"
+                            : "GCash Payment"}
                         </h4>
                       </div>
-                      <div style={{ fontSize: "13px", color: "#666", lineHeight: "1.6" }}>
+                      <div
+                        style={{
+                          fontSize: "13px",
+                          color: "#666",
+                          lineHeight: "1.6",
+                        }}
+                      >
                         <p style={{ margin: "4px 0" }}>
                           <strong>Name:</strong> {method.account_name}
                         </p>
@@ -723,9 +862,14 @@ export default function ClubRegistration() {
                   <motion.div
                     variants={itemVariants}
                     animate={{ x: [0, 5, -5, 0] }}
-                    transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      repeatDelay: 2,
+                    }}
                     style={{
-                      background: "linear-gradient(135deg, #f59e0b15 0%, #d9770615 100%)",
+                      background:
+                        "linear-gradient(135deg, #f59e0b15 0%, #d9770615 100%)",
                       padding: "12px 16px",
                       borderRadius: "12px",
                       display: "flex",
@@ -734,15 +878,28 @@ export default function ClubRegistration() {
                       marginTop: "16px",
                     }}
                   >
-                    <ClockCircleOutlined style={{ fontSize: "18px", color: "#f59e0b" }} />
+                    <ClockCircleOutlined
+                      style={{ fontSize: "18px", color: "#f59e0b" }}
+                    />
                     <div style={{ fontSize: "13px", color: "#92400e" }}>
-                      Upload proof within <strong>4 hours</strong> to secure registration
+                      Upload proof within <strong>4 hours</strong> to secure
+                      registration
                     </div>
                   </motion.div>
                 </motion.div>
 
-                <Upload accept="image/*,.pdf" beforeUpload={() => false} onChange={handlePaymentUpload} maxCount={1}>
-                  <motion.div variants={buttonVariants} initial="rest" whileHover="hover" whileTap="tap">
+                <Upload
+                  accept="image/*,.pdf"
+                  beforeUpload={() => false}
+                  onChange={handlePaymentUpload}
+                  maxCount={1}
+                >
+                  <motion.div
+                    variants={buttonVariants}
+                    initial="rest"
+                    whileHover="hover"
+                    whileTap="tap"
+                  >
                     <Button
                       icon={<UploadOutlined />}
                       size="large"
@@ -753,7 +910,8 @@ export default function ClubRegistration() {
                         borderRadius: "12px",
                         fontWeight: "600",
                         fontSize: "16px",
-                        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                        background:
+                          "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
                         color: "white",
                         border: "none",
                         boxShadow: "0 4px 15px rgba(102, 126, 234, 0.4)",
@@ -763,7 +921,14 @@ export default function ClubRegistration() {
                     </Button>
                   </motion.div>
                 </Upload>
-                <p style={{ textAlign: "center", color: "#999", fontSize: "12px", marginTop: "8px" }}>
+                <p
+                  style={{
+                    textAlign: "center",
+                    color: "#999",
+                    fontSize: "12px",
+                    marginTop: "8px",
+                  }}
+                >
                   JPG, PNG, PDF (Max 5MB)
                 </p>
               </motion.div>
@@ -783,13 +948,19 @@ export default function ClubRegistration() {
                 <motion.div
                   initial={{ scale: 0, rotate: -180 }}
                   animate={{ scale: 1, rotate: 0 }}
-                  transition={{ type: "spring", stiffness: 150, damping: 12, delay: 0.2 }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 150,
+                    damping: 12,
+                    delay: 0.2,
+                  }}
                   whileHover={{ scale: 1.1, rotate: 360 }}
                   style={{
                     width: "80px",
                     height: "80px",
                     borderRadius: "50%",
-                    background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                    background:
+                      "linear-gradient(135deg, #10b981 0%, #059669 100%)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -798,16 +969,30 @@ export default function ClubRegistration() {
                     cursor: "pointer",
                   }}
                 >
-                  <CheckCircleOutlined style={{ fontSize: "40px", color: "white" }} />
+                  <CheckCircleOutlined
+                    style={{ fontSize: "40px", color: "white" }}
+                  />
                 </motion.div>
 
                 <motion.h2
                   variants={itemVariants}
-                  style={{ fontSize: "24px", fontWeight: "800", color: "#10b981", marginBottom: "8px" }}
+                  style={{
+                    fontSize: "24px",
+                    fontWeight: "800",
+                    color: "#10b981",
+                    marginBottom: "8px",
+                  }}
                 >
                   All Set!
                 </motion.h2>
-                <motion.p variants={itemVariants} style={{ fontSize: "16px", color: "#666", marginBottom: "24px" }}>
+                <motion.p
+                  variants={itemVariants}
+                  style={{
+                    fontSize: "16px",
+                    color: "#666",
+                    marginBottom: "24px",
+                  }}
+                >
                   <strong>{clubData?.clubName}</strong> registered successfully
                 </motion.p>
 
@@ -815,7 +1000,8 @@ export default function ClubRegistration() {
                   variants={itemVariants}
                   whileHover={{ scale: 1.02 }}
                   style={{
-                    background: "linear-gradient(135deg, #667eea08 0%, #764ba208 100%)",
+                    background:
+                      "linear-gradient(135deg, #667eea08 0%, #764ba208 100%)",
                     padding: "20px",
                     borderRadius: "16px",
                     marginBottom: "20px",
@@ -823,11 +1009,29 @@ export default function ClubRegistration() {
                     border: "1px solid #667eea20",
                   }}
                 >
-                  <h3 style={{ fontSize: "16px", fontWeight: "700", marginBottom: "12px", color: "#333" }}>
+                  <h3
+                    style={{
+                      fontSize: "16px",
+                      fontWeight: "700",
+                      marginBottom: "12px",
+                      color: "#333",
+                    }}
+                  >
                     What's Next?
                   </h3>
-                  <div style={{ fontSize: "14px", color: "#666", lineHeight: "1.8" }}>
-                    {["Check your email for confirmation", "Admin team will review your payment", "Register your club members once approved", "Receive email notification when approved"].map((item, i) => (
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      color: "#666",
+                      lineHeight: "1.8",
+                    }}
+                  >
+                    {[
+                      "Check your email for confirmation",
+                      "Admin team will review your payment",
+                      "Register your club members once approved",
+                      "Receive email notification when approved",
+                    ].map((item, i) => (
                       <motion.p
                         key={i}
                         initial={{ opacity: 0, x: -20 }}
@@ -844,24 +1048,49 @@ export default function ClubRegistration() {
                 <motion.div
                   variants={itemVariants}
                   style={{
-                    background: "linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)",
+                    background:
+                      "linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)",
                     padding: "16px",
                     borderRadius: "16px",
                     marginBottom: "20px",
                     textAlign: "left",
                   }}
                 >
-                  <h3 style={{ fontSize: "14px", fontWeight: "700", marginBottom: "8px", color: "#92400e" }}>
+                  <h3
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: "700",
+                      marginBottom: "8px",
+                      color: "#92400e",
+                    }}
+                  >
                     Event Details
                   </h3>
-                  <div style={{ fontSize: "13px", color: "#78350f", lineHeight: "1.6" }}>
-                    <p style={{ margin: "4px 0" }}><strong>Date:</strong> January 25, 2026</p>
-                    <p style={{ margin: "4px 0" }}><strong>Time:</strong> 8am-6pm</p>
-                    <p style={{ margin: "4px 0" }}><strong>Venue:</strong> Marikina Sports Center</p>
+                  <div
+                    style={{
+                      fontSize: "13px",
+                      color: "#78350f",
+                      lineHeight: "1.6",
+                    }}
+                  >
+                    <p style={{ margin: "4px 0" }}>
+                      <strong>Date:</strong> January 25, 2026
+                    </p>
+                    <p style={{ margin: "4px 0" }}>
+                      <strong>Time:</strong> 8am-6pm
+                    </p>
+                    <p style={{ margin: "4px 0" }}>
+                      <strong>Venue:</strong> Marikina Sports Center
+                    </p>
                   </div>
                 </motion.div>
 
-                <motion.div variants={buttonVariants} initial="rest" whileHover="hover" whileTap="tap">
+                <motion.div
+                  variants={buttonVariants}
+                  initial="rest"
+                  whileHover="hover"
+                  whileTap="tap"
+                >
                   <Button
                     type="default"
                     size="large"

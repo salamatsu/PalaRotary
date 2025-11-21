@@ -6,7 +6,10 @@ const axios = createAxiosInstanceWithInterceptor("data");
 // ============================================
 
 export const getCsrfToken = async () => {
-  return await axiosInstance.get("/api/v1/users/csrf-token");
+  // Use a separate axios instance without CSRF token for fetching the CSRF token
+  // to avoid circular dependency
+  const response = await axiosInstance.get("/api/v1/users/csrf-token");
+  return response.data;   
 };
 
 // ============================================
@@ -49,9 +52,14 @@ export const getPaymentInfo = async () => {
 };
 
 export const getApprovedClubs = async () => {
-  const response = await axiosInstance.get("/api/clubs/approved");
+  const response = await axiosInstance.get("/api/v1/users/clubs");
   return response.data;
 };
+
+// export const getApprovedClubs = async () => {
+//   const response = await axiosInstance.get("/api/v1/users/clubs");
+//   return response.data;
+// };
 
 export const checkClubStatus = async (clubId) => {
   const response = await axiosInstance.get(`/api/clubs/${clubId}/status`);
@@ -168,5 +176,34 @@ export const exportAttendance = async (date) => {
   const response = await axios.get("/api/scanner/export", {
     params: { date },
   });
+  return response.data;
+};
+
+// ============================================
+// SHIRT ORDER APIS
+// ============================================
+
+export const submitShirtOrder = async (orderData) => {
+  const response = await axiosInstance.post("/api/shirts/order", orderData);
+  return response.data;
+};
+
+export const getShirtOrders = async (params) => {
+  const response = await axios.get("/api/admin/shirts/orders", { params });
+  return response.data;
+};
+
+export const updateShirtOrderStatus = async (orderId, status) => {
+  const response = await axios.put(`/api/admin/shirts/orders/${orderId}/status`, {
+    status,
+  });
+  return response.data;
+};
+
+export const approveSpecialNumber = async (orderId, itemId, approved) => {
+  const response = await axios.put(
+    `/api/admin/shirts/orders/${orderId}/items/${itemId}/special-number`,
+    { approved }
+  );
   return response.data;
 };
