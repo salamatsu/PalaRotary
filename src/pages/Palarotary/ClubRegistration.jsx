@@ -1,26 +1,33 @@
 import {
   BankOutlined,
   CheckCircleOutlined,
-  ClockCircleOutlined,
   InfoCircleOutlined,
   MobileOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
-import { App, Button, Card, Form, Input, Progress, Select, Upload } from "antd";
-import { motion, AnimatePresence, useAnimationControls } from "framer-motion";
+import {
+  App,
+  Button,
+  Card,
+  Divider,
+  Form,
+  Input,
+  Modal,
+  Progress,
+  Upload,
+} from "antd";
+import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import {
   usePaymentInfo,
   useRegisterClub,
-  useUploadPaymentProof,
 } from "../../services/requests/usePalarotary";
 
 export default function ClubRegistration() {
   const { message } = App.useApp();
   const [form] = Form.useForm();
   const [currentStep, setCurrentStep] = useState(0);
-  const [clubId, setClubId] = useState(null);
   const [clubData, setClubData] = useState(null);
 
   const containerRef = useRef(null);
@@ -31,10 +38,7 @@ export default function ClubRegistration() {
   const progressBarRef = useRef(null);
 
   const registerClub = useRegisterClub();
-  const uploadPayment = useUploadPaymentProof();
   const { data: paymentInfo } = usePaymentInfo();
-
-  const controls = useAnimationControls();
 
   // Advanced GSAP page load animation with timeline
   useEffect(() => {
@@ -162,75 +166,99 @@ export default function ClubRegistration() {
     }
   }, [currentStep]);
 
-  const onFinishStep1 = async (values) => {
-    try {
-      const response = await registerClub.mutateAsync(values);
-      setClubId(response.data.club_id);
-      setClubData(values);
+  const onFinishStep1 = (values) => {
+    Modal.confirm({
+      title: "Confirm Registration",
+      content: (
+        <div style={{ padding: "10px 0" }}>
+          <p style={{ marginBottom: "8px" }}>
+            Please confirm the following details:
+          </p>
+          <div style={{ fontSize: "14px", lineHeight: "1.8" }}>
+            <p style={{ margin: "4px 0" }}>
+              <strong>Club Name:</strong> {values.clubName}
+            </p>
+            {values.zone && (
+              <p style={{ margin: "4px 0" }}>
+                <strong>Zone:</strong> {values.zone}
+              </p>
+            )}
+            <p style={{ margin: "4px 0" }}>
+              <strong>Contact Person:</strong> {values.firstName}{" "}
+              {values.lastName}
+            </p>
+            <p style={{ margin: "4px 0" }}>
+              <strong>Email:</strong> {values.email}
+            </p>
+            <p style={{ margin: "4px 0" }}>
+              <strong>Mobile:</strong> {values.mobileNumber}
+            </p>
+            {values.paymentProof && values.paymentProof.length > 0 && (
+              <p style={{ margin: "4px 0" }}>
+                <strong>Payment Proof:</strong> {values.paymentProof[0].name}
+              </p>
+            )}
+          </div>
+        </div>
+      ),
+      okText: "Confirm & Submit",
+      cancelText: "Cancel",
+      onOk: async () => {
+        try {
+          // Prepare form data
+          const formData = new FormData();
+          formData.append("clubName", values.clubName);
+          if (values.zone) formData.append("zone", values.zone);
+          formData.append("firstName", values.firstName);
+          formData.append("lastName", values.lastName);
+          formData.append("email", values.email);
+          formData.append("mobileNumber", values.mobileNumber);
 
-      // Advanced GSAP exit animation
-      const tl = gsap.timeline();
-      tl.to(formRef.current.querySelectorAll(".ant-form-item"), {
-        opacity: 0,
-        x: -30,
-        rotationY: 45,
-        stagger: 0.05,
-        duration: 0.3,
-        ease: "power2.in",
-      }).to(
-        formRef.current,
-        {
-          opacity: 0,
-          scale: 0.9,
-          duration: 0.3,
-          onComplete: () => {
-            message.success(
-              "Club registered successfully! Please proceed to payment."
-            );
-            setCurrentStep(1);
-          },
-        },
-        "-=0.2"
-      );
-    } catch (error) {
-      message.error(error.response?.data?.message || "Failed to register club");
-    }
-  };
+          // Add payment proof if provided
+          if (values.paymentProof && values.paymentProof.length > 0) {
+            const file =
+              values.paymentProof[0].originFileObj || values.paymentProof[0];
+            formData.append("paymentProof", file);
+          }
 
-  const handlePaymentUpload = async (info) => {
-    if (info.file.status === "done" || info.file) {
-      try {
-        await uploadPayment.mutateAsync({
-          clubId,
-          file: info.file.originFileObj || info.file,
-        });
+          const response = await registerClub.mutateAsync(formData);
 
-        // Success burst animation
-        const tl = gsap.timeline();
-        tl.to(formRef.current, {
-          scale: 1.05,
-          duration: 0.2,
-          ease: "power2.out",
-        }).to(formRef.current, {
-          scale: 0.95,
-          opacity: 0,
-          duration: 0.4,
-          ease: "power2.in",
-          onComplete: () => {
-            message.success("Payment proof uploaded successfully!");
-            setCurrentStep(2);
-          },
-        });
-      } catch (error) {
-        message.error(
-          error.response?.data?.message || "Failed to upload payment proof"
-        );
-      }
-    }
+          console.log("SUCCESS DATA", response.data);
+          setClubData(values);
+
+          // Advanced GSAP exit animation
+          const tl = gsap.timeline();
+          tl.to(formRef.current.querySelectorAll(".ant-form-item"), {
+            opacity: 0,
+            x: -30,
+            rotationY: 45,
+            stagger: 0.05,
+            duration: 0.3,
+            ease: "power2.in",
+          }).to(
+            formRef.current,
+            {
+              opacity: 0,
+              scale: 0.9,
+              duration: 0.3,
+              onComplete: () => {
+                message.success("Club registered successfully!");
+                setCurrentStep(1);
+              },
+            },
+            "-=0.2"
+          );
+        } catch (error) {
+          message.error(
+            error.response?.data?.message || "Failed to register club"
+          );
+        }
+      },
+    });
   };
 
   const paymentMethods = paymentInfo?.data || [];
-  const progressPercent = ((currentStep + 1) / 3) * 100;
+  const progressPercent = ((currentStep + 1) / 2) * 100;
 
   // Advanced Framer Motion variants
   const containerVariants = {
@@ -273,19 +301,6 @@ export default function ClubRegistration() {
     },
   };
 
-  const cardHoverVariants = {
-    rest: { scale: 1, y: 0 },
-    hover: {
-      scale: 1.03,
-      y: -4,
-      transition: {
-        type: "spring",
-        stiffness: 400,
-        damping: 17,
-      },
-    },
-  };
-
   const buttonVariants = {
     rest: { scale: 1 },
     hover: {
@@ -306,7 +321,7 @@ export default function ClubRegistration() {
       animate={{ opacity: 1 }}
       style={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        background: "linear-gradient(135deg, #1E3A71 0%, #2A5298 100%)",
         padding: "20px",
         display: "flex",
         alignItems: "center",
@@ -378,7 +393,7 @@ export default function ClubRegistration() {
           >
             <motion.h1
               style={{
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                background: "linear-gradient(135deg, #1E3A71 0%, #2A5298 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 fontSize: "28px",
@@ -413,8 +428,8 @@ export default function ClubRegistration() {
               <Progress
                 percent={progressPercent}
                 strokeColor={{
-                  "0%": "#667eea",
-                  "100%": "#764ba2",
+                  "0%": "#1E3A71",
+                  "100%": "#2A5298",
                 }}
                 showInfo={false}
                 strokeWidth={8}
@@ -422,7 +437,7 @@ export default function ClubRegistration() {
               />
             </div>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              {["Club Info", "Payment", "Done"].map((step, index) => (
+              {["Registration", "Done"].map((step, index) => (
                 <motion.div
                   key={step}
                   className="step-circle"
@@ -443,9 +458,9 @@ export default function ClubRegistration() {
                       index === currentStep
                         ? {
                             boxShadow: [
-                              "0 4px 15px rgba(102, 126, 234, 0.4)",
-                              "0 8px 25px rgba(102, 126, 234, 0.6)",
-                              "0 4px 15px rgba(102, 126, 234, 0.4)",
+                              "0 4px 15px rgba(30, 58, 113, 0.4)",
+                              "0 8px 25px rgba(30, 58, 113, 0.6)",
+                              "0 4px 15px rgba(30, 58, 113, 0.4)",
                             ],
                           }
                         : {}
@@ -459,7 +474,7 @@ export default function ClubRegistration() {
                       borderRadius: "50%",
                       background:
                         index <= currentStep
-                          ? "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                          ? "linear-gradient(135deg, #1E3A71 0%, #2A5298 100%)"
                           : "#e0e0e0",
                       display: "flex",
                       alignItems: "center",
@@ -503,7 +518,7 @@ export default function ClubRegistration() {
                   whileHover={{ scale: 1.02 }}
                   style={{
                     background:
-                      "linear-gradient(135deg, #667eea15 0%, #764ba215 100%)",
+                      "linear-gradient(135deg, #1E3A7115 0%, #2A529815 100%)",
                     padding: "12px 16px",
                     borderRadius: "12px",
                     marginBottom: "20px",
@@ -521,11 +536,11 @@ export default function ClubRegistration() {
                     }}
                   >
                     <InfoCircleOutlined
-                      style={{ fontSize: "20px", color: "#667eea" }}
+                      style={{ fontSize: "20px", color: "#1E3A71" }}
                     />
                   </motion.div>
                   <div>
-                    <strong style={{ color: "#667eea" }}>
+                    <strong style={{ color: "#1E3A71" }}>
                       Registration Fee: ₱4,000.00
                     </strong>
                   </div>
@@ -535,7 +550,6 @@ export default function ClubRegistration() {
                   form={form}
                   layout="vertical"
                   onFinish={onFinishStep1}
-                  initialValues={{ paymentChannel: "BDO" }}
                   requiredMark={false}
                 >
                   <div
@@ -563,34 +577,30 @@ export default function ClubRegistration() {
                     </Form.Item>
 
                     <Form.Item
+                      style={{ gridColumn: "1 / -1" }}
                       label={
                         <span style={{ fontWeight: "600", color: "#333" }}>
                           Zone
                         </span>
                       }
                       name="zone"
+                      rules={[
+                        {
+                          pattern: /^ZONE\s+\d+$/i,
+                          message: "Format: ZONE 1",
+                        },
+                      ]}
                     >
                       <Input
-                        placeholder="Zone (optional)"
+                        placeholder="ZONE 1"
                         size="large"
                         style={{ borderRadius: "12px" }}
                       />
                     </Form.Item>
 
-                    <Form.Item
-                      label={
-                        <span style={{ fontWeight: "600", color: "#333" }}>
-                          Payment Channel
-                        </span>
-                      }
-                      name="paymentChannel"
-                      rules={[{ required: true, message: "Required" }]}
-                    >
-                      <Select size="large" style={{ borderRadius: "12px" }}>
-                        <Select.Option value="BDO">BDO</Select.Option>
-                        <Select.Option value="GCASH">GCASH</Select.Option>
-                      </Select>
-                    </Form.Item>
+                    <Divider style={{ gridColumn: "1 / -1" }}>
+                      Contact Information
+                    </Divider>
 
                     <Form.Item
                       label={
@@ -599,9 +609,10 @@ export default function ClubRegistration() {
                         </span>
                       }
                       name="firstName"
+                      rules={[{ required: true, message: "Required" }]}
                     >
                       <Input
-                        placeholder="First name (optional)"
+                        placeholder="Enter first name"
                         size="large"
                         style={{ borderRadius: "12px" }}
                       />
@@ -614,9 +625,10 @@ export default function ClubRegistration() {
                         </span>
                       }
                       name="lastName"
+                      rules={[{ required: true, message: "Required" }]}
                     >
                       <Input
-                        placeholder="Last name (optional)"
+                        placeholder="Enter last name"
                         size="large"
                         style={{ borderRadius: "12px" }}
                       />
@@ -651,16 +663,183 @@ export default function ClubRegistration() {
                       }
                       name="mobileNumber"
                       rules={[
-                        { pattern: /^[0-9+\-\s()]+$/, message: "Invalid" },
+                        { required: true, message: "Required" },
+                        {
+                          pattern: /^09\d{9}$/,
+                          message: "Must be 11 digits starting with 09",
+                        },
                       ]}
                     >
                       <Input
-                        placeholder="0917 123 4567 (optional)"
+                        placeholder="09171234567"
                         size="large"
+                        maxLength={11}
                         style={{ borderRadius: "12px" }}
                       />
                     </Form.Item>
                   </div>
+
+                  {/* Payment Information */}
+                  <motion.div
+                    variants={itemVariants}
+                    style={{
+                      background:
+                        "linear-gradient(135deg, #1E3A7108 0%, #2A529808 100%)",
+                      padding: "16px",
+                      borderRadius: "12px",
+                      marginBottom: "16px",
+                      border: "2px solid #1E3A7120",
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: "14px",
+                        color: "#666",
+                        marginBottom: "4px",
+                      }}
+                    >
+                      Registration Fee
+                    </div>
+                    <motion.div
+                      style={{
+                        fontSize: "28px",
+                        fontWeight: "800",
+                        color: "#1E3A71",
+                        marginBottom: "16px",
+                      }}
+                    >
+                      ₱4,000.00
+                    </motion.div>
+
+                    {paymentMethods.map((method, index) => (
+                      <motion.div
+                        key={index}
+                        whileHover={{ scale: 1.02 }}
+                        style={{
+                          background: "#f8f9fa",
+                          padding: "12px",
+                          marginBottom: "8px",
+                          borderRadius: "8px",
+                          border: "1px solid #e9ecef",
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                            marginBottom: "6px",
+                          }}
+                        >
+                          {method.payment_method === "BDO" ? (
+                            <BankOutlined
+                              style={{ fontSize: "18px", color: "#1E3A71" }}
+                            />
+                          ) : (
+                            <MobileOutlined
+                              style={{ fontSize: "18px", color: "#1E3A71" }}
+                            />
+                          )}
+                          <h4
+                            style={{
+                              margin: 0,
+                              fontWeight: "700",
+                              fontSize: "14px",
+                              color: "#333",
+                            }}
+                          >
+                            {method.payment_method === "BDO"
+                              ? "BDO Bank Transfer"
+                              : "GCash Payment"}
+                          </h4>
+                        </div>
+                        <div
+                          style={{
+                            fontSize: "12px",
+                            color: "#666",
+                            lineHeight: "1.5",
+                          }}
+                        >
+                          <p style={{ margin: "2px 0" }}>
+                            <strong>Name:</strong> {method.account_name}
+                          </p>
+                          {method.account_number && (
+                            <p style={{ margin: "2px 0" }}>
+                              <strong>Account:</strong> {method.account_number}
+                            </p>
+                          )}
+                          {method.mobile_number && (
+                            <p style={{ margin: "2px 0" }}>
+                              <strong>Mobile:</strong> {method.mobile_number}
+                            </p>
+                          )}
+                        </div>
+                      </motion.div>
+                    ))}
+                  </motion.div>
+
+                  <Form.Item
+                    label={
+                      <span style={{ fontWeight: "600", color: "#333" }}>
+                        Payment Proof <small>(optional)</small>
+                      </span>
+                    }
+                    name="paymentProof"
+                    valuePropName="fileList"
+                    getValueFromEvent={(e) => {
+                      if (Array.isArray(e)) {
+                        return e;
+                      }
+                      return e?.fileList;
+                    }}
+                    // rules={[
+                    //   { required: true, message: "Payment proof is required" },
+                    // ]}
+                  >
+                    <Upload.Dragger
+                      accept="image/*"
+                      beforeUpload={() => false}
+                      maxCount={1}
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #1E3A7105 0%, #2A529805 100%)",
+                        border: "2px dashed #1E3A71",
+                        borderRadius: "12px",
+                        padding: "20px",
+                      }}
+                    >
+                      <div style={{ padding: "20px 0" }}>
+                        <p style={{ margin: 0, marginBottom: "12px" }}>
+                          <UploadOutlined
+                            style={{
+                              fontSize: "48px",
+                              color: "#1E3A71",
+                            }}
+                          />
+                        </p>
+                        <p
+                          style={{
+                            margin: 0,
+                            fontSize: "16px",
+                            fontWeight: "600",
+                            color: "#1E3A71",
+                            marginBottom: "4px",
+                          }}
+                        >
+                          Click or drag file to upload
+                        </p>
+                        <p
+                          style={{
+                            margin: 0,
+                            fontSize: "13px",
+                            color: "#666",
+                          }}
+                        >
+                          Support for image files (JPG, PNG, Max 5MB)
+                        </p>
+                      </div>
+                    </Upload.Dragger>
+                  </Form.Item>
 
                   <Form.Item style={{ marginTop: "8px", marginBottom: 0 }}>
                     <motion.div
@@ -677,16 +856,16 @@ export default function ClubRegistration() {
                         loading={registerClub.isPending}
                         style={{
                           background:
-                            "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                            "linear-gradient(135deg, #1E3A71 0%, #2A5298 100%)",
                           border: "none",
                           height: "48px",
                           borderRadius: "12px",
                           fontWeight: "600",
                           fontSize: "16px",
-                          boxShadow: "0 4px 15px rgba(102, 126, 234, 0.4)",
+                          boxShadow: "0 4px 15px rgba(30, 58, 113, 0.4)",
                         }}
                       >
-                        Continue to Payment
+                        Submit Registration
                       </Button>
                     </motion.div>
                   </Form.Item>
@@ -694,248 +873,8 @@ export default function ClubRegistration() {
               </motion.div>
             )}
 
-            {/* Step 2: Payment */}
+            {/* Success Page */}
             {currentStep === 1 && (
-              <motion.div
-                key="step2"
-                ref={formRef}
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-              >
-                <motion.div
-                  variants={itemVariants}
-                  initial={{ scale: 0, rotate: -180 }}
-                  animate={{ scale: 1, rotate: 0 }}
-                  transition={{ type: "spring", stiffness: 200, damping: 15 }}
-                  style={{
-                    background:
-                      "linear-gradient(135deg, #10b98115 0%, #0f766e15 100%)",
-                    padding: "16px",
-                    borderRadius: "16px",
-                    marginBottom: "20px",
-                    textAlign: "center",
-                  }}
-                >
-                  <motion.div
-                    animate={{ scale: [1, 1.2, 1], rotate: [0, 360] }}
-                    transition={{ duration: 0.8 }}
-                  >
-                    <CheckCircleOutlined
-                      style={{
-                        fontSize: "32px",
-                        color: "#10b981",
-                        marginBottom: "8px",
-                      }}
-                    />
-                  </motion.div>
-                  <h3
-                    style={{
-                      margin: 0,
-                      color: "#10b981",
-                      fontSize: "18px",
-                      fontWeight: "700",
-                    }}
-                  >
-                    Club Registered!
-                  </h3>
-                  <p
-                    style={{
-                      margin: "4px 0 0 0",
-                      color: "#666",
-                      fontSize: "14px",
-                    }}
-                  >
-                    Complete payment to finalize registration
-                  </p>
-                </motion.div>
-
-                <motion.div
-                  variants={containerVariants}
-                  initial="hidden"
-                  animate="visible"
-                  style={{ marginBottom: "20px" }}
-                >
-                  <motion.div
-                    variants={itemVariants}
-                    whileHover={{ scale: 1.02, rotate: [0, -1, 1, 0] }}
-                    transition={{ rotate: { duration: 0.5 } }}
-                    style={{
-                      background:
-                        "linear-gradient(135deg, #667eea08 0%, #764ba208 100%)",
-                      padding: "16px",
-                      borderRadius: "12px",
-                      marginBottom: "12px",
-                      border: "2px solid #667eea20",
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontSize: "14px",
-                        color: "#666",
-                        marginBottom: "4px",
-                      }}
-                    >
-                      Registration Fee
-                    </div>
-                    <motion.div
-                      style={{
-                        fontSize: "28px",
-                        fontWeight: "800",
-                        color: "#667eea",
-                      }}
-                      animate={{ scale: [1, 1.05, 1] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                    >
-                      ₱4,000.00
-                    </motion.div>
-                  </motion.div>
-
-                  {paymentMethods.map((method, index) => (
-                    <motion.div
-                      key={index}
-                      variants={cardHoverVariants}
-                      initial="rest"
-                      whileHover="hover"
-                      style={{
-                        background: "#f8f9fa",
-                        padding: "16px",
-                        marginBottom: "12px",
-                        borderRadius: "12px",
-                        border: "1px solid #e9ecef",
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "8px",
-                          marginBottom: "8px",
-                        }}
-                      >
-                        {method.payment_method === "BDO" ? (
-                          <BankOutlined
-                            style={{ fontSize: "20px", color: "#667eea" }}
-                          />
-                        ) : (
-                          <MobileOutlined
-                            style={{ fontSize: "20px", color: "#667eea" }}
-                          />
-                        )}
-                        <h4
-                          style={{
-                            margin: 0,
-                            fontWeight: "700",
-                            color: "#333",
-                          }}
-                        >
-                          {method.payment_method === "BDO"
-                            ? "BDO Bank Transfer"
-                            : "GCash Payment"}
-                        </h4>
-                      </div>
-                      <div
-                        style={{
-                          fontSize: "13px",
-                          color: "#666",
-                          lineHeight: "1.6",
-                        }}
-                      >
-                        <p style={{ margin: "4px 0" }}>
-                          <strong>Name:</strong> {method.account_name}
-                        </p>
-                        {method.account_number && (
-                          <p style={{ margin: "4px 0" }}>
-                            <strong>Account:</strong> {method.account_number}
-                          </p>
-                        )}
-                        {method.mobile_number && (
-                          <p style={{ margin: "4px 0" }}>
-                            <strong>Mobile:</strong> {method.mobile_number}
-                          </p>
-                        )}
-                      </div>
-                    </motion.div>
-                  ))}
-
-                  <motion.div
-                    variants={itemVariants}
-                    animate={{ x: [0, 5, -5, 0] }}
-                    transition={{
-                      duration: 3,
-                      repeat: Infinity,
-                      repeatDelay: 2,
-                    }}
-                    style={{
-                      background:
-                        "linear-gradient(135deg, #f59e0b15 0%, #d9770615 100%)",
-                      padding: "12px 16px",
-                      borderRadius: "12px",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "12px",
-                      marginTop: "16px",
-                    }}
-                  >
-                    <ClockCircleOutlined
-                      style={{ fontSize: "18px", color: "#f59e0b" }}
-                    />
-                    <div style={{ fontSize: "13px", color: "#92400e" }}>
-                      Upload proof within <strong>4 hours</strong> to secure
-                      registration
-                    </div>
-                  </motion.div>
-                </motion.div>
-
-                <Upload
-                  accept="image/*,.pdf"
-                  beforeUpload={() => false}
-                  onChange={handlePaymentUpload}
-                  maxCount={1}
-                >
-                  <motion.div
-                    variants={buttonVariants}
-                    initial="rest"
-                    whileHover="hover"
-                    whileTap="tap"
-                  >
-                    <Button
-                      icon={<UploadOutlined />}
-                      size="large"
-                      block
-                      loading={uploadPayment.isPending}
-                      style={{
-                        height: "48px",
-                        borderRadius: "12px",
-                        fontWeight: "600",
-                        fontSize: "16px",
-                        background:
-                          "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                        color: "white",
-                        border: "none",
-                        boxShadow: "0 4px 15px rgba(102, 126, 234, 0.4)",
-                      }}
-                    >
-                      Upload Proof of Payment
-                    </Button>
-                  </motion.div>
-                </Upload>
-                <p
-                  style={{
-                    textAlign: "center",
-                    color: "#999",
-                    fontSize: "12px",
-                    marginTop: "8px",
-                  }}
-                >
-                  JPG, PNG, PDF (Max 5MB)
-                </p>
-              </motion.div>
-            )}
-
-            {/* Step 3: Confirmation */}
-            {currentStep === 2 && (
               <motion.div
                 key="step3"
                 ref={formRef}
@@ -960,12 +899,12 @@ export default function ClubRegistration() {
                     height: "80px",
                     borderRadius: "50%",
                     background:
-                      "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                      "linear-gradient(135deg, #1E3A71 0%, #2A5298 100%)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     margin: "0 auto 20px",
-                    boxShadow: "0 8px 25px rgba(16, 185, 129, 0.3)",
+                    boxShadow: "0 8px 25px rgba(30, 58, 113, 0.3)",
                     cursor: "pointer",
                   }}
                 >
@@ -979,7 +918,7 @@ export default function ClubRegistration() {
                   style={{
                     fontSize: "24px",
                     fontWeight: "800",
-                    color: "#10b981",
+                    color: "#1E3A71",
                     marginBottom: "8px",
                   }}
                 >
@@ -1001,12 +940,12 @@ export default function ClubRegistration() {
                   whileHover={{ scale: 1.02 }}
                   style={{
                     background:
-                      "linear-gradient(135deg, #667eea08 0%, #764ba208 100%)",
+                      "linear-gradient(135deg, #1E3A7108 0%, #2A529808 100%)",
                     padding: "20px",
                     borderRadius: "16px",
                     marginBottom: "20px",
                     textAlign: "left",
-                    border: "1px solid #667eea20",
+                    border: "1px solid #1E3A7120",
                   }}
                 >
                   <h3
@@ -1100,8 +1039,8 @@ export default function ClubRegistration() {
                       borderRadius: "12px",
                       fontWeight: "600",
                       fontSize: "16px",
-                      border: "2px solid #667eea",
-                      color: "#667eea",
+                      border: "2px solid #1E3A71",
+                      color: "#1E3A71",
                       background: "white",
                     }}
                     block

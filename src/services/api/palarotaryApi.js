@@ -48,7 +48,29 @@ export const getCheckAvailability = async ({ zone, shirtNumber }) => {
 // ============================================
 
 export const submitShirtOrder = async (orderData) => {
-  const response = await axiosInstance.post("/api/shirts/order", orderData);
+  const response = await axiosInstance.post(
+    "/api/v1/users/visitors/merchandise",
+    orderData
+  );
+  return response.data;
+};
+
+// ============================================
+// PUBLIC APIS - Club Registration
+// ============================================
+
+export const registerClub = async (data) => {
+  const response = await axiosInstance.post(
+    "/api/v1/clubs/auth/register-club",
+    data
+  );
+  return response.data;
+};
+
+export const getRegisteredClub = async () => {
+  const response = await axiosInstance.get(
+    "/api/v1/clubs/auth/registered-clubs"
+  );
   return response.data;
 };
 
@@ -68,11 +90,6 @@ export const loginAdminApi = async (credentials) => {
 // ============================================
 // PUBLIC APIS - Club Registration
 // ============================================
-
-export const registerClub = async (data) => {
-  const response = await axiosInstance.post("/api/clubs/register", data);
-  return response.data;
-};
 
 export const uploadPaymentProof = async (clubId, file) => {
   const formData = new FormData();

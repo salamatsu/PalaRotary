@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { Button, Upload, message, Card, Typography, Spin, Divider } from "antd";
-import { QrCode, Upload as UploadIcon, Scan, ArrowRight } from "lucide-react";
+import {
+  QrCode,
+  Upload as UploadIcon,
+  Scan,
+  ArrowRight,
+  Home,
+} from "lucide-react";
 import { Html5Qrcode } from "html5-qrcode";
 import { useGetVerifyQrCode } from "../../services/requests/usePalarotary";
 
@@ -158,6 +164,10 @@ const ShirtValidation = () => {
     });
   };
 
+  const handleBack = () => {
+    navigate("/");
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-xl">
@@ -180,7 +190,7 @@ const ShirtValidation = () => {
         )}
 
         {!scanning && (
-          <div className="space-y-4">
+          <div className="flex flex-col gap-3">
             <Button
               type="primary"
               size="large"
@@ -188,7 +198,6 @@ const ShirtValidation = () => {
               onClick={handleScan}
               disabled={loading}
               block
-              className="h-14"
             >
               Scan QR Code with Camera
             </Button>
@@ -198,17 +207,30 @@ const ShirtValidation = () => {
               accept="image/*"
               showUploadList={false}
               disabled={loading}
+              style={{ width: "100%" }}
             >
               <Button
                 size="large"
                 icon={<UploadIcon size={20} />}
                 disabled={loading}
                 block
-                className="h-14"
               >
                 Upload QR Code Image
               </Button>
             </Upload>
+
+            <Button
+              type="primary"
+              danger
+              size="large"
+              icon={<Home size={20} />}
+              onClick={handleBack}
+              disabled={loading}
+              block
+              className="h-14"
+            >
+              Back to Home
+            </Button>
 
             {loading && (
               <div className="text-center py-4">
@@ -218,20 +240,6 @@ const ShirtValidation = () => {
                 </div>
               </div>
             )}
-
-            <Divider>or</Divider>
-
-            <Button
-              type="default"
-              size="large"
-              icon={<ArrowRight size={20} />}
-              onClick={handleBypass}
-              disabled={loading}
-              block
-              className="h-14"
-            >
-              Continue Without Badge
-            </Button>
           </div>
         )}
 

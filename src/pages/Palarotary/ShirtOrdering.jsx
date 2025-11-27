@@ -6,6 +6,7 @@ import {
   ShoppingCartOutlined,
   SaveOutlined,
   CloseOutlined,
+  HomeOutlined,
 } from "@ant-design/icons";
 import {
   Badge,
@@ -67,8 +68,9 @@ const ShirtOrdering = () => {
   const [showEditConfirm, setShowEditConfirm] = useState(false);
   const [editingOrderId, setEditingOrderId] = useState(null);
   const [editingOrderData, setEditingOrderData] = useState(null);
-  const [isDesiredNumberEnabled, setIsDesiredNumberEnabled] = useState(false);
   const [lastCheckedNumber, setLastCheckedNumber] = useState(null);
+  const [availabilityData, setAvailabilityData] = useState(null);
+  const [showCheckoutConfirm, setShowCheckoutConfirm] = useState(false);
 
   const { mutate: submitOrder, isPending: submitting } = useSubmitShirtOrder();
   const { mutate: checkAvailability, isPending: checkingAvailability } =
@@ -164,8 +166,26 @@ const ShirtOrdering = () => {
       }
     };
 
+    // Fetch initial availability data
+    const fetchInitialAvailability = () => {
+      if (data?.zone) {
+        checkAvailability(
+          { zone: data.zone, shirtNumber: "00" },
+          {
+            onSuccess: ({ data: responseData }) => {
+              setAvailabilityData(responseData);
+            },
+            onError: (error) => {
+              console.error("Failed to fetch availability:", error);
+            },
+          }
+        );
+      }
+    };
+
     generateInitialPreview();
-  }, [location, navigate, form]);
+    fetchInitialAvailability();
+  }, [location, navigate, form, checkAvailability]);
 
   const generatePreview = async (orderData) => {
     if (!memberData?.zone || !orderData.name) return null;
@@ -187,10 +207,7 @@ const ShirtOrdering = () => {
   };
 
   const handleCheckAvailability = (shirtNumber) => {
-    if (!shirtNumber || shirtNumber.length < 2 || !memberData?.zone) return;
-
-    // Don't check if it's the same as last checked
-    if (lastCheckedNumber === shirtNumber) return;
+    if (!shirtNumber || !memberData?.zone) return;
 
     setLastCheckedNumber(shirtNumber);
 
@@ -198,15 +215,19 @@ const ShirtOrdering = () => {
       { zone: memberData.zone, shirtNumber },
       {
         onSuccess: ({ data, message: msgdata }) => {
+          // Update availability data
+          setAvailabilityData(data);
+
           if (!data.available) {
+            const takenBy = data.takenBy;
             Modal.confirm({
               width: 500,
               title: "Shirt Number Not Available",
               content: (
                 <div>
                   <p>
-                    Shirt number {data.shirtNumber} in {data.zone} is already
-                    taken.
+                    Shirt number <strong>{data.shirtNumber}</strong> in{" "}
+                    <strong>{data.zone}</strong> is already taken.
                   </p>
                   <br />
                   <p>Would you like to add it as your desired number?</p>
@@ -215,7 +236,6 @@ const ShirtOrdering = () => {
               okText: "Use as Desired Number",
               cancelText: "Choose Different Number",
               onOk: () => {
-                setIsDesiredNumberEnabled(true);
                 form.setFieldValue("desiredNumber", shirtNumber);
                 setCurrentOrder((prev) => ({
                   ...prev,
@@ -305,16 +325,6 @@ const ShirtOrdering = () => {
     message.info("You can now edit email and mobile number");
   };
 
-  const handleClearDesiredNumber = () => {
-    setIsDesiredNumberEnabled(false);
-    form.setFieldValue("desiredNumber", "");
-    setCurrentOrder((prev) => ({
-      ...prev,
-      desiredNumber: "",
-    }));
-    setLastCheckedNumber(null);
-  };
-
   const addOrderToCart = async () => {
     try {
       await form.validateFields();
@@ -357,7 +367,6 @@ const ShirtOrdering = () => {
       form.resetFields();
       form.setFieldValue("email", email);
       form.setFieldValue("mobileNumber", mobileNumber);
-      setIsDesiredNumberEnabled(false);
       setLastCheckedNumber(null);
 
       // Scroll to cart with smooth animation
@@ -471,12 +480,15 @@ const ShirtOrdering = () => {
     }
   };
 
-  const handleSubmitOrder = async () => {
+  const handleCheckout = () => {
     if (orders.length === 0) {
       message.warning("Please add at least one shirt to your cart");
       return;
     }
+    setShowCheckoutConfirm(true);
+  };
 
+  const handleSubmitOrder = async () => {
     const orderData = {
       qrCode: memberData?.qrCode,
       email: email,
@@ -492,16 +504,23 @@ const ShirtOrdering = () => {
 
     submitOrder(orderData, {
       onSuccess: (response) => {
+        setShowCheckoutConfirm(false);
         message.success("Order submitted successfully!");
-        navigate("/order-confirmation", {
+
+        // Redirect to success page
+        navigate("/palarotary/success", {
           state: {
             orderId: response.data?.orderId,
             orders,
             totalAmount: orders.reduce((sum, order) => sum + order.price, 0),
+            memberData: memberData,
+            email: email,
+            mobileNumber: mobileNumber,
           },
         });
       },
       onError: (error) => {
+        setShowCheckoutConfirm(false);
         message.error(
           error.message || "Failed to submit order. Please try again."
         );
@@ -546,8 +565,28 @@ const ShirtOrdering = () => {
         {/* Header */}
         <div
           className="header-section"
-          style={{ textAlign: "center", marginBottom: "40px" }}
+          style={{
+            textAlign: "center",
+            marginBottom: "40px",
+            position: "relative",
+          }}
         >
+          <Button
+            type="default"
+            size="large"
+            icon={<HomeOutlined />}
+            onClick={() => navigate("/")}
+            style={{
+              position: "absolute",
+              left: "0",
+              top: "0",
+              background: "white",
+              borderRadius: "12px",
+              fontWeight: "500",
+            }}
+          >
+            Back to Home
+          </Button>
           <Title
             level={1}
             style={{
@@ -712,43 +751,39 @@ const ShirtOrdering = () => {
                   <Select
                     placeholder="Select shirt number"
                     size="large"
-                    options={Array.from({ length: 100 }, (_, i) => ({
-                      value: String(i).padStart(2, "0"),
-                      label: String(i).padStart(2, "0"),
-                    }))}
+                    options={
+                      availabilityData
+                        ? Array.from({ length: 100 }, (_, i) => {
+                            const numberStr = String(i).padStart(2, "0");
+                            const isAvailable =
+                              availabilityData.availableNumbers?.includes(
+                                numberStr
+                              );
+                            const takenInfo =
+                              availabilityData.takenNumbers?.find(
+                                (taken) => taken.shirtNumber === numberStr
+                              );
+
+                            return {
+                              value: numberStr,
+                              label: takenInfo ? `${numberStr}` : numberStr,
+                              disabled: !isAvailable,
+                            };
+                          })
+                        : Array.from({ length: 100 }, (_, i) => ({
+                            value: String(i).padStart(2, "0"),
+                            label: String(i).padStart(2, "0"),
+                          }))
+                    }
                     allowClear
                     showSearch
-                    onChange={
-                      (value) => {
-                        handleFieldChange("shirtNumber", value);
-                        handleCheckAvailability(value);
-                      }
-                      // handleFieldChange("shirtNumber", value)
-                    }
+                    onChange={(value) => {
+                      handleFieldChange("shirtNumber", value);
+                      handleCheckAvailability(value);
+                    }}
                     loading={checkingAvailability}
                     disabled={checkingAvailability}
                   />
-                  {/* <Input
-                    placeholder="00-99"
-                    onChange={(e) => {
-                      let value = e.target.value.replace(/\D/g, "");
-                      handleFieldChange("shirtNumber", value);
-                    }}
-                    onBlur={(e) => {
-                      let value = e.target.value.replace(/\D/g, "");
-                      if (value.length === 1) {
-                        value = value.padStart(2, "0");
-                        form.setFieldValue("shirtNumber", value);
-                        handleFieldChange("shirtNumber", value);
-                      }
-                      if (value.length === 2) {
-                        handleCheckAvailability(value);
-                      }
-                    }}
-                    size="large"
-                    maxLength={2}
-                    suffix={checkingAvailability && <Spin size="small" />}
-                  /> */}
                 </Form.Item>
 
                 {/* Desired Number */}
@@ -758,29 +793,34 @@ const ShirtOrdering = () => {
                       <Text strong>
                         Desired Number{" "}
                         <Text type="secondary" style={{ fontSize: "12px" }}>
-                          (if shirt number is taken but still wanted)
+                          (select from taken numbers only)
                         </Text>
                       </Text>
-                      {isDesiredNumberEnabled && (
-                        <Button
-                          type="link"
-                          size="small"
-                          onClick={handleClearDesiredNumber}
-                          danger
-                        >
-                          Clear
-                        </Button>
-                      )}
                     </Space>
                   }
                   name="desiredNumber"
                 >
-                  <Input
-                    placeholder="e.g., 00, 99"
-                    disabled={!isDesiredNumberEnabled}
-                    value={currentOrder.desiredNumber}
+                  <Select
+                    placeholder="Select desired number (taken numbers only)"
                     size="large"
-                    maxLength={2}
+                    options={
+                      availabilityData?.takenNumbers
+                        ? availabilityData.takenNumbers.map((taken) => ({
+                            value: taken.shirtNumber,
+                            label: `${taken.shirtNumber} `,
+                          }))
+                        : []
+                    }
+                    allowClear
+                    showSearch
+                    onChange={(value) =>
+                      handleFieldChange("desiredNumber", value)
+                    }
+                    notFoundContent={
+                      availabilityData
+                        ? "No taken numbers available"
+                        : "Loading availability data..."
+                    }
                   />
                 </Form.Item>
 
@@ -1191,8 +1231,7 @@ const ShirtOrdering = () => {
                 type="primary"
                 size="large"
                 block
-                loading={submitting}
-                onClick={handleSubmitOrder}
+                onClick={handleCheckout}
                 icon={<ArrowRightOutlined />}
                 style={{
                   background:
@@ -1303,6 +1342,181 @@ const ShirtOrdering = () => {
             </div>
           </Space>
         </Modal>
+
+        {/* Checkout Confirmation Modal */}
+        <Modal
+          title={
+            <div style={{ textAlign: "center" }}>
+              <Title level={3} style={{ margin: 0, color: "#1E3A71" }}>
+                Confirm Your Order
+              </Title>
+            </div>
+          }
+          open={showCheckoutConfirm}
+          onCancel={() => setShowCheckoutConfirm(false)}
+          footer={null}
+          width={700}
+        >
+          <Space direction="vertical" size="large" style={{ width: "100%" }}>
+            {/* Contact Information */}
+            <div>
+              <Text
+                strong
+                style={{
+                  fontSize: "16px",
+                  display: "block",
+                  marginBottom: "12px",
+                }}
+              >
+                Contact Information
+              </Text>
+              <div
+                style={{
+                  background: "#f5f7fa",
+                  padding: "16px",
+                  borderRadius: "8px",
+                }}
+              >
+                <Space
+                  direction="vertical"
+                  size="small"
+                  style={{ width: "100%" }}
+                >
+                  <div>
+                    <Text type="secondary">Email: </Text>
+                    <Text strong>{email}</Text>
+                  </div>
+                  <div>
+                    <Text type="secondary">Mobile: </Text>
+                    <Text strong>{mobileNumber}</Text>
+                  </div>
+                  <div>
+                    <Text type="secondary">Zone: </Text>
+                    <Tag color="blue">{memberData?.zone}</Tag>
+                  </div>
+                </Space>
+              </div>
+            </div>
+
+            {/* Order Items */}
+            <div>
+              <Text
+                strong
+                style={{
+                  fontSize: "16px",
+                  display: "block",
+                  marginBottom: "12px",
+                }}
+              >
+                Order Items ({orders.length}{" "}
+                {orders.length === 1 ? "item" : "items"})
+              </Text>
+              <div style={{ maxHeight: "300px", overflowY: "auto" }}>
+                <Space
+                  direction="vertical"
+                  size="small"
+                  style={{ width: "100%" }}
+                >
+                  {orders.map((order, index) => (
+                    <div
+                      key={order.id}
+                      style={{
+                        background: "#f5f7fa",
+                        padding: "12px",
+                        borderRadius: "8px",
+                        border: "1px solid #e8edf2",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "start",
+                        }}
+                      >
+                        <Space direction="vertical" size={0}>
+                          <Text strong>
+                            {index + 1}. {order.name}
+                          </Text>
+                          <Text type="secondary" style={{ fontSize: "13px" }}>
+                            Size: {order.size}
+                          </Text>
+                          {order.shirtNumber && (
+                            <Text type="secondary" style={{ fontSize: "13px" }}>
+                              Number: {order.shirtNumber}
+                            </Text>
+                          )}
+                          {order.desiredNumber && (
+                            <Text
+                              type="secondary"
+                              style={{ fontSize: "13px", fontStyle: "italic" }}
+                            >
+                              Desired: {order.desiredNumber}
+                            </Text>
+                          )}
+                        </Space>
+                        <Text
+                          strong
+                          style={{ color: "#1E3A71", fontSize: "16px" }}
+                        >
+                          ₱{order.price}
+                        </Text>
+                      </div>
+                    </div>
+                  ))}
+                </Space>
+              </div>
+            </div>
+
+            {/* Total Amount */}
+            <div
+              style={{
+                background: "linear-gradient(135deg, #1E3A71 0%, #0f2847 100%)",
+                padding: "20px",
+                borderRadius: "12px",
+                textAlign: "center",
+              }}
+            >
+              <Text
+                style={{
+                  color: "rgba(255,255,255,0.9)",
+                  fontSize: "16px",
+                  display: "block",
+                }}
+              >
+                Total Amount
+              </Text>
+              <Title level={2} style={{ color: "white", margin: "8px 0 0 0" }}>
+                ₱{getTotalAmount()}
+              </Title>
+            </div>
+
+            {/* Action Buttons */}
+            <Space style={{ width: "100%", justifyContent: "flex-end" }}>
+              <Button
+                size="large"
+                onClick={() => setShowCheckoutConfirm(false)}
+                disabled={submitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="primary"
+                size="large"
+                loading={submitting}
+                onClick={handleSubmitOrder}
+                icon={<ArrowRightOutlined />}
+                style={{
+                  background:
+                    "linear-gradient(135deg, #1E3A71 0%, #0f2847 100%)",
+                  border: "none",
+                }}
+              >
+                Confirm & Submit Order
+              </Button>
+            </Space>
+          </Space>
+        </Modal>
       </div>
 
       {/* Responsive CSS */}
@@ -1310,6 +1524,13 @@ const ShirtOrdering = () => {
         @media (max-width: 768px) {
           .shirt-order-grid {
             grid-template-columns: 1fr !important;
+          }
+          .header-section {
+            padding-top: 60px !important;
+          }
+          .header-section button {
+            position: static !important;
+            margin-bottom: 20px !important;
           }
         }
       `}</style>

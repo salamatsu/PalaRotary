@@ -19,6 +19,7 @@ const ShirtOrdering = lazy(() => import("../pages/Palarotary/ShirtOrdering"));
 const OrderConfirmation = lazy(() =>
   import("../pages/Palarotary/OrderConfirmation")
 );
+const Success = lazy(() => import("../pages/Palarotary/Success"));
 const PalarotaryAdminRoute = lazy(() =>
   import("./pageRoutes/PalarotaryAdminRoute")
 );
@@ -70,6 +71,14 @@ const RootRoutes = () => {
       element: (
         <Suspense fallback={<LoadingFallback />}>
           <OrderConfirmation />
+        </Suspense>
+      ),
+    },
+    {
+      path: "/palarotary/success",
+      element: (
+        <Suspense fallback={<LoadingFallback />}>
+          <Success />
         </Suspense>
       ),
     },

@@ -18,6 +18,7 @@ import { useNavigate } from "react-router";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { shirtTemplate } from "../../assets/images/Other";
+import { logo2, logoBanner } from "../../assets/images/logos";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -274,7 +275,7 @@ export default function PalarotaryLandingPage() {
                   }}
                   transition={{ duration: 3, repeat: Infinity }}
                 >
-                  PALAROTARY 2026
+                  <img src={logo2} />
                 </motion.span>
               </Title>
             </motion.div>
@@ -292,9 +293,12 @@ export default function PalarotaryLandingPage() {
                   fontWeight: "400",
                   marginBottom: "24px",
                   fontSize: "clamp(18px, 3vw, 28px)",
+                  textAlign: "center",
                 }}
               >
-                Radio Enthusiasts Convention
+                <center>
+                  <img src={logoBanner} className=" max-w-[500px]" />
+                </center>
               </Title>
             </motion.div>
 

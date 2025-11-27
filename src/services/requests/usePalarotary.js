@@ -17,6 +17,7 @@ import {
   getMemberBadge,
   getMemberDetails,
   getPaymentInfo,
+  getRegisteredClub,
   getVerifyQrCode,
   registerClub,
   registerMember,
@@ -58,6 +59,17 @@ export const useGetCheckAvailability = () => {
 export const useSubmitShirtOrder = () => {
   return useMutation({
     mutationFn: submitShirtOrder,
+  });
+};
+
+// ============================================
+// PUBLIC HOOKS - Club Registration
+// ============================================
+
+export const useGetRegisteredClub = () => {
+  return useQuery({
+    queryKey: ["getRegisteredClub"],
+    queryFn: getRegisteredClub,
   });
 };
 
