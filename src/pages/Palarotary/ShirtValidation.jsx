@@ -3,7 +3,12 @@ import { useNavigate } from "react-router";
 import { Button, Upload, message, Card, Typography, Spin, Divider } from "antd";
 import { QrCode, Upload as UploadIcon, Scan, ArrowRight } from "lucide-react";
 import { Html5Qrcode } from "html5-qrcode";
-import { getMemberDetails } from "../../services/api/palarotaryApi";
+import { useGetVerifyQrCode } from "../../services/requests/usePalarotary";
+
+// QR Code Format: qrCode:firstName:lastName:eventTag:origin
+// - qrCode: must be exactly 18 characters
+// - origin: P (preregistration) or O (onsite)
+// - Total: 5 parts separated by 4 colons
 
 const { Title, Text } = Typography;
 
@@ -11,19 +16,74 @@ const ShirtValidation = () => {
   const [loading, setLoading] = useState(false);
   const [scanning, setScanning] = useState(false);
   const navigate = useNavigate();
+  const { mutateAsync: verifyQrCode } = useGetVerifyQrCode();
 
-  const validateMember = async (memberId) => {
+  // Validate QR code format before API call
+  const validateQrCodeFormat = (scannedValue) => {
+    // Split by colon
+    const parts = scannedValue.split(":");
+
+    // Check if we have exactly 5 parts (qrCode:firstName:lastName:eventTag:origin)
+    if (parts.length !== 5) {
+      return {
+        isValid: false,
+        error:
+          "Invalid QR code format. Expected format: qrCode:firstName:lastName:eventTag:origin",
+      };
+    }
+
+    const [qrCode, firstName, lastName, eventTag, origin] = parts;
+
+    // Validate qrCode length (must be 18 chars)
+    if (qrCode.length !== 18) {
+      return {
+        isValid: false,
+        error: "Invalid QR code ID. Must be exactly 18 characters.",
+      };
+    }
+
+    // Validate all parts are non-empty
+    if (!firstName || !lastName || !eventTag || !origin) {
+      return {
+        isValid: false,
+        error: "QR code is incomplete. All fields are required.",
+      };
+    }
+
+    // Validate origin (must be P or O)
+    if (origin !== "P" && origin !== "O") {
+      return {
+        isValid: false,
+        error:
+          "Invalid origin code. Must be 'P' (preregistration) or 'O' (onsite).",
+      };
+    }
+
+    return {
+      isValid: true,
+      data: { qrCode, firstName, lastName, eventTag, origin },
+    };
+  };
+
+  const validateMember = async (qrCode) => {
+    // Validate QR code format
+    const validation = validateQrCodeFormat(qrCode);
+    if (!validation.isValid) {
+      message.error(validation.error);
+      return;
+    }
+
     try {
       setLoading(true);
-      const response = await getMemberDetails(memberId);
+      const response = await verifyQrCode(validation.data.qrCode);
 
       if (response.success && response.data) {
         message.success("Badge validated successfully!");
         // Navigate to ordering page with member data
         navigate("/order-shirt", {
           state: {
-            memberData: response.data
-          }
+            memberData: response.data,
+          },
         });
       } else {
         message.error("Invalid badge. Please try again.");
@@ -51,17 +111,8 @@ const ShirtValidation = () => {
           await html5QrCode.stop();
           setScanning(false);
 
-          // Extract member ID from QR code
-          try {
-            const qrData = JSON.parse(decodedText);
-            if (qrData.memberId) {
-              await validateMember(qrData.memberId);
-            } else {
-              message.error("Invalid QR code format");
-            }
-          } catch (e) {
-            message.error("Failed to read QR code");
-          }
+          // Validate and process QR code
+          await validateMember(decodedText);
         },
         (error) => {
           console.warn("QR scan error:", error);
@@ -69,7 +120,9 @@ const ShirtValidation = () => {
       );
     } catch (error) {
       setScanning(false);
-      message.error("Failed to start camera. Please try uploading an image instead.");
+      message.error(
+        "Failed to start camera. Please try uploading an image instead."
+      );
       console.error("Camera error:", error);
     }
   };
@@ -80,18 +133,10 @@ const ShirtValidation = () => {
       const html5QrCode = new Html5Qrcode("qr-reader-upload");
 
       const result = await html5QrCode.scanFile(file, false);
+      console.log(result);
 
-      // Extract member ID from QR code
-      try {
-        const qrData = JSON.parse(result);
-        if (qrData.memberId) {
-          await validateMember(qrData.memberId);
-        } else {
-          message.error("Invalid QR code format");
-        }
-      } catch (e) {
-        message.error("Failed to read QR code from image");
-      }
+      // Validate and process QR code
+      await validateMember(result);
     } catch (error) {
       message.error("Failed to scan QR code from image");
       console.error("Upload scan error:", error);
@@ -108,8 +153,8 @@ const ShirtValidation = () => {
     navigate("/order-shirt", {
       state: {
         memberData: null,
-        bypassValidation: true
-      }
+        bypassValidation: true,
+      },
     });
   };
 

@@ -12,6 +12,18 @@ import {
   useApprovedClubs,
   useRegisterMember,
 } from "../../services/requests/usePalarotary";
+import { imageToBase64 } from "../../utils/tobase64";
+// {
+//     "attendeeId": "KUZW80G76FL4HGW7",
+//     "qrCode": "P20251MIFRH18N1126",
+//     "fullName": "CHRISTOPHER DUNGARAN",
+//     "firstName": "CHRISTOPHER",
+//     "lastName": "DUNGARAN",
+//     "email": "toopsidy0023@gmail.com",
+//     "clubName": "DARK HORSE",
+//     "eventId": 1,
+//     "badgeUrl": "http://192.168.2.169:3000/api/v1/users/badge/KUZW80G76FL4HGW7"
+// }
 
 export default function MemberRegistration() {
   const { message } = App.useApp();
@@ -19,6 +31,8 @@ export default function MemberRegistration() {
   const [registrationComplete, setRegistrationComplete] = useState(false);
   const [badgeData, setBadgeData] = useState(null);
   const [formLoadTime] = useState(Date.now());
+
+  console.log(badgeData);
 
   const containerRef = useRef(null);
   const formRef = useRef(null);
@@ -155,19 +169,29 @@ export default function MemberRegistration() {
     }
   };
 
-  const downloadQRCode = () => {
-    if (badgeData?.badge?.qr_code_data_url) {
-      const a = document.createElement("a");
-      a.download = `PALAROTARY-${badgeData.badge_number}.png`;
-      a.href = badgeData.badge.qr_code_data_url;
-      document.body.appendChild(a);
-      a.click();
+  const downloadQRCode = async () => {
+    if (badgeData?.badgeUrl) {
+      try {
+        // Convert image URL to base64
+        const base64Image = await imageToBase64(badgeData.badgeUrl);
 
-      setTimeout(() => {
-        document.body.removeChild(a);
-      }, 100);
+        // Create download link
+        const a = document.createElement("a");
+        a.download = `PALAROTARY-${badgeData.qrCode}.png`;
+        a.href = base64Image;
+        document.body.appendChild(a);
+        a.click();
 
-      message.success("QR Code downloaded!");
+        // Cleanup
+        setTimeout(() => {
+          document.body.removeChild(a);
+        }, 100);
+
+        message.success("QR Code downloaded!");
+      } catch (error) {
+        console.error("Failed to download QR code:", error);
+        message.error("Failed to download QR code. Please try again.");
+      }
     }
   };
 
@@ -290,7 +314,7 @@ export default function MemberRegistration() {
                     marginBottom: "20px",
                   }}
                 >
-                  {badgeData.badge.qr_code_data_url && (
+                  {badgeData?.qrCode && (
                     <motion.img
                       initial={{ rotate: -10, scale: 0.8 }}
                       animate={{ rotate: 0, scale: 1 }}
@@ -299,16 +323,17 @@ export default function MemberRegistration() {
                         stiffness: 200,
                         delay: 0.5,
                       }}
-                      src={badgeData.badge.qr_code_data_url}
+                      src={badgeData?.badgeUrl}
                       alt="QR Code Badge"
                       style={{
-                        width: "220px",
-                        height: "220px",
-                        border: "3px solid #1e3a8a",
-                        borderRadius: "16px",
-                        padding: "12px",
-                        background: "white",
-                        boxShadow: "0 8px 20px rgba(30, 58, 138, 0.2)",
+                        maxWidth: "400px",
+                        // width: "220px",
+                        // height: "220px",
+                        // border: "3px solid #1e3a8a",
+                        // borderRadius: "16px",
+                        // padding: "12px",
+                        // background: "white",
+                        // boxShadow: "0 8px 20px rgba(30, 58, 138, 0.2)",
                       }}
                     />
                   )}
@@ -335,17 +360,14 @@ export default function MemberRegistration() {
                       fontSize: "14px",
                     }}
                   >
-                    <strong style={{ color: "#475569" }}>Badge:</strong>
-                    <span style={{ color: "#1e293b", fontWeight: "600" }}>
-                      {badgeData.badge_number}
-                    </span>
-
                     <strong style={{ color: "#475569" }}>Name:</strong>
                     <span
                       style={{ color: "#1e293b", fontWeight: "600" }}
                       className="uppercase"
                     >
-                      {badgeData.badge.member_name}
+                      {[badgeData?.firstName, badgeData?.lastName]
+                        .join(" ")
+                        ?.trim()}
                     </span>
 
                     <strong style={{ color: "#475569" }}>Club:</strong>
@@ -353,23 +375,23 @@ export default function MemberRegistration() {
                       style={{ color: "#1e293b", fontWeight: "600" }}
                       className="uppercase"
                     >
-                      {badgeData.badge.club_name}
+                      {badgeData?.clubName}
                     </span>
 
-                    {badgeData.badge.callsign && (
+                    {badgeData?.companyName && (
                       <>
-                        <strong style={{ color: "#475569" }}>Callsign:</strong>
+                        <strong style={{ color: "#475569" }}>Company:</strong>
                         <span style={{ color: "#1e293b", fontWeight: "600" }}>
-                          {badgeData.badge.callsign}
+                          {badgeData?.companyName}
                         </span>
                       </>
                     )}
 
-                    {badgeData.badge.position && (
+                    {badgeData?.position && (
                       <>
                         <strong style={{ color: "#475569" }}>Position:</strong>
                         <span style={{ color: "#1e293b", fontWeight: "600" }}>
-                          {badgeData.badge.position}
+                          {badgeData?.position}
                         </span>
                       </>
                     )}
@@ -458,17 +480,22 @@ export default function MemberRegistration() {
                   }}
                 >
                   <p style={{ margin: "4px 0" }}>
-                    <strong>Event:</strong> {badgeData.badge.event_name}
+                    <strong>Event:</strong> {badgeData?.eventDetails?.eventName}
                   </p>
                   <p style={{ margin: "4px 0" }}>
-                    <strong>Date:</strong> {badgeData.badge.event_date}
+                    <strong>Date:</strong> {badgeData?.eventDetails?.eventDate}
                   </p>
-                  <p style={{ margin: "4px 0" }}>
-                    <strong>Time:</strong> {badgeData.badge.event_time}
-                  </p>
-                  <p style={{ margin: "4px 0" }}>
-                    <strong>Venue:</strong> {badgeData.badge.event_location}
-                  </p>
+                  {badgeData?.eventDetails?.location && (
+                    <p style={{ margin: "4px 0" }}>
+                      <strong>Time:</strong> {badgeData?.eventDetails?.location}
+                    </p>
+                  )}
+                  {badgeData?.eventDetails?.description && (
+                    <p style={{ margin: "4px 0" }}>
+                      <strong>Venue:</strong>{" "}
+                      {badgeData?.eventDetails?.description}
+                    </p>
+                  )}
                 </div>
               </motion.div>
 
@@ -599,7 +626,7 @@ export default function MemberRegistration() {
               form={form}
               layout="vertical"
               onFinish={onFinish}
-              requiredMark={false}
+              // requiredMark={false}
             >
               <Form.Item
                 label={
@@ -615,17 +642,18 @@ export default function MemberRegistration() {
                   size="large"
                   loading={loadingClubs}
                   showSearch
+                  allowClear
                   style={{ borderRadius: "12px" }}
                   filterOption={(input, option) =>
                     option.children.toLowerCase().includes(input.toLowerCase())
                   }
-                >
-                  {clubs.map((club) => (
-                    <Select.Option key={club.id} value={club.id}>
-                      {club.club_name} {club.zone && `(${club.zone})`}
-                    </Select.Option>
-                  ))}
-                </Select>
+                  options={clubs.map((club) => ({
+                    value: club.clubId,
+                    label: `${club.clubName} ${
+                      club.zone ? `(${club.zone})` : ""
+                    }`,
+                  }))}
+                />
               </Form.Item>
 
               <Form.Item
@@ -641,16 +669,16 @@ export default function MemberRegistration() {
                   placeholder="Select category"
                   size="large"
                   style={{ borderRadius: "12px" }}
-                >
-                  <Select.Option value="Rotary">Rotary</Select.Option>
-                  <Select.Option value="Spouse / Partner">
-                    Spouse / Partner
-                  </Select.Option>
-                  <Select.Option value="Child">Child</Select.Option>
-                  <Select.Option value="Rotaract / Interact">
-                    Rotaract / Interact
-                  </Select.Option>
-                </Select>
+                  options={[
+                    { value: "Rotary", label: "Rotary" },
+                    { value: "Spouse / Partner", label: "Spouse / Partner" },
+                    { value: "Child", label: "Child" },
+                    {
+                      value: "Rotaract / Interact",
+                      label: "Rotaract / Interact",
+                    },
+                  ]}
+                />
               </Form.Item>
 
               <div
@@ -761,36 +789,6 @@ export default function MemberRegistration() {
                     style={{ borderRadius: "12px" }}
                   />
                 </Form.Item>
-
-                {/* <Form.Item
-                  label={
-                    <span style={{ fontWeight: "600", color: "#333" }}>
-                      Company Name
-                    </span>
-                  }
-                  name="companyName"
-                >
-                  <Input
-                    placeholder="Company (optional)"
-                    size="large"
-                    style={{ borderRadius: "12px" }}
-                  />
-                </Form.Item>
-
-                <Form.Item
-                  label={
-                    <span style={{ fontWeight: "600", color: "#333" }}>
-                      Designation
-                    </span>
-                  }
-                  name="designation"
-                >
-                  <Input
-                    placeholder="Job title (optional)"
-                    size="large"
-                    style={{ borderRadius: "12px" }}
-                  />
-                </Form.Item> */}
               </div>
 
               {/* Honeypot fields - hidden from users, visible to bots */}

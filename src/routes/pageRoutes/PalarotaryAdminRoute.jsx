@@ -1,4 +1,9 @@
-import { HomeOutlined, ScanOutlined, TeamOutlined, BankOutlined } from "@ant-design/icons";
+import {
+  HomeOutlined,
+  ScanOutlined,
+  TeamOutlined,
+  BankOutlined,
+} from "@ant-design/icons";
 import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router";
 import BasicLayout from "../../components/layout/BasicLayout";
@@ -18,7 +23,7 @@ const PalarotaryAdminRoute = () => {
   const isAuthenticated = useAdminAuthStore((state) => state.isAuthenticated);
 
   if (!isAuthenticated) {
-    return <Navigate to="/admin-login" replace />;
+    return <Navigate to="/admin" replace />;
   }
 
   const navigations = [

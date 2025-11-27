@@ -658,19 +658,19 @@ export default function AdminDashboard() {
                       dataSource={attendance.recent_scans?.slice(0, 5) || []}
                       columns={[
                         {
-                          title: "Name",
-                          dataIndex: "member_name",
-                          key: "member_name",
+                          title: "First Name",
+                          dataIndex: "firstName",
+                          key: "firstName",
                         },
                         {
                           title: "Club",
-                          dataIndex: "club_name",
-                          key: "club_name",
+                          dataIndex: "clubName",
+                          key: "clubName",
                         },
                         {
                           title: "Time",
-                          dataIndex: "scanned_at",
-                          key: "scanned_at",
+                          dataIndex: "scannedAt",
+                          key: "scannedAt",
                           render: (date) => new Date(date).toLocaleTimeString(),
                         },
                       ]}

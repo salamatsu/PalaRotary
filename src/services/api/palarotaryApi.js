@@ -9,8 +9,49 @@ export const getCsrfToken = async () => {
   // Use a separate axios instance without CSRF token for fetching the CSRF token
   // to avoid circular dependency
   const response = await axiosInstance.get("/api/v1/users/csrf-token");
-  return response.data;   
+  return response.data;
 };
+
+// ============================================
+// PUBLIC APIS - Member Registration
+// ============================================
+
+export const getApprovedClubs = async () => {
+  const response = await axiosInstance.get("/api/v1/users/clubs");
+  return response.data;
+};
+
+export const registerMember = async (data) => {
+  const response = await axiosInstance.post(
+    "/api/v1/users/register/visitor",
+    data
+  );
+  return response.data;
+};
+
+export const getVerifyQrCode = async (qrCode) => {
+  const response = await axiosInstance.get(
+    `/api/v1/users/visitors/verify/${qrCode}`
+  );
+  return response.data;
+};
+
+// ============================================
+// SHIRT ORDERING API
+// ============================================
+
+export const submitShirtOrder = async (orderData) => {
+  const response = await axiosInstance.post("/api/shirts/order", orderData);
+  return response.data;
+};
+
+
+
+
+
+// ============================================
+// OLD API - must remove when done
+// ============================================
 
 // ============================================
 // ADMIN AUTH
@@ -51,11 +92,6 @@ export const getPaymentInfo = async () => {
   return response.data;
 };
 
-export const getApprovedClubs = async () => {
-  const response = await axiosInstance.get("/api/v1/users/clubs");
-  return response.data;
-};
-
 // export const getApprovedClubs = async () => {
 //   const response = await axiosInstance.get("/api/v1/users/clubs");
 //   return response.data;
@@ -63,15 +99,6 @@ export const getApprovedClubs = async () => {
 
 export const checkClubStatus = async (clubId) => {
   const response = await axiosInstance.get(`/api/clubs/${clubId}/status`);
-  return response.data;
-};
-
-// ============================================
-// PUBLIC APIS - Member Registration
-// ============================================
-
-export const registerMember = async (data) => {
-  const response = await axiosInstance.post("/api/members/register", data);
   return response.data;
 };
 
@@ -183,10 +210,6 @@ export const exportAttendance = async (date) => {
 // SHIRT ORDER APIS
 // ============================================
 
-export const submitShirtOrder = async (orderData) => {
-  const response = await axiosInstance.post("/api/shirts/order", orderData);
-  return response.data;
-};
 
 export const getShirtOrders = async (params) => {
   const response = await axios.get("/api/admin/shirts/orders", { params });
@@ -194,9 +217,12 @@ export const getShirtOrders = async (params) => {
 };
 
 export const updateShirtOrderStatus = async (orderId, status) => {
-  const response = await axios.put(`/api/admin/shirts/orders/${orderId}/status`, {
-    status,
-  });
+  const response = await axios.put(
+    `/api/admin/shirts/orders/${orderId}/status`,
+    {
+      status,
+    }
+  );
   return response.data;
 };
 

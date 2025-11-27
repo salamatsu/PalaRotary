@@ -1,6 +1,8 @@
 import {
   ArrowRightOutlined,
   DeleteOutlined,
+  EditOutlined,
+  LockOutlined,
   ShoppingCartOutlined,
 } from "@ant-design/icons";
 import {
@@ -9,11 +11,11 @@ import {
   Card,
   Divider,
   Form,
+  Image,
   Input,
   message,
   Modal,
   Radio,
-  Select,
   Space,
   Spin,
   Table,
@@ -26,13 +28,11 @@ import {
   ADULT_SHIRT_SIZES,
   KID_SHIRT_SIZES,
   SHIRT_PRICING,
-  ZONE_INFORMATION,
 } from "../../lib/constants";
 import { draw } from "../../hooks/useCanvas";
-import { submitShirtOrder } from "../../services/api/palarotaryApi";
+import { useSubmitShirtOrder } from "../../services/requests/usePalarotary";
 
 const { Title, Text } = Typography;
-const { Option } = Select;
 
 const ShirtOrdering = () => {
   const location = useLocation();
@@ -42,25 +42,27 @@ const ShirtOrdering = () => {
   const [currentOrder, setCurrentOrder] = useState({
     id: Date.now(),
     name: "",
-    zone: "",
     size: "",
     sizeCategory: "adult",
-    number: "",
-    specialNumber: "",
-    contactNumber: "",
+    shirtNumber: "",
+    desiredNumber: "",
     price: 0,
     preview: null,
   });
-  const [submitting, setSubmitting] = useState(false);
   const [showSizeInfo, setShowSizeInfo] = useState(false);
   const [memberData, setMemberData] = useState(null);
   const [previewLoading, setPreviewLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [isContactEditable, setIsContactEditable] = useState(false);
+  const [showEditConfirm, setShowEditConfirm] = useState(false);
 
+  const { mutate: submitOrder, isPending: submitting } = useSubmitShirtOrder();
+console.log(memberData)
   useEffect(() => {
     const data = location.state?.memberData;
-    const bypassValidation = location.state?.bypassValidation;
 
-    if (!data && !bypassValidation) {
+    if (!data) {
       message.warning("Please validate your badge first");
       navigate("/shirt-validation");
       return;
@@ -68,40 +70,57 @@ const ShirtOrdering = () => {
 
     setMemberData(data);
 
-    if (data?.mobile_number) {
-      setCurrentOrder((prev) => ({
-        ...prev,
-        contactNumber: data.mobile_number,
-      }));
-      form.setFieldValue("contactNumber", data.mobile_number);
+    // Set email and mobile number from memberData
+    if (data?.email) {
+      setEmail(data.email);
+      form.setFieldValue("email", data.email);
     }
 
-    if (data?.last_name) {
-      setCurrentOrder((prev) => ({
-        ...prev,
-        name: data.last_name,
-      }));
-      form.setFieldValue("name", data.last_name);
+    if (data?.mobileNumber) {
+      setMobileNumber(data.mobileNumber);
+      form.setFieldValue("mobileNumber", data.mobileNumber);
     }
 
-    if (data?.zone) {
+    // Set lastName as default name if available
+    if (data?.lastName) {
       setCurrentOrder((prev) => ({
         ...prev,
-        zone: data.zone,
+        name: data.lastName,
       }));
-      form.setFieldValue("zone", data.zone);
+      form.setFieldValue("name", data.lastName);
     }
+
+    // Generate initial preview with default values
+    const generateInitialPreview = async () => {
+      if (data?.zone) {
+        try {
+          setPreviewLoading(true);
+          const preview = await draw({
+            name: "SHIRT NAME",
+            zone: data.zone,
+            number: "00",
+          });
+          setCurrentOrder((prev) => ({ ...prev, preview }));
+        } catch (error) {
+          console.error("Initial preview generation error:", error);
+        } finally {
+          setPreviewLoading(false);
+        }
+      }
+    };
+
+    generateInitialPreview();
   }, [location, navigate, form]);
 
   const generatePreview = async (orderData) => {
-    if (!orderData.zone || !orderData.name) return null;
+    if (!memberData?.zone || !orderData.name) return null;
 
     try {
       setPreviewLoading(true);
       const preview = await draw({
         name: orderData.name,
-        zone: orderData.zone,
-        number: orderData.number || "",
+        zone: memberData.zone,
+        number: orderData.shirtNumber || "",
       });
       return preview;
     } catch (error) {
@@ -125,10 +144,26 @@ const ShirtOrdering = () => {
     form.setFieldValue(field, value);
 
     // Auto-generate preview when key fields change
-    if (["name", "zone", "number"].includes(field)) {
+    if (["name", "shirtNumber"].includes(field)) {
       const preview = await generatePreview(updatedOrder);
       setCurrentOrder((prev) => ({ ...prev, preview }));
     }
+  };
+
+  const handleEditContactToggle = () => {
+    if (isContactEditable) {
+      // If turning off edit mode, just disable
+      setIsContactEditable(false);
+    } else {
+      // If turning on edit mode, show confirmation
+      setShowEditConfirm(true);
+    }
+  };
+
+  const confirmEditContact = () => {
+    setIsContactEditable(true);
+    setShowEditConfirm(false);
+    message.info("You can now edit email and mobile number");
   };
 
   const addOrderToCart = async () => {
@@ -152,27 +187,21 @@ const ShirtOrdering = () => {
       setOrders([...orders, newOrder]);
       message.success("Shirt added to cart!");
 
-      // Reset form for new order
-      const contactNumber = currentOrder.contactNumber;
-      const zone = memberData?.zone || "";
+      // Reset form for new order but keep email and mobileNumber
       setCurrentOrder({
         id: Date.now(),
         name: "",
-        zone,
         size: "",
         sizeCategory: "adult",
-        number: "",
-        specialNumber: "",
-        contactNumber,
+        shirtNumber: "",
+        desiredNumber: "",
         price: 0,
         preview: null,
       });
 
       form.resetFields();
-      form.setFieldValue("contactNumber", contactNumber);
-      if (zone) {
-        form.setFieldValue("zone", zone);
-      }
+      form.setFieldValue("email", email);
+      form.setFieldValue("mobileNumber", mobileNumber);
     } catch (error) {
       message.error("Please fill in all required fields");
     }
@@ -189,53 +218,43 @@ const ShirtOrdering = () => {
       return;
     }
 
-    try {
-      setSubmitting(true);
+    const orderData = {
+      qrCode: memberData?.qrCode,
+      email: email,
+      zone: memberData?.zone,
+      mobileNumber: mobileNumber,
+      shirtConfig: orders.map((order) => ({
+        name: order.name,
+        size: order.size,
+        shirtNumber: order.shirtNumber,
+        desiredNumber: order.desiredNumber || "",
+      })),
+    };
 
-      const orderData = {
-        memberId: memberData?.id,
-        orders: orders.map((order) => ({
-          name: order.name,
-          zone: order.zone,
-          size: order.size,
-          number: order.number,
-          specialNumber: order.specialNumber,
-          contactNumber: order.contactNumber,
-          price: order.price,
-        })),
-        totalAmount: orders.reduce((sum, order) => sum + order.price, 0),
-      };
-
-      const response = await submitShirtOrder(orderData);
-
-      if (response.success) {
+    submitOrder(orderData, {
+      onSuccess: (response) => {
         message.success("Order submitted successfully!");
         navigate("/order-confirmation", {
           state: {
-            orderId: response.data.orderId,
+            orderId: response.data?.orderId,
             orders,
-            totalAmount: orderData.totalAmount,
+            totalAmount: orders.reduce((sum, order) => sum + order.price, 0),
           },
         });
-      } else {
-        message.error(response.message || "Failed to submit order");
-      }
-    } catch (error) {
-      message.error("Failed to submit order. Please try again.");
-      console.error("Order submission error:", error);
-    } finally {
-      setSubmitting(false);
-    }
+      },
+      onError: (error) => {
+        message.error(
+          error.message || "Failed to submit order. Please try again."
+        );
+        console.error("Order submission error:", error);
+      },
+    });
   };
 
   const getSizeOptions = () => {
     return currentOrder.sizeCategory === "kid"
       ? KID_SHIRT_SIZES
       : ADULT_SHIRT_SIZES;
-  };
-
-  const getZoneInfo = (zone) => {
-    return ZONE_INFORMATION.find((z) => z.zone === zone);
   };
 
   const getTotalAmount = () => {
@@ -311,33 +330,95 @@ const ShirtOrdering = () => {
               </Title>
 
               <Form form={form} layout="vertical">
-                {/* Zone Selection */}
+                {/* Email Field */}
                 <Form.Item
-                  label={<Text strong>Zone</Text>}
-                  name="zone"
+                  label={
+                    <Space>
+                      <Text strong>Email</Text>
+                      <Button
+                        type="link"
+                        size="small"
+                        icon={
+                          isContactEditable ? (
+                            <LockOutlined />
+                          ) : (
+                            <EditOutlined />
+                          )
+                        }
+                        onClick={handleEditContactToggle}
+                      >
+                        {isContactEditable ? "Lock" : "Edit"}
+                      </Button>
+                    </Space>
+                  }
+                  name="email"
                   rules={[
-                    { required: true, message: "Please select your zone" },
+                    { required: true, message: "Please enter your email" },
+                    { type: "email", message: "Please enter a valid email" },
                   ]}
                 >
-                  <Select
-                    placeholder="Select your zone"
-                    onChange={(value) => handleFieldChange("zone", value)}
+                  <Input
+                    placeholder="your.email@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={!isContactEditable}
                     size="large"
-                  >
-                    {ZONE_INFORMATION.map((zone) => (
-                      <Option key={zone.zone} value={zone.zone}>
-                        <Space>
-                          <Badge color="#1c3c6d" />
-                          {zone.zone} - {zone.area} ({zone.color})
-                        </Space>
-                      </Option>
-                    ))}
-                  </Select>
+                  />
                 </Form.Item>
+
+                {/* Mobile Number Field */}
+                <Form.Item
+                  label={<Text strong>Mobile Number</Text>}
+                  name="mobileNumber"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please enter your mobile number",
+                    },
+                    {
+                      pattern: /^[0-9]{10,11}$/,
+                      message: "Enter valid 10-11 digit phone number",
+                    },
+                  ]}
+                >
+                  <Input
+                    placeholder="09XXXXXXXXX"
+                    value={mobileNumber}
+                    onChange={(e) => setMobileNumber(e.target.value)}
+                    disabled={!isContactEditable}
+                    size="large"
+                    maxLength={11}
+                  />
+                </Form.Item>
+
+                {/* Zone Display (Read-only) */}
+                {memberData?.zone && (
+                  <div
+                    style={{
+                      padding: "12px 16px",
+                      background: "#f5f5f5",
+                      borderRadius: "8px",
+                      marginBottom: "24px",
+                    }}
+                  >
+                    <Text type="secondary" style={{ fontSize: "12px" }}>
+                      Zone
+                    </Text>
+                    <div>
+                      <Text strong style={{ fontSize: "16px" }}>
+                        {memberData.zone}
+                      </Text>
+                    </div>
+                  </div>
+                )}
 
                 {/* Name Input */}
                 <Form.Item
-                  label={<Text strong>Name (on shirt)</Text>}
+                  label={
+                    <Text strong>
+                      Name <small>(on shirt)</small>
+                    </Text>
+                  }
                   name="name"
                   rules={[
                     { required: true, message: "Please enter the name" },
@@ -354,55 +435,68 @@ const ShirtOrdering = () => {
 
                 {/* Shirt Number */}
                 <Form.Item
-                  label={<Text strong>Shirt Number (Optional)</Text>}
-                  name="number"
+                  label={
+                    <Text strong>
+                      Shirt Number{" "}
+                      <small>(must be a number between 00-99)</small>
+                    </Text>
+                  }
+                  name="shirtNumber"
+                  rules={[
+                    { required: true, message: "Please enter shirt number" },
+                    {
+                      pattern: /^[0-9]{1,2}$/,
+                      message: "Enter a number between 00-99",
+                    },
+                  ]}
                 >
                   <Input
-                    placeholder="1-99"
-                    onChange={(e) =>
-                      handleFieldChange("number", e.target.value)
-                    }
+                    placeholder="00-99"
+                    onChange={(e) => {
+                      let value = e.target.value.replace(/\D/g, "");
+                      handleFieldChange("shirtNumber", value);
+                    }}
+                    onBlur={(e) => {
+                      let value = e.target.value.replace(/\D/g, "");
+                      if (value.length === 1) {
+                        value = value.padStart(2, "0");
+                        form.setFieldValue("shirtNumber", value);
+                        handleFieldChange("shirtNumber", value);
+                      }
+                    }}
                     size="large"
                     maxLength={2}
                   />
                 </Form.Item>
 
-                {/* Special Number */}
+                {/* Desired Number (if shirt number is taken) */}
                 <Form.Item
-                  label={<Text strong>Special Number (Requires Approval)</Text>}
-                  name="specialNumber"
+                  label={
+                    <Text strong>
+                      Desired Number{" "}
+                      <Text type="secondary" style={{ fontSize: "12px" }}>
+                        (if shirt number is taken but still wanted)
+                      </Text>
+                    </Text>
+                  }
+                  name="desiredNumber"
                 >
                   <Input
                     placeholder="e.g., 00, 99"
-                    onChange={(e) =>
-                      handleFieldChange("specialNumber", e.target.value)
-                    }
+                    onChange={(e) => {
+                      let value = e.target.value.replace(/\D/g, "");
+                      handleFieldChange("desiredNumber", value);
+                    }}
+                    onBlur={(e) => {
+                      let value = e.target.value.replace(/\D/g, "");
+                      if (value.length === 1) {
+                        value = value.padStart(2, "0");
+                        form.setFieldValue("desiredNumber", value);
+                        handleFieldChange("desiredNumber", value);
+                      }
+                    }}
                     size="large"
-                  />
-                </Form.Item>
-
-                {/* Contact Number */}
-                <Form.Item
-                  label={<Text strong>Contact Number</Text>}
-                  name="contactNumber"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please enter your contact number",
-                    },
-                    {
-                      pattern: /^[0-9]{10,11}$/,
-                      message: "Enter valid 10-11 digit phone number",
-                    },
-                  ]}
-                >
-                  <Input
-                    placeholder="09XXXXXXXXX"
-                    onChange={(e) =>
-                      handleFieldChange("contactNumber", e.target.value)
-                    }
-                    size="large"
-                    maxLength={11}
+                    maxLength={2}
                   />
                 </Form.Item>
 
@@ -597,7 +691,7 @@ const ShirtOrdering = () => {
                   </div>
                 ) : currentOrder.preview ? (
                   <div style={{ textAlign: "center" }}>
-                    <motion.img
+                    {/* <motion.img
                       initial={{ scale: 0.9, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       transition={{ duration: 0.3 }}
@@ -609,6 +703,17 @@ const ShirtOrdering = () => {
                         borderRadius: "12px",
                         boxShadow: "0 8px 30px rgba(0,0,0,0.15)",
                       }}
+                    /> */}
+                    <Image
+                      src={currentOrder.preview}
+                      alt="Shirt Preview"
+                      style={{
+                        width: "100%",
+                        maxWidth: "500px",
+                        borderRadius: "12px",
+                        boxShadow: "0 8px 30px rgba(0,0,0,0.15)",
+                      }}
+                      // preview={false}
                     />
                   </div>
                 ) : (
@@ -671,7 +776,6 @@ const ShirtOrdering = () => {
                 }}
               >
                 {orders.map((order) => {
-                  const orderZoneInfo = getZoneInfo(order.zone);
                   return (
                     <motion.div
                       key={order.id}
@@ -706,12 +810,19 @@ const ShirtOrdering = () => {
                           <Text strong style={{ fontSize: "16px" }}>
                             {order.name}
                           </Text>
-                          <Text type="secondary">
-                            {order.zone} - {orderZoneInfo?.area}
-                          </Text>
                           <Text type="secondary">Size: {order.size}</Text>
-                          {order.number && (
-                            <Text type="secondary">Number: {order.number}</Text>
+                          {order.shirtNumber && (
+                            <Text type="secondary">
+                              Number: {order.shirtNumber}
+                            </Text>
+                          )}
+                          {order.desiredNumber && (
+                            <Text
+                              type="secondary"
+                              style={{ fontStyle: "italic" }}
+                            >
+                              Desired: {order.desiredNumber}
+                            </Text>
                           )}
                           <div
                             style={{
@@ -774,6 +885,38 @@ const ShirtOrdering = () => {
             </Card>
           </motion.div>
         )}
+
+        {/* Edit Contact Confirmation Modal */}
+        <Modal
+          title="Edit Contact Information"
+          open={showEditConfirm}
+          onOk={confirmEditContact}
+          onCancel={() => setShowEditConfirm(false)}
+          okText="Yes, Edit"
+          cancelText="Cancel"
+        >
+          <Space direction="vertical" size="large" style={{ width: "100%" }}>
+            <Text>
+              Are you sure you want to edit your email and mobile number? These
+              changes will apply to all shirts in your order.
+            </Text>
+            <div
+              style={{
+                background: "#fff7e6",
+                padding: "12px",
+                borderRadius: "8px",
+                border: "1px solid #ffd591",
+              }}
+            >
+              <Text strong>Current Information:</Text>
+              <div style={{ marginTop: "8px" }}>
+                <Text>Email: {email}</Text>
+                <br />
+                <Text>Mobile: {mobileNumber}</Text>
+              </div>
+            </div>
+          </Space>
+        </Modal>
 
         {/* Size Chart Modal */}
         <Modal

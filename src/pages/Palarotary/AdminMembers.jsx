@@ -76,8 +76,8 @@ export default function AdminMembers() {
   const columns = [
     {
       title: "Badge Number",
-      dataIndex: "badge_number",
-      key: "badge_number",
+      dataIndex: "qrcode",
+      key: "qrcode",
       fixed: "left",
       width: 150,
     },
@@ -236,7 +236,7 @@ export default function AdminMembers() {
           <>
             <Descriptions bordered column={1} size="small">
               <Descriptions.Item label="Badge Number">
-                <strong>{selectedMember.badge_number}</strong>
+                <strong>{selectedMember.qrcode}</strong>
               </Descriptions.Item>
               <Descriptions.Item label="First Name">
                 {selectedMember.first_name}

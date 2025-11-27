@@ -1,30 +1,61 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  registerClub,
-  uploadPaymentProof,
-  getPaymentInfo,
-  getApprovedClubs,
-  checkClubStatus,
-  registerMember,
-  getMemberBadge,
-  getMemberDetails,
-  getAdminDashboard,
-  getAdminAnalytics,
-  getAdminClubs,
-  getAdminClubDetails,
   approveClub,
-  rejectClub,
-  getAdminMembers,
+  checkClubStatus,
   deleteMember,
+  exportAttendance,
+  getAdminAnalytics,
+  getAdminClubDetails,
+  getAdminClubs,
+  getAdminDashboard,
+  getAdminMembers,
   getAdminZones,
-  scanQRCode,
+  getApprovedClubs,
   getAttendanceStats,
   getMemberAttendance,
-  exportAttendance,
-} from '../api/palarotaryApi';
+  getMemberBadge,
+  getMemberDetails,
+  getPaymentInfo,
+  getVerifyQrCode,
+  registerClub,
+  registerMember,
+  rejectClub,
+  scanQRCode,
+  submitShirtOrder,
+  uploadPaymentProof,
+} from "../api/palarotaryApi";
 
 // ============================================
-// PUBLIC HOOKS - Club Registration
+// PUBLIC HOOKS - Member Registration
+// ============================================
+
+export const useRegisterMember = () => {
+  return useMutation({
+    mutationFn: registerMember,
+  });
+};
+
+export const useApprovedClubs = () => {
+  return useQuery({
+    queryKey: ["approved-clubs"],
+    queryFn: getApprovedClubs,
+  });
+};
+
+export const useGetVerifyQrCode = () => {
+  return useMutation({
+    mutationFn: getVerifyQrCode,
+  });
+};
+
+export const useSubmitShirtOrder = () => {
+  return useMutation({
+    mutationFn: submitShirtOrder,
+  });
+};
+
+// ============================================
+// OLD HOOKS
 // ============================================
 
 export const useRegisterClub = () => {
@@ -38,29 +69,22 @@ export const useUploadPaymentProof = () => {
   return useMutation({
     mutationFn: ({ clubId, file }) => uploadPaymentProof(clubId, file),
     onSuccess: () => {
-      queryClient.invalidateQueries(['club-status']);
+      queryClient.invalidateQueries(["club-status"]);
     },
   });
 };
 
 export const usePaymentInfo = () => {
   return useQuery({
-    queryKey: ['payment-info'],
+    queryKey: ["payment-info"],
     queryFn: getPaymentInfo,
     staleTime: 1000 * 60 * 60, // 1 hour
   });
 };
 
-export const useApprovedClubs = () => {
-  return useQuery({
-    queryKey: ['approved-clubs'],
-    queryFn: getApprovedClubs,
-  });
-};
-
 export const useClubStatus = (clubId, enabled = true) => {
   return useQuery({
-    queryKey: ['club-status', clubId],
+    queryKey: ["club-status", clubId],
     queryFn: () => checkClubStatus(clubId),
     enabled: !!clubId && enabled,
   });
@@ -70,15 +94,9 @@ export const useClubStatus = (clubId, enabled = true) => {
 // PUBLIC HOOKS - Member Registration
 // ============================================
 
-export const useRegisterMember = () => {
-  return useMutation({
-    mutationFn: registerMember,
-  });
-};
-
 export const useMemberBadge = (memberId, enabled = true) => {
   return useQuery({
-    queryKey: ['member-badge', memberId],
+    queryKey: ["member-badge", memberId],
     queryFn: () => getMemberBadge(memberId),
     enabled: !!memberId && enabled,
   });
@@ -86,7 +104,7 @@ export const useMemberBadge = (memberId, enabled = true) => {
 
 export const useMemberDetails = (memberId, enabled = true) => {
   return useQuery({
-    queryKey: ['member-details', memberId],
+    queryKey: ["member-details", memberId],
     queryFn: () => getMemberDetails(memberId),
     enabled: !!memberId && enabled,
   });
@@ -98,7 +116,7 @@ export const useMemberDetails = (memberId, enabled = true) => {
 
 export const useAdminDashboard = () => {
   return useQuery({
-    queryKey: ['admin-dashboard'],
+    queryKey: ["admin-dashboard"],
     queryFn: getAdminDashboard,
     refetchInterval: 60000, // Refetch every minute
   });
@@ -106,15 +124,16 @@ export const useAdminDashboard = () => {
 
 export const useAdminAnalytics = () => {
   return useQuery({
-    queryKey: ['admin-analytics'],
+    queryKey: ["admin-analytics"],
     queryFn: getAdminAnalytics,
   });
 };
 
 export const useAdvancedAnalytics = () => {
   return useQuery({
-    queryKey: ['advanced-analytics'],
-    queryFn: () => import('../api/palarotaryApi').then(m => m.getAdvancedAnalytics()),
+    queryKey: ["advanced-analytics"],
+    queryFn: () =>
+      import("../api/palarotaryApi").then((m) => m.getAdvancedAnalytics()),
     refetchInterval: 60000, // Refetch every minute
   });
 };
@@ -125,14 +144,14 @@ export const useAdvancedAnalytics = () => {
 
 export const useAdminClubs = (params = {}) => {
   return useQuery({
-    queryKey: ['admin-clubs', params],
+    queryKey: ["admin-clubs", params],
     queryFn: () => getAdminClubs(params),
   });
 };
 
 export const useAdminClubDetails = (clubId, enabled = true) => {
   return useQuery({
-    queryKey: ['admin-club-details', clubId],
+    queryKey: ["admin-club-details", clubId],
     queryFn: () => getAdminClubDetails(clubId),
     enabled: !!clubId && enabled,
   });
@@ -143,9 +162,9 @@ export const useApproveClub = () => {
   return useMutation({
     mutationFn: approveClub,
     onSuccess: () => {
-      queryClient.invalidateQueries(['admin-clubs']);
-      queryClient.invalidateQueries(['admin-dashboard']);
-      queryClient.invalidateQueries(['admin-club-details']);
+      queryClient.invalidateQueries(["admin-clubs"]);
+      queryClient.invalidateQueries(["admin-dashboard"]);
+      queryClient.invalidateQueries(["admin-club-details"]);
     },
   });
 };
@@ -153,11 +172,12 @@ export const useApproveClub = () => {
 export const useRejectClub = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ clubId, rejectionReason }) => rejectClub(clubId, rejectionReason),
+    mutationFn: ({ clubId, rejectionReason }) =>
+      rejectClub(clubId, rejectionReason),
     onSuccess: () => {
-      queryClient.invalidateQueries(['admin-clubs']);
-      queryClient.invalidateQueries(['admin-dashboard']);
-      queryClient.invalidateQueries(['admin-club-details']);
+      queryClient.invalidateQueries(["admin-clubs"]);
+      queryClient.invalidateQueries(["admin-dashboard"]);
+      queryClient.invalidateQueries(["admin-club-details"]);
     },
   });
 };
@@ -168,7 +188,7 @@ export const useRejectClub = () => {
 
 export const useAdminMembers = (params = {}) => {
   return useQuery({
-    queryKey: ['admin-members', params],
+    queryKey: ["admin-members", params],
     queryFn: () => getAdminMembers(params),
   });
 };
@@ -178,9 +198,9 @@ export const useDeleteMember = () => {
   return useMutation({
     mutationFn: deleteMember,
     onSuccess: () => {
-      queryClient.invalidateQueries(['admin-members']);
-      queryClient.invalidateQueries(['admin-dashboard']);
-      queryClient.invalidateQueries(['admin-club-details']);
+      queryClient.invalidateQueries(["admin-members"]);
+      queryClient.invalidateQueries(["admin-dashboard"]);
+      queryClient.invalidateQueries(["admin-club-details"]);
     },
   });
 };
@@ -191,7 +211,7 @@ export const useDeleteMember = () => {
 
 export const useAdminZones = () => {
   return useQuery({
-    queryKey: ['admin-zones'],
+    queryKey: ["admin-zones"],
     queryFn: getAdminZones,
   });
 };
@@ -205,14 +225,14 @@ export const useScanQRCode = () => {
   return useMutation({
     mutationFn: scanQRCode,
     onSuccess: () => {
-      queryClient.invalidateQueries(['attendance-stats']);
+      queryClient.invalidateQueries(["attendance-stats"]);
     },
   });
 };
 
 export const useAttendanceStats = () => {
   return useQuery({
-    queryKey: ['attendance-stats'],
+    queryKey: ["attendance-stats"],
     queryFn: getAttendanceStats,
     refetchInterval: 30000, // Refetch every 30 seconds
   });
@@ -220,7 +240,7 @@ export const useAttendanceStats = () => {
 
 export const useMemberAttendance = (memberId, enabled = true) => {
   return useQuery({
-    queryKey: ['member-attendance', memberId],
+    queryKey: ["member-attendance", memberId],
     queryFn: () => getMemberAttendance(memberId),
     enabled: !!memberId && enabled,
   });

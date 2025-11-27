@@ -607,7 +607,7 @@ export default function PalarotaryLandingPage() {
                           fontSize: "32px",
                         }}
                       >
-                        Starting at ₱500
+                        ₱300
                       </Title>
                       <Paragraph
                         style={{
@@ -616,16 +616,17 @@ export default function PalarotaryLandingPage() {
                           color: "#666",
                         }}
                       >
-                        Customized shirt with your callsign
+                        All sizes - with custom name and number (00-99)
                       </Paragraph>
                     </motion.div>
 
                     <div style={{ marginBottom: "28px" }}>
                       {[
-                        "Choose your size and color",
-                        "Add your callsign and name",
+                        "Must be a registered member",
+                        "Upload / scan your member badge",
+                        "Choose your size",
+                        "Add your name and 2-digit number (00-99)",
                         "Secure online payment",
-                        "Pick up at the event",
                       ].map((text, i) => (
                         <motion.div
                           key={i}

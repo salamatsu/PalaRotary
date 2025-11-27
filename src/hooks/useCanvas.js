@@ -2,16 +2,16 @@ import { createCanvas, loadImage } from "canvas";
 
 import { imageToBase64 } from "../utils/tobase64";
 import { SHIRT_ZONES_IMAGE } from "../lib/constants";
-import VarsityTeamFont from "../assets/fonts/VarsityTeam-Bold.otf";
+import Athletic from "../assets/fonts/Athletic.ttf";
 
 // Load custom font for canvas use
 const loadFont = async () => {
   try {
-    const font = new FontFace("VarsityTeam", `url(${VarsityTeamFont})`);
+    const font = new FontFace("Athletic", `url(${Athletic})`);
     await font.load();
     document.fonts.add(font);
   } catch (error) {
-    console.warn("Failed to load VarsityTeam font:", error);
+    console.warn("Failed to load Athletic font:", error);
   }
 };
 
@@ -49,13 +49,13 @@ export const draw = async (data) => {
     context.textAlign = "center";
     context.fillStyle = "white";
 
-    // Draw name with VarsityTeam font
-    context.font = "700 26pt 'VarsityTeam', 'Arial'";
+    // Draw name with Athletic font
+    context.font = " 26pt 'Athletic', 'Arial'";
     context.fillText(name, 600, nameHeight, nameWidth);
 
-    // Draw number if provided with VarsityTeam font
+    // Draw number if provided with Athletic font
     if (number) {
-      context.font = "700 90pt 'VarsityTeam', 'Arial'";
+      context.font = " 90pt 'Athletic', 'Arial'";
       context.fillText(number, 600, numberHeight, numberWidth);
     }
 

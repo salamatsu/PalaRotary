@@ -89,7 +89,9 @@ const BasicLayout = ({ navigations = [], store }) => {
                       <div className=" leading-none">
                         <Typography.Title level={4}>
                           {userData &&
-                            [userData.firstName, userData.lastName].join(" ")}
+                            [userData.firstName, userData.lastName]
+                              .join(" ")
+                              ?.trim()}
                         </Typography.Title>
                       </div>
                       <div>

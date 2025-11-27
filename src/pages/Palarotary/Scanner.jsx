@@ -414,7 +414,7 @@ const Scanner = () => {
                               color: "#000",
                             }}
                           >
-                            {scanResult.member.badge_number}
+                            {scanResult.member.qrcode}
                           </p>
                         </div>
                         <div>

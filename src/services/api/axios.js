@@ -25,14 +25,53 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Add response interceptor for CSRF token refetch
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    // Check for CSRF validation failure
+    if (
+      error.response?.status === 403 &&
+      error.response?.data?.code === "CSRF_VALIDATION_FAILED" &&
+      !originalRequest._retry
+    ) {
+      originalRequest._retry = true;
+
+      try {
+        // Fetch new CSRF token
+        const response = await axiosInstance.get("/api/v1/users/csrf-token");
+        const newCsrfToken = response.data.csrfToken;
+
+        // Update the store with the new token
+        useCsrfStore.getState().setCsrfToken(newCsrfToken);
+
+        // Update the original request with the new token
+        if (!originalRequest.url?.includes("/csrf-token")) {
+          originalRequest.headers["x-csrf-token"] = newCsrfToken;
+        }
+
+        // Retry the original request
+        return axiosInstance(originalRequest);
+      } catch (refetchError) {
+        console.error("Failed to refetch CSRF token:", refetchError);
+        return Promise.reject(error);
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
 export const createAxiosInstanceWithInterceptor = (type = "data") => {
   const auth = useAdminAuthStore.getState();
   const token = auth.token;
 
-  if (!token) {
-    message.warning("Authentication required");
-    return null;
-  }
+  // if (!token) {
+  //   message.warning("Authentication required");
+  //   return null;
+  // }
 
   const headers = {
     "Access-Control-Allow-Origin": "*",
@@ -74,9 +113,40 @@ export const createAxiosInstanceWithInterceptor = (type = "data") => {
 
   instance.interceptors.response.use(
     (response) => response,
-    (error) => {
+    async (error) => {
       const errMessage = error.response?.data;
+      const originalRequest = error.config;
 
+      // Check for CSRF validation failure
+      if (
+        error.response?.status === 403 &&
+        errMessage?.code === "CSRF_VALIDATION_FAILED" &&
+        !originalRequest._retry
+      ) {
+        originalRequest._retry = true;
+
+        try {
+          // Fetch new CSRF token
+          const response = await axiosInstance.get("/api/v1/users/csrf-token");
+          const newCsrfToken = response.data.csrfToken;
+
+          // Update the store with the new token
+          useCsrfStore.getState().setCsrfToken(newCsrfToken);
+
+          // Update the original request with the new token
+          if (!originalRequest.url?.includes("/csrf-token")) {
+            originalRequest.headers["x-csrf-token"] = newCsrfToken;
+          }
+
+          // Retry the original request
+          return instance(originalRequest);
+        } catch (refetchError) {
+          console.error("Failed to refetch CSRF token:", refetchError);
+          return Promise.reject(error);
+        }
+      }
+
+      // Handle authentication errors
       if (
         errMessage?.message === "Invalid token." ||
         errMessage?.message === "No token provided" ||

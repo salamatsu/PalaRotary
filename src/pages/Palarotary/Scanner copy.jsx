@@ -473,7 +473,7 @@ export default function Scanner() {
                                     Badge Number
                                   </p>
                                   <p style={{ fontWeight: "600", margin: 0 }}>
-                                    {scanResult.member.badge_number}
+                                    {scanResult.member.qrcode}
                                   </p>
                                 </div>
                                 <div>
@@ -624,7 +624,9 @@ export default function Scanner() {
                     <List.Item>
                       <List.Item.Meta
                         avatar={<UserOutlined style={{ fontSize: "24px" }} />}
-                        title={item.member_name}
+                        title={[item.firstName, " ", item.lastName]
+                          .join("")
+                          ?.trim()}
                         description={
                           <div>
                             <div>
@@ -632,7 +634,7 @@ export default function Scanner() {
                               {item.zone && ` (${item.zone})`}
                             </div>
                             <div style={{ fontSize: "12px", color: "#999" }}>
-                              Badge: {item.badge_number}
+                              Badge: {item.qrcode}
                             </div>
                           </div>
                         }
