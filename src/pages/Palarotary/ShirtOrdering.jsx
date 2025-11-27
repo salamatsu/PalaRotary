@@ -4,6 +4,8 @@ import {
   EditOutlined,
   LockOutlined,
   ShoppingCartOutlined,
+  SaveOutlined,
+  CloseOutlined,
 } from "@ant-design/icons";
 import {
   Badge,
@@ -20,19 +22,26 @@ import {
   Spin,
   Table,
   Typography,
+  Tag,
+  Select,
 } from "antd";
-import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router";
+import { gsap } from "gsap";
+import { useGSAP } from "@gsap/react";
 import {
   ADULT_SHIRT_SIZES,
   KID_SHIRT_SIZES,
   SHIRT_PRICING,
 } from "../../lib/constants";
 import { draw } from "../../hooks/useCanvas";
-import { useSubmitShirtOrder } from "../../services/requests/usePalarotary";
+import {
+  useGetCheckAvailability,
+  useSubmitShirtOrder,
+} from "../../services/requests/usePalarotary";
 
 const { Title, Text } = Typography;
+const { Option } = Select;
 
 const ShirtOrdering = () => {
   const location = useLocation();
@@ -56,9 +65,58 @@ const ShirtOrdering = () => {
   const [mobileNumber, setMobileNumber] = useState("");
   const [isContactEditable, setIsContactEditable] = useState(false);
   const [showEditConfirm, setShowEditConfirm] = useState(false);
+  const [editingOrderId, setEditingOrderId] = useState(null);
+  const [editingOrderData, setEditingOrderData] = useState(null);
+  const [isDesiredNumberEnabled, setIsDesiredNumberEnabled] = useState(false);
+  const [lastCheckedNumber, setLastCheckedNumber] = useState(null);
 
   const { mutate: submitOrder, isPending: submitting } = useSubmitShirtOrder();
-console.log(memberData)
+  const { mutate: checkAvailability, isPending: checkingAvailability } =
+    useGetCheckAvailability();
+
+  // Refs for GSAP animations
+  const containerRef = useRef(null);
+  const previewRef = useRef(null);
+  const cartRef = useRef(null);
+  const orderCardsRef = useRef([]);
+
+  // Initial animations
+  useGSAP(
+    () => {
+      if (containerRef.current) {
+        const tl = gsap.timeline();
+
+        tl.from(".header-section", {
+          y: -50,
+          opacity: 0,
+          duration: 0.8,
+          ease: "power3.out",
+        })
+          .from(
+            ".form-container",
+            {
+              x: -100,
+              opacity: 0,
+              duration: 0.8,
+              ease: "power3.out",
+            },
+            "-=0.4"
+          )
+          .from(
+            ".preview-container",
+            {
+              x: 100,
+              opacity: 0,
+              duration: 0.8,
+              ease: "power3.out",
+            },
+            "-=0.8"
+          );
+      }
+    },
+    { scope: containerRef }
+  );
+
   useEffect(() => {
     const data = location.state?.memberData;
 
@@ -70,7 +128,6 @@ console.log(memberData)
 
     setMemberData(data);
 
-    // Set email and mobile number from memberData
     if (data?.email) {
       setEmail(data.email);
       form.setFieldValue("email", data.email);
@@ -81,7 +138,6 @@ console.log(memberData)
       form.setFieldValue("mobileNumber", data.mobileNumber);
     }
 
-    // Set lastName as default name if available
     if (data?.lastName) {
       setCurrentOrder((prev) => ({
         ...prev,
@@ -90,7 +146,6 @@ console.log(memberData)
       form.setFieldValue("name", data.lastName);
     }
 
-    // Generate initial preview with default values
     const generateInitialPreview = async () => {
       if (data?.zone) {
         try {
@@ -120,7 +175,7 @@ console.log(memberData)
       const preview = await draw({
         name: orderData.name,
         zone: memberData.zone,
-        number: orderData.shirtNumber || "",
+        number: orderData.shirtNumber || "00",
       });
       return preview;
     } catch (error) {
@@ -131,31 +186,115 @@ console.log(memberData)
     }
   };
 
+  const handleCheckAvailability = (shirtNumber) => {
+    if (!shirtNumber || shirtNumber.length < 2 || !memberData?.zone) return;
+
+    // Don't check if it's the same as last checked
+    if (lastCheckedNumber === shirtNumber) return;
+
+    setLastCheckedNumber(shirtNumber);
+
+    checkAvailability(
+      { zone: memberData.zone, shirtNumber },
+      {
+        onSuccess: ({ data, message: msgdata }) => {
+          if (!data.available) {
+            Modal.confirm({
+              width: 500,
+              title: "Shirt Number Not Available",
+              content: (
+                <div>
+                  <p>
+                    Shirt number {data.shirtNumber} in {data.zone} is already
+                    taken.
+                  </p>
+                  <br />
+                  <p>Would you like to add it as your desired number?</p>
+                </div>
+              ),
+              okText: "Use as Desired Number",
+              cancelText: "Choose Different Number",
+              onOk: () => {
+                setIsDesiredNumberEnabled(true);
+                form.setFieldValue("desiredNumber", shirtNumber);
+                setCurrentOrder((prev) => ({
+                  ...prev,
+                  desiredNumber: shirtNumber,
+                }));
+                form.setFieldValue("shirtNumber", "");
+                setCurrentOrder((prev) => ({
+                  ...prev,
+                  shirtNumber: "",
+                }));
+                message.info("Please choose a different shirt number");
+              },
+              onCancel: () => {
+                form.setFieldValue("shirtNumber", "");
+                setCurrentOrder((prev) => ({
+                  ...prev,
+                  shirtNumber: "",
+                }));
+              },
+            });
+          } else {
+            message.success(msgdata);
+          }
+        },
+        onError: (error) => {
+          console.error("Availability check error:", error);
+          message.error("Failed to check availability");
+          form.setFieldValue("shirtNumber", "");
+          setCurrentOrder((prev) => ({
+            ...prev,
+            shirtNumber: "",
+          }));
+        },
+      }
+    );
+  };
+
   const handleFieldChange = async (field, value) => {
     const updatedOrder = { ...currentOrder, [field]: value };
 
-    // Update price when size changes
     if (field === "size") {
       const price = SHIRT_PRICING.sizes[value] || SHIRT_PRICING.base;
       updatedOrder.price = price;
+
+      // Animate price change
+      gsap.fromTo(
+        ".price-display",
+        { scale: 1.2, color: "#52c41a" },
+        {
+          scale: 1,
+          color: "#1E3A71",
+          duration: 0.5,
+          ease: "elastic.out(1, 0.5)",
+        }
+      );
     }
 
     setCurrentOrder(updatedOrder);
     form.setFieldValue(field, value);
 
-    // Auto-generate preview when key fields change
     if (["name", "shirtNumber"].includes(field)) {
       const preview = await generatePreview(updatedOrder);
       setCurrentOrder((prev) => ({ ...prev, preview }));
+
+      // Animate preview update
+      if (previewRef.current) {
+        gsap.fromTo(
+          previewRef.current,
+          { scale: 0.95, opacity: 0.5 },
+          { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.7)" }
+        );
+      }
     }
   };
 
   const handleEditContactToggle = () => {
     if (isContactEditable) {
-      // If turning off edit mode, just disable
       setIsContactEditable(false);
     } else {
-      // If turning on edit mode, show confirmation
       setShowEditConfirm(true);
     }
   };
@@ -164,6 +303,16 @@ console.log(memberData)
     setIsContactEditable(true);
     setShowEditConfirm(false);
     message.info("You can now edit email and mobile number");
+  };
+
+  const handleClearDesiredNumber = () => {
+    setIsDesiredNumberEnabled(false);
+    form.setFieldValue("desiredNumber", "");
+    setCurrentOrder((prev) => ({
+      ...prev,
+      desiredNumber: "",
+    }));
+    setLastCheckedNumber(null);
   };
 
   const addOrderToCart = async () => {
@@ -175,7 +324,6 @@ console.log(memberData)
         return;
       }
 
-      // Generate final preview
       const preview = await generatePreview(currentOrder);
 
       const newOrder = {
@@ -187,7 +335,14 @@ console.log(memberData)
       setOrders([...orders, newOrder]);
       message.success("Shirt added to cart!");
 
-      // Reset form for new order but keep email and mobileNumber
+      // Animate success
+      gsap.fromTo(
+        ".add-to-cart-btn",
+        { scale: 0.9 },
+        { scale: 1, duration: 0.3, ease: "back.out(2)" }
+      );
+
+      // Reset form
       setCurrentOrder({
         id: Date.now(),
         name: "",
@@ -202,14 +357,118 @@ console.log(memberData)
       form.resetFields();
       form.setFieldValue("email", email);
       form.setFieldValue("mobileNumber", mobileNumber);
+      setIsDesiredNumberEnabled(false);
+      setLastCheckedNumber(null);
+
+      // Scroll to cart with smooth animation
+      if (cartRef.current) {
+        gsap.to(window, {
+          scrollTo: { y: cartRef.current, offsetY: 100 },
+          duration: 1,
+          ease: "power2.inOut",
+        });
+      }
     } catch (error) {
       message.error("Please fill in all required fields");
     }
   };
 
+  const handleEditOrder = (orderId) => {
+    const orderToEdit = orders.find((o) => o.id === orderId);
+    if (orderToEdit) {
+      setEditingOrderId(orderId);
+      setEditingOrderData({ ...orderToEdit });
+
+      // Animate edit mode
+      const cardElement =
+        orderCardsRef.current[orders.findIndex((o) => o.id === orderId)];
+      if (cardElement) {
+        gsap.fromTo(
+          cardElement,
+          { backgroundColor: "#fff" },
+          { backgroundColor: "#fff7e6", duration: 0.3 }
+        );
+      }
+    }
+  };
+
+  const handleSaveEdit = async (orderId) => {
+    if (!editingOrderData) return;
+
+    // Generate new preview with updated data
+    const preview = await generatePreview(editingOrderData);
+
+    const updatedOrders = orders.map((order) =>
+      order.id === orderId ? { ...editingOrderData, preview } : order
+    );
+
+    setOrders(updatedOrders);
+    setEditingOrderId(null);
+    setEditingOrderData(null);
+    message.success("Order updated successfully!");
+
+    // Animate save
+    const cardElement =
+      orderCardsRef.current[orders.findIndex((o) => o.id === orderId)];
+    if (cardElement) {
+      gsap.fromTo(
+        cardElement,
+        { backgroundColor: "#fff7e6", scale: 1.02 },
+        { backgroundColor: "#fff", scale: 1, duration: 0.3 }
+      );
+    }
+  };
+
+  const handleCancelEdit = (orderId) => {
+    setEditingOrderId(null);
+    setEditingOrderData(null);
+
+    // Animate cancel
+    const cardElement =
+      orderCardsRef.current[orders.findIndex((o) => o.id === orderId)];
+    if (cardElement) {
+      gsap.to(cardElement, {
+        backgroundColor: "#fff",
+        duration: 0.3,
+      });
+    }
+  };
+
+  const handleEditFieldChange = (field, value) => {
+    if (field === "size") {
+      const price = SHIRT_PRICING.sizes[value] || SHIRT_PRICING.base;
+      setEditingOrderData((prev) => ({
+        ...prev,
+        [field]: value,
+        price,
+      }));
+    } else {
+      setEditingOrderData((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+    }
+  };
+
   const removeOrder = (orderId) => {
-    setOrders(orders.filter((order) => order.id !== orderId));
-    message.info("Item removed from cart");
+    const orderIndex = orders.findIndex((o) => o.id === orderId);
+
+    // Animate removal
+    if (orderCardsRef.current[orderIndex]) {
+      gsap.to(orderCardsRef.current[orderIndex], {
+        x: 100,
+        opacity: 0,
+        duration: 0.4,
+        ease: "power2.in",
+        onComplete: () => {
+          setOrders(orders.filter((order) => order.id !== orderId));
+          message.info("Item removed from cart");
+        },
+      });
+    } else {
+      setOrders(orders.filter((order) => order.id !== orderId));
+      message.info("Item removed from cart");
+    }
   };
 
   const handleSubmitOrder = async () => {
@@ -261,31 +520,32 @@ console.log(memberData)
     return orders.reduce((sum, order) => sum + order.price, 0);
   };
 
-  const buttonVariants = {
-    hover: {
-      scale: 1.05,
-      transition: {
-        type: "spring",
-        stiffness: 400,
-        damping: 10,
-      },
-    },
-    tap: { scale: 0.95 },
+  const handleSizeClick = (size) => {
+    handleFieldChange("size", size);
+
+    // Animate size selection
+    gsap.to(`.size-option-${size}`, {
+      scale: 1.1,
+      duration: 0.2,
+      yoyo: true,
+      repeat: 1,
+      ease: "power2.inOut",
+    });
   };
 
   return (
     <div
+      ref={containerRef}
       style={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #1c3c6d 0%, #0f2847 100%)",
+        background: "linear-gradient(135deg, #1E3A71 0%, #0f2847 100%)",
         padding: "40px 20px",
       }}
     >
       <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
+        <div
+          className="header-section"
           style={{ textAlign: "center", marginBottom: "40px" }}
         >
           <Title
@@ -301,7 +561,7 @@ console.log(memberData)
           <Text style={{ color: "rgba(255,255,255,0.95)", fontSize: "18px" }}>
             Design your personalized PALAROTARY 2026 shirt
           </Text>
-        </motion.div>
+        </div>
 
         {/* Main Content */}
         <div
@@ -314,11 +574,7 @@ console.log(memberData)
           className="shirt-order-grid"
         >
           {/* Order Form */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-          >
+          <div className="form-container">
             <Card
               style={{
                 borderRadius: "24px",
@@ -330,95 +586,98 @@ console.log(memberData)
               </Title>
 
               <Form form={form} layout="vertical">
-                {/* Email Field */}
-                <Form.Item
-                  label={
-                    <Space>
-                      <Text strong>Email</Text>
-                      <Button
-                        type="link"
-                        size="small"
-                        icon={
-                          isContactEditable ? (
-                            <LockOutlined />
-                          ) : (
-                            <EditOutlined />
-                          )
-                        }
-                        onClick={handleEditContactToggle}
-                      >
-                        {isContactEditable ? "Lock" : "Edit"}
-                      </Button>
-                    </Space>
-                  }
-                  name="email"
-                  rules={[
-                    { required: true, message: "Please enter your email" },
-                    { type: "email", message: "Please enter a valid email" },
-                  ]}
+                {/* Contact Information Section */}
+                <div
+                  style={{
+                    background:
+                      "linear-gradient(135deg, #f5f7fa 0%, #e8edf2 100%)",
+                    padding: "20px",
+                    borderRadius: "12px",
+                    marginBottom: "24px",
+                  }}
                 >
-                  <Input
-                    placeholder="your.email@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    disabled={!isContactEditable}
-                    size="large"
-                  />
-                </Form.Item>
-
-                {/* Mobile Number Field */}
-                <Form.Item
-                  label={<Text strong>Mobile Number</Text>}
-                  name="mobileNumber"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please enter your mobile number",
-                    },
-                    {
-                      pattern: /^[0-9]{10,11}$/,
-                      message: "Enter valid 10-11 digit phone number",
-                    },
-                  ]}
-                >
-                  <Input
-                    placeholder="09XXXXXXXXX"
-                    value={mobileNumber}
-                    onChange={(e) => setMobileNumber(e.target.value)}
-                    disabled={!isContactEditable}
-                    size="large"
-                    maxLength={11}
-                  />
-                </Form.Item>
-
-                {/* Zone Display (Read-only) */}
-                {memberData?.zone && (
                   <div
                     style={{
-                      padding: "12px 16px",
-                      background: "#f5f5f5",
-                      borderRadius: "8px",
-                      marginBottom: "24px",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginBottom: "16px",
                     }}
                   >
-                    <Text type="secondary" style={{ fontSize: "12px" }}>
-                      Zone
+                    <Text strong style={{ fontSize: "16px" }}>
+                      Contact Information
                     </Text>
-                    <div>
-                      <Text strong style={{ fontSize: "16px" }}>
-                        {memberData.zone}
-                      </Text>
-                    </div>
+                    <Button
+                      type="link"
+                      icon={
+                        isContactEditable ? <LockOutlined /> : <EditOutlined />
+                      }
+                      onClick={handleEditContactToggle}
+                    >
+                      {isContactEditable ? "Lock" : "Edit"}
+                    </Button>
                   </div>
-                )}
+
+                  <Form.Item
+                    label={<Text strong>Email</Text>}
+                    name="email"
+                    rules={[
+                      { required: true, message: "Please enter your email" },
+                      { type: "email", message: "Please enter a valid email" },
+                    ]}
+                  >
+                    <Input
+                      placeholder="your.email@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      disabled={!isContactEditable}
+                      size="large"
+                    />
+                  </Form.Item>
+
+                  <Form.Item
+                    label={<Text strong>Mobile Number</Text>}
+                    name="mobileNumber"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please enter your mobile number",
+                      },
+                      {
+                        pattern: /^[0-9]{10,11}$/,
+                        message: "Enter valid 10-11 digit phone number",
+                      },
+                    ]}
+                  >
+                    <Input
+                      placeholder="09XXXXXXXXX"
+                      value={mobileNumber}
+                      onChange={(e) => setMobileNumber(e.target.value)}
+                      disabled={!isContactEditable}
+                      size="large"
+                      maxLength={11}
+                    />
+                  </Form.Item>
+
+                  {/* Zone Display */}
+                  {memberData?.zone && (
+                    <div style={{ marginTop: "16px" }}>
+                      <Text strong style={{ marginRight: "8px" }}>
+                        Zone:
+                      </Text>
+                      <Tag
+                        color="blue"
+                        style={{ fontSize: "14px", padding: "4px 12px" }}
+                      >
+                        {memberData.zone}
+                      </Tag>
+                    </div>
+                  )}
+                </div>
 
                 {/* Name Input */}
                 <Form.Item
-                  label={
-                    <Text strong>
-                      Name <small>(on shirt)</small>
-                    </Text>
-                  }
+                  label={<Text strong>Name (on shirt)</Text>}
                   name="name"
                   rules={[
                     { required: true, message: "Please enter the name" },
@@ -437,8 +696,7 @@ console.log(memberData)
                 <Form.Item
                   label={
                     <Text strong>
-                      Shirt Number{" "}
-                      <small>(must be a number between 00-99)</small>
+                      Shirt Number <small>(00-99)</small>{" "}
                     </Text>
                   }
                   name="shirtNumber"
@@ -449,8 +707,28 @@ console.log(memberData)
                       message: "Enter a number between 00-99",
                     },
                   ]}
+                  help={checkingAvailability ? "Checking availability..." : ""}
                 >
-                  <Input
+                  <Select
+                    placeholder="Select shirt number"
+                    size="large"
+                    options={Array.from({ length: 100 }, (_, i) => ({
+                      value: String(i).padStart(2, "0"),
+                      label: String(i).padStart(2, "0"),
+                    }))}
+                    allowClear
+                    showSearch
+                    onChange={
+                      (value) => {
+                        handleFieldChange("shirtNumber", value);
+                        handleCheckAvailability(value);
+                      }
+                      // handleFieldChange("shirtNumber", value)
+                    }
+                    loading={checkingAvailability}
+                    disabled={checkingAvailability}
+                  />
+                  {/* <Input
                     placeholder="00-99"
                     onChange={(e) => {
                       let value = e.target.value.replace(/\D/g, "");
@@ -463,38 +741,44 @@ console.log(memberData)
                         form.setFieldValue("shirtNumber", value);
                         handleFieldChange("shirtNumber", value);
                       }
+                      if (value.length === 2) {
+                        handleCheckAvailability(value);
+                      }
                     }}
                     size="large"
                     maxLength={2}
-                  />
+                    suffix={checkingAvailability && <Spin size="small" />}
+                  /> */}
                 </Form.Item>
 
-                {/* Desired Number (if shirt number is taken) */}
+                {/* Desired Number */}
                 <Form.Item
                   label={
-                    <Text strong>
-                      Desired Number{" "}
-                      <Text type="secondary" style={{ fontSize: "12px" }}>
-                        (if shirt number is taken but still wanted)
+                    <Space>
+                      <Text strong>
+                        Desired Number{" "}
+                        <Text type="secondary" style={{ fontSize: "12px" }}>
+                          (if shirt number is taken but still wanted)
+                        </Text>
                       </Text>
-                    </Text>
+                      {isDesiredNumberEnabled && (
+                        <Button
+                          type="link"
+                          size="small"
+                          onClick={handleClearDesiredNumber}
+                          danger
+                        >
+                          Clear
+                        </Button>
+                      )}
+                    </Space>
                   }
                   name="desiredNumber"
                 >
                   <Input
                     placeholder="e.g., 00, 99"
-                    onChange={(e) => {
-                      let value = e.target.value.replace(/\D/g, "");
-                      handleFieldChange("desiredNumber", value);
-                    }}
-                    onBlur={(e) => {
-                      let value = e.target.value.replace(/\D/g, "");
-                      if (value.length === 1) {
-                        value = value.padStart(2, "0");
-                        form.setFieldValue("desiredNumber", value);
-                        handleFieldChange("desiredNumber", value);
-                      }
-                    }}
+                    disabled={!isDesiredNumberEnabled}
+                    value={currentOrder.desiredNumber}
                     size="large"
                     maxLength={2}
                   />
@@ -555,18 +839,15 @@ console.log(memberData)
                       const isSelected = currentOrder.size === sizeOption.size;
 
                       return (
-                        <motion.div
+                        <div
                           key={sizeOption.size}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() =>
-                            handleFieldChange("size", sizeOption.size)
-                          }
+                          className={`size-option-${sizeOption.size}`}
+                          onClick={() => handleSizeClick(sizeOption.size)}
                           style={{
                             cursor: "pointer",
                             padding: "12px 8px",
                             borderRadius: "8px",
-                            background: isSelected ? "#1c3c6d" : "#f5f5f5",
+                            background: isSelected ? "#1E3A71" : "#f5f5f5",
                             border: isSelected ? "none" : "1px solid #d9d9d9",
                             textAlign: "center",
                             transition: "all 0.3s ease",
@@ -587,13 +868,13 @@ console.log(memberData)
                               display: "block",
                               color: isSelected
                                 ? "rgba(255,255,255,0.8)"
-                                : "#1c3c6d",
+                                : "#1E3A71",
                               fontSize: "12px",
                             }}
                           >
                             ₱{price}
                           </Text>
-                        </motion.div>
+                        </div>
                       );
                     })}
                   </div>
@@ -601,10 +882,11 @@ console.log(memberData)
 
                 {currentOrder.price > 0 && (
                   <div
+                    className="price-display"
                     style={{
                       padding: "16px",
                       background:
-                        "linear-gradient(135deg, #1c3c6d15 0%, #0f284715 100%)",
+                        "linear-gradient(135deg, #1E3A7115 0%, #0f284715 100%)",
                       borderRadius: "12px",
                       marginBottom: "16px",
                     }}
@@ -617,7 +899,7 @@ console.log(memberData)
                       </Text>
                       <Text
                         strong
-                        style={{ fontSize: "24px", color: "#1c3c6d" }}
+                        style={{ fontSize: "24px", color: "#1E3A71" }}
                       >
                         ₱{currentOrder.price}
                       </Text>
@@ -625,41 +907,32 @@ console.log(memberData)
                   </div>
                 )}
 
-                <motion.div
-                  variants={buttonVariants}
-                  whileHover="hover"
-                  whileTap="tap"
+                <Button
+                  type="primary"
+                  size="large"
+                  block
+                  onClick={addOrderToCart}
+                  icon={<ShoppingCartOutlined />}
+                  className="add-to-cart-btn"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, #1E3A71 0%, #0f2847 100%)",
+                    border: "none",
+                    height: "56px",
+                    fontSize: "18px",
+                    fontWeight: "600",
+                    borderRadius: "12px",
+                    boxShadow: "0 6px 20px rgba(30, 58, 113, 0.4)",
+                  }}
                 >
-                  <Button
-                    type="primary"
-                    size="large"
-                    block
-                    onClick={addOrderToCart}
-                    icon={<ShoppingCartOutlined />}
-                    style={{
-                      background:
-                        "linear-gradient(135deg, #1c3c6d 0%, #0f2847 100%)",
-                      border: "none",
-                      height: "56px",
-                      fontSize: "18px",
-                      fontWeight: "600",
-                      borderRadius: "12px",
-                      boxShadow: "0 6px 20px rgba(28, 60, 109, 0.4)",
-                    }}
-                  >
-                    Add to Cart
-                  </Button>
-                </motion.div>
+                  Add to Cart
+                </Button>
               </Form>
             </Card>
-          </motion.div>
+          </div>
 
           {/* Live Preview */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-          >
+          <div className="preview-container">
             <Card
               style={{
                 borderRadius: "24px",
@@ -674,6 +947,7 @@ console.log(memberData)
               </Title>
 
               <div
+                ref={previewRef}
                 style={{
                   flex: 1,
                   display: "flex",
@@ -690,32 +964,16 @@ console.log(memberData)
                     </div>
                   </div>
                 ) : currentOrder.preview ? (
-                  <div style={{ textAlign: "center" }}>
-                    {/* <motion.img
-                      initial={{ scale: 0.9, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ duration: 0.3 }}
-                      src={currentOrder.preview}
-                      alt="Shirt Preview"
-                      style={{
-                        width: "100%",
-                        maxWidth: "500px",
-                        borderRadius: "12px",
-                        boxShadow: "0 8px 30px rgba(0,0,0,0.15)",
-                      }}
-                    /> */}
-                    <Image
-                      src={currentOrder.preview}
-                      alt="Shirt Preview"
-                      style={{
-                        width: "100%",
-                        maxWidth: "500px",
-                        borderRadius: "12px",
-                        boxShadow: "0 8px 30px rgba(0,0,0,0.15)",
-                      }}
-                      // preview={false}
-                    />
-                  </div>
+                  <Image
+                    src={currentOrder.preview}
+                    alt="Shirt Preview"
+                    style={{
+                      width: "100%",
+                      maxWidth: "500px",
+                      borderRadius: "12px",
+                      boxShadow: "0 8px 30px rgba(0,0,0,0.15)",
+                    }}
+                  />
                 ) : (
                   <div style={{ textAlign: "center", padding: "40px" }}>
                     <Text type="secondary" style={{ fontSize: "16px" }}>
@@ -725,15 +983,12 @@ console.log(memberData)
                 )}
               </div>
             </Card>
-          </motion.div>
+          </div>
         </div>
 
         {/* Shopping Cart */}
         {orders.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
+          <div ref={cartRef}>
             <Card
               style={{
                 borderRadius: "24px",
@@ -750,17 +1005,17 @@ console.log(memberData)
               >
                 <Space>
                   <ShoppingCartOutlined
-                    style={{ fontSize: "24px", color: "#1c3c6d" }}
+                    style={{ fontSize: "24px", color: "#1E3A71" }}
                   />
                   <Title level={3} style={{ margin: 0 }}>
                     Shopping Cart
                   </Title>
                   <Badge
                     count={orders.length}
-                    style={{ backgroundColor: "#1c3c6d" }}
+                    style={{ backgroundColor: "#1E3A71" }}
                   />
                 </Space>
-                <Title level={3} style={{ margin: 0, color: "#1c3c6d" }}>
+                <Title level={3} style={{ margin: 0, color: "#1E3A71" }}>
                   Total: ₱{getTotalAmount()}
                 </Title>
               </div>
@@ -775,118 +1030,189 @@ console.log(memberData)
                   marginBottom: "24px",
                 }}
               >
-                {orders.map((order) => {
+                {orders.map((order, index) => {
+                  const isEditing = editingOrderId === order.id;
+                  const displayOrder = isEditing ? editingOrderData : order;
+
                   return (
-                    <motion.div
+                    <Card
                       key={order.id}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      whileHover={{ y: -5 }}
+                      ref={(el) => (orderCardsRef.current[index] = el)}
+                      type="inner"
+                      style={{
+                        borderRadius: "12px",
+                        border: isEditing
+                          ? "2px solid #1E3A71"
+                          : "2px solid #f0f0f0",
+                      }}
                     >
-                      <Card
-                        type="inner"
-                        style={{
-                          borderRadius: "12px",
-                          border: "2px solid #f0f0f0",
-                        }}
+                      {order.preview && (
+                        <img
+                          src={order.preview}
+                          alt="Order Preview"
+                          style={{
+                            width: "100%",
+                            borderRadius: "8px",
+                            marginBottom: "12px",
+                          }}
+                        />
+                      )}
+
+                      <Space
+                        direction="vertical"
+                        size="small"
+                        style={{ width: "100%" }}
                       >
-                        {order.preview && (
-                          <img
-                            src={order.preview}
-                            alt="Order Preview"
-                            style={{
-                              width: "100%",
-                              borderRadius: "8px",
-                              marginBottom: "12px",
-                            }}
-                          />
+                        {isEditing ? (
+                          <>
+                            <Input
+                              value={displayOrder.name}
+                              onChange={(e) =>
+                                handleEditFieldChange("name", e.target.value)
+                              }
+                              placeholder="Name"
+                              size="small"
+                            />
+                            <Select
+                              value={displayOrder.size}
+                              onChange={(value) =>
+                                handleEditFieldChange("size", value)
+                              }
+                              style={{ width: "100%" }}
+                              size="small"
+                            >
+                              {(displayOrder.sizeCategory === "kid"
+                                ? KID_SHIRT_SIZES
+                                : ADULT_SHIRT_SIZES
+                              ).map((s) => (
+                                <Option key={s.size} value={s.size}>
+                                  {s.size}
+                                </Option>
+                              ))}
+                            </Select>
+                            <Input
+                              value={displayOrder.shirtNumber}
+                              onChange={(e) => {
+                                let value = e.target.value.replace(/\D/g, "");
+                                if (value.length <= 2) {
+                                  handleEditFieldChange("shirtNumber", value);
+                                }
+                              }}
+                              placeholder="Shirt Number"
+                              maxLength={2}
+                              size="small"
+                            />
+                          </>
+                        ) : (
+                          <>
+                            <Text strong style={{ fontSize: "16px" }}>
+                              {order.name}
+                            </Text>
+                            <Text type="secondary">Size: {order.size}</Text>
+                            {order.shirtNumber && (
+                              <Text type="secondary">
+                                Number: {order.shirtNumber}
+                              </Text>
+                            )}
+                            {order.desiredNumber && (
+                              <Text
+                                type="secondary"
+                                style={{ fontStyle: "italic" }}
+                              >
+                                Desired: {order.desiredNumber}
+                              </Text>
+                            )}
+                          </>
                         )}
 
-                        <Space
-                          direction="vertical"
-                          size="small"
-                          style={{ width: "100%" }}
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            marginTop: "8px",
+                          }}
                         >
-                          <Text strong style={{ fontSize: "16px" }}>
-                            {order.name}
-                          </Text>
-                          <Text type="secondary">Size: {order.size}</Text>
-                          {order.shirtNumber && (
-                            <Text type="secondary">
-                              Number: {order.shirtNumber}
-                            </Text>
-                          )}
-                          {order.desiredNumber && (
-                            <Text
-                              type="secondary"
-                              style={{ fontStyle: "italic" }}
-                            >
-                              Desired: {order.desiredNumber}
-                            </Text>
-                          )}
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                              marginTop: "8px",
-                            }}
+                          <Text
+                            strong
+                            style={{ color: "#1E3A71", fontSize: "18px" }}
                           >
-                            <Text
-                              strong
-                              style={{ color: "#1c3c6d", fontSize: "18px" }}
-                            >
-                              ₱{order.price}
-                            </Text>
-                            <Button
-                              type="text"
-                              danger
-                              icon={<DeleteOutlined />}
-                              onClick={() => removeOrder(order.id)}
-                            >
-                              Remove
-                            </Button>
-                          </div>
-                        </Space>
-                      </Card>
-                    </motion.div>
+                            ₱{displayOrder.price}
+                          </Text>
+                          <Space>
+                            {isEditing ? (
+                              <>
+                                <Button
+                                  type="primary"
+                                  size="small"
+                                  icon={<SaveOutlined />}
+                                  onClick={() => handleSaveEdit(order.id)}
+                                >
+                                  Save
+                                </Button>
+                                <Button
+                                  size="small"
+                                  icon={<CloseOutlined />}
+                                  onClick={() => handleCancelEdit(order.id)}
+                                >
+                                  Cancel
+                                </Button>
+                              </>
+                            ) : (
+                              <>
+                                {/* <Button
+                                  type="text"
+                                  size="small"
+                                  icon={<EditOutlined />}
+                                  onClick={() => handleEditOrder(order.id)}
+                                >
+                                  Edit
+                                </Button> */}
+                                <Button
+                                  type="text"
+                                  danger
+                                  size="small"
+                                  icon={<DeleteOutlined />}
+                                  onClick={() => removeOrder(order.id)}
+                                >
+                                  Remove
+                                </Button>
+                              </>
+                            )}
+                          </Space>
+                        </div>
+                      </Space>
+                    </Card>
                   );
                 })}
               </div>
 
-              <motion.div
-                variants={buttonVariants}
-                whileHover="hover"
-                whileTap="tap"
+              <Button
+                type="primary"
+                size="large"
+                block
+                loading={submitting}
+                onClick={handleSubmitOrder}
+                icon={<ArrowRightOutlined />}
+                style={{
+                  background:
+                    "linear-gradient(135deg, #1E3A71 0%, #0f2847 100%)",
+                  border: "none",
+                  height: "60px",
+                  fontSize: "18px",
+                  fontWeight: "600",
+                  borderRadius: "12px",
+                  boxShadow: "0 6px 20px rgba(30, 58, 113, 0.4)",
+                }}
               >
-                <Button
-                  type="primary"
-                  size="large"
-                  block
-                  loading={submitting}
-                  onClick={handleSubmitOrder}
-                  icon={<ArrowRightOutlined />}
-                  style={{
-                    background:
-                      "linear-gradient(135deg, #1c3c6d 0%, #0f2847 100%)",
-                    border: "none",
-                    height: "60px",
-                    fontSize: "18px",
-                    fontWeight: "600",
-                    borderRadius: "12px",
-                    boxShadow: "0 6px 20px rgba(28, 60, 109, 0.4)",
-                  }}
-                >
-                  Proceed to Checkout ({orders.length}{" "}
-                  {orders.length === 1 ? "item" : "items"} - ₱{getTotalAmount()}
-                  )
-                </Button>
-              </motion.div>
+                Proceed to Checkout ({orders.length}{" "}
+                {orders.length === 1 ? "item" : "items"} - ₱{getTotalAmount()})
+              </Button>
             </Card>
-          </motion.div>
+          </div>
         )}
 
-        {/* Edit Contact Confirmation Modal */}
+        {/* Edit Contact Modal */}
         <Modal
           title="Edit Contact Information"
           open={showEditConfirm}

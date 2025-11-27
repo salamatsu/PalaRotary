@@ -12,6 +12,7 @@ import {
   getAdminZones,
   getApprovedClubs,
   getAttendanceStats,
+  getCheckAvailability,
   getMemberAttendance,
   getMemberBadge,
   getMemberDetails,
@@ -45,6 +46,12 @@ export const useApprovedClubs = () => {
 export const useGetVerifyQrCode = () => {
   return useMutation({
     mutationFn: getVerifyQrCode,
+  });
+};
+
+export const useGetCheckAvailability = () => {
+  return useMutation({
+    mutationFn: getCheckAvailability,
   });
 };
 

@@ -36,6 +36,13 @@ export const getVerifyQrCode = async (qrCode) => {
   return response.data;
 };
 
+export const getCheckAvailability = async ({ zone, shirtNumber }) => {
+  const response = await axiosInstance.get(
+    `/api/v1/users/visitors/merchandise/check-availability?zone=${zone}&shirtNumber=${shirtNumber}`
+  );
+  return response.data;
+};
+
 // ============================================
 // SHIRT ORDERING API
 // ============================================
@@ -44,10 +51,6 @@ export const submitShirtOrder = async (orderData) => {
   const response = await axiosInstance.post("/api/shirts/order", orderData);
   return response.data;
 };
-
-
-
-
 
 // ============================================
 // OLD API - must remove when done
@@ -209,7 +212,6 @@ export const exportAttendance = async (date) => {
 // ============================================
 // SHIRT ORDER APIS
 // ============================================
-
 
 export const getShirtOrders = async (params) => {
   const response = await axios.get("/api/admin/shirts/orders", { params });
