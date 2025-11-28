@@ -74,6 +74,14 @@ export const registerClub = async (data) => {
   return response.data;
 };
 
+export const uploadPaymentProof = async ({ token, ...payload }) => {
+  const response = await axiosInstance.post(
+    `/api/v1/clubs/auth/upload-payment-proof?token=${token}`,
+    payload
+  );
+  return response.data;
+};
+
 export const getRegisteredClub = async () => {
   const response = await axiosInstance.get(
     "/api/v1/clubs/auth/registered-clubs"
@@ -98,21 +106,21 @@ export const loginAdminApi = async (credentials) => {
 // PUBLIC APIS - Club Registration
 // ============================================
 
-export const uploadPaymentProof = async (clubId, file) => {
-  const formData = new FormData();
-  formData.append("proof_of_payment", file);
+// export const uploadPaymentProof = async (clubId, file) => {
+//   const formData = new FormData();
+//   formData.append("proof_of_payment", file);
 
-  const response = await axiosInstance.post(
-    `/api/clubs/${clubId}/upload-payment`,
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
-  );
-  return response.data;
-};
+//   const response = await axiosInstance.post(
+//     `/api/clubs/${clubId}/upload-payment`,
+//     formData,
+//     {
+//       headers: {
+//         "Content-Type": "multipart/form-data",
+//       },
+//     }
+//   );
+//   return response.data;
+// };
 
 export const getPaymentInfo = async () => {
   const response = await axiosInstance.get("/api/clubs/payment-info");
