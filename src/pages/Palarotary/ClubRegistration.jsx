@@ -25,6 +25,7 @@ import {
   usePaymentInfo,
   useRegisterClub,
 } from "../../services/requests/usePalarotary";
+import { logo2, logoBanner } from "../../assets/images/logos";
 
 export default function ClubRegistration() {
   const { message } = App.useApp();
@@ -343,11 +344,12 @@ export default function ClubRegistration() {
             width: `${Math.random() * 100 + 50}px`,
             height: `${Math.random() * 100 + 50}px`,
             borderRadius: "50%",
-            background: i % 3 === 0
-              ? `rgba(28, 60, 109, ${Math.random() * 0.08 + 0.02})`  // Navy blue
-              : i % 3 === 1
-              ? `rgba(247, 165, 10, ${Math.random() * 0.08 + 0.02})`  // Orange
-              : `rgba(213, 72, 57, ${Math.random() * 0.08 + 0.02})`,  // Red
+            background:
+              i % 3 === 0
+                ? `rgba(28, 60, 109, ${Math.random() * 0.08 + 0.02})` // Navy blue
+                : i % 3 === 1
+                ? `rgba(247, 165, 10, ${Math.random() * 0.08 + 0.02})` // Orange
+                : `rgba(213, 72, 57, ${Math.random() * 0.08 + 0.02})`, // Red
             left: `${Math.random() * 100}%`,
             top: `${Math.random() * 100}%`,
             pointerEvents: "none",
@@ -412,6 +414,7 @@ export default function ClubRegistration() {
           </motion.div>
 
           {/* Header */}
+
           <motion.div
             ref={headerRef}
             initial={{ y: -20, opacity: 0 }}
@@ -419,27 +422,50 @@ export default function ClubRegistration() {
             transition={{ delay: 0.2, type: "spring", stiffness: 120 }}
             style={{ textAlign: "center", marginBottom: "24px" }}
           >
-            <motion.h1
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className=" flex flex-col justify-center items-center"
+            >
+              <div
+                style={{
+                  textAlign: "center",
+                  color: "#1a1a2e",
+                }}
+              >
+                <motion.div
+                  className="hero-title"
+                  initial={{ opacity: 0, y: 50 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <center>
+                    <img src={logo2} className=" w-full max-w-[400px]" />
+                  </center>
+                </motion.div>
+
+                <motion.div
+                  className="hero-subtitle"
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <center>
+                    <img src={logoBanner} className=" w-full max-w-[300px]" />
+                  </center>
+                </motion.div>
+              </div>
+            </motion.div>
+
+            <h2
               style={{
-                background: "linear-gradient(135deg, #1c3c6d 0%, #173052 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                fontSize: "28px",
-                fontWeight: "800",
-                marginBottom: "4px",
-                letterSpacing: "1px",
-              }}
-              animate={{
-                backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
-              }}
-              transition={{
-                duration: 5,
-                repeat: Infinity,
-                ease: "linear",
+                fontSize: "18px",
+                color: "#1c3c6d",
+                fontWeight: "700",
+                marginTop: "8px",
               }}
             >
-              PALAROTARY 2026
-            </motion.h1>
+              Club Registration
+            </h2>
             <motion.p
               style={{ fontSize: "14px", color: "#6b7280", margin: 0 }}
               initial={{ opacity: 0 }}
@@ -580,6 +606,7 @@ export default function ClubRegistration() {
                   layout="vertical"
                   onFinish={onFinishStep1}
                   requiredMark={false}
+                  scrollToFirstError
                 >
                   <div
                     style={{
