@@ -77,7 +77,12 @@ export const registerClub = async (data) => {
 export const uploadPaymentProof = async ({ token, ...payload }) => {
   const response = await axiosInstance.post(
     `/api/v1/clubs/auth/upload-payment-proof?token=${token}`,
-    payload
+    payload,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
   );
   return response.data;
 };

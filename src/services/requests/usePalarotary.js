@@ -82,6 +82,12 @@ export const useGetRegisteredClub = () => {
   });
 };
 
+export const useUploadPaymentProof = () => {
+  return useMutation({
+    mutationFn: uploadPaymentProof,
+  });
+};
+
 // ============================================
 // OLD HOOKS
 // ============================================
@@ -92,15 +98,15 @@ export const useRegisterClub = () => {
   });
 };
 
-export const useUploadPaymentProof = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ clubId, file }) => uploadPaymentProof(clubId, file),
-    onSuccess: () => {
-      queryClient.invalidateQueries(["club-status"]);
-    },
-  });
-};
+// export const useUploadPaymentProof = () => {
+//   const queryClient = useQueryClient();
+//   return useMutation({
+//     mutationFn: ({ clubId, file }) => uploadPaymentProof(clubId, file),
+//     onSuccess: () => {
+//       queryClient.invalidateQueries(["club-status"]);
+//     },
+//   });
+// };
 
 export const usePaymentInfo = () => {
   return useQuery({
