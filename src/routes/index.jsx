@@ -75,7 +75,7 @@ const RootRoutes = () => {
       ),
     },
     {
-      path: "/palarotary/success",
+      path: "/payment/success",
       element: (
         <Suspense fallback={<LoadingFallback />}>
           <Success />

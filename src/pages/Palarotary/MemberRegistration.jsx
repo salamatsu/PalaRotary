@@ -3,16 +3,19 @@ import {
   DownloadOutlined,
   QrcodeOutlined,
   UserAddOutlined,
+  ArrowLeftOutlined,
 } from "@ant-design/icons";
 import { Button, Card, Form, Input, Select, App } from "antd";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router";
 import gsap from "gsap";
 import {
   useApprovedClubs,
   useRegisterMember,
 } from "../../services/requests/usePalarotary";
 import { imageToBase64 } from "../../utils/tobase64";
+import { logo2, logoBanner } from "../../assets/images/logos";
 // {
 //     "attendeeId": "KUZW80G76FL4HGW7",
 //     "qrCode": "P20251MIFRH18N1126",
@@ -27,6 +30,7 @@ import { imageToBase64 } from "../../utils/tobase64";
 
 export default function MemberRegistration() {
   const { message } = App.useApp();
+  const navigate = useNavigate();
   const [form] = Form.useForm();
   const [registrationComplete, setRegistrationComplete] = useState(false);
   const [badgeData, setBadgeData] = useState(null);
@@ -455,11 +459,12 @@ export default function MemberRegistration() {
                 transition={{ delay: 0.9 }}
                 style={{
                   background:
-                    "linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)",
+                    "linear-gradient(135deg, #fff9eb 0%, #fff3d6 100%)",
                   padding: "16px",
                   borderRadius: "16px",
                   marginBottom: "20px",
                   textAlign: "left",
+                  border: "2px solid #f7a50a30",
                 }}
               >
                 <h3
@@ -467,7 +472,7 @@ export default function MemberRegistration() {
                     fontSize: "14px",
                     fontWeight: "700",
                     marginBottom: "8px",
-                    color: "#92400e",
+                    color: "#f7a50a",
                   }}
                 >
                   Event Details
@@ -475,7 +480,7 @@ export default function MemberRegistration() {
                 <div
                   style={{
                     fontSize: "13px",
-                    color: "#78350f",
+                    color: "#1a1a2e",
                     lineHeight: "1.6",
                   }}
                 >
@@ -539,7 +544,7 @@ export default function MemberRegistration() {
       animate={{ opacity: 1 }}
       style={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)",
+        background: "linear-gradient(135deg, #ffffff 0%, #3b82f6 100%)",
         padding: "20px",
         display: "flex",
         alignItems: "center",
@@ -563,35 +568,76 @@ export default function MemberRegistration() {
         >
           {/* Header */}
           <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            style={{ marginBottom: "16px" }}
+          >
+            <Button
+              type="text"
+              icon={<ArrowLeftOutlined />}
+              onClick={() => navigate("/")}
+              style={{
+                color: "#1c3c6d",
+                fontWeight: "600",
+                fontSize: "15px",
+              }}
+            >
+              Back to Home
+            </Button>
+          </motion.div>
+
+          <motion.div
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2 }}
             style={{ textAlign: "center", marginBottom: "24px" }}
           >
-            <h1
-              style={{
-                background: "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                fontSize: "28px",
-                fontWeight: "800",
-                marginBottom: "4px",
-                letterSpacing: "1px",
-              }}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className=" flex flex-col justify-center items-center"
             >
-              PALAROTARY 2026
-            </h1>
+              <div
+                style={{
+                  textAlign: "center",
+                  color: "#1a1a2e",
+                }}
+              >
+                <motion.div
+                  className="hero-title"
+                  initial={{ opacity: 0, y: 50 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <center>
+                    <img src={logo2} className=" w-full max-w-[400px]" />
+                  </center>
+                </motion.div>
+
+                <motion.div
+                  className="hero-subtitle"
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <center>
+                    <img src={logoBanner} className=" w-full max-w-[300px]" />
+                  </center>
+                </motion.div>
+              </div>
+            </motion.div>
+
             <h2
               style={{
                 fontSize: "18px",
-                color: "#1e3a8a",
+                color: "#1c3c6d",
                 marginBottom: "4px",
                 fontWeight: "700",
               }}
             >
               Member Registration
             </h2>
-            <p style={{ fontSize: "14px", color: "#666", margin: 0 }}>
+            <p style={{ fontSize: "14px", color: "#6b7280", margin: 0 }}>
               January 25, 2026 • Marikina Sports Center • 8am-6pm
             </p>
           </motion.div>
@@ -602,20 +648,20 @@ export default function MemberRegistration() {
             transition={{ duration: 0.3, delay: 0.3 }}
             style={{
               background:
-                "linear-gradient(135deg, #10b98115 0%, #05966915 100%)",
+                "linear-gradient(135deg, #fff3d615 0%, #ffe7ad15 100%)",
               padding: "12px 16px",
               borderRadius: "12px",
               marginBottom: "24px",
               display: "flex",
               alignItems: "center",
               gap: "12px",
-              border: "1px solid #10b98120",
+              border: "2px solid #f7a50a30",
             }}
           >
-            <UserAddOutlined style={{ fontSize: "20px", color: "#10b981" }} />
+            <UserAddOutlined style={{ fontSize: "20px", color: "#f7a50a" }} />
             <div>
-              <strong style={{ color: "#10b981" }}>Free Registration</strong>
-              <p style={{ margin: 0, fontSize: "13px", color: "#047857" }}>
+              <strong style={{ color: "#f7a50a" }}>Free Registration</strong>
+              <p style={{ margin: 0, fontSize: "13px", color: "#c68408" }}>
                 Get your digital badge instantly
               </p>
             </div>

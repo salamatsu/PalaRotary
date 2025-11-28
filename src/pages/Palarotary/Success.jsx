@@ -1,6 +1,18 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
-import { Result, Button, Card, Typography, Space, Tag, Divider } from "antd";
+import {
+  Result,
+  Button,
+  Card,
+  Typography,
+  Space,
+  Tag,
+  Divider,
+  Row,
+  Col,
+  Spin,
+  Image,
+} from "antd";
 import {
   CheckCircleOutlined,
   HomeOutlined,
@@ -9,6 +21,9 @@ import {
 import confetti from "canvas-confetti";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
+import { motion } from "framer-motion";
+import { useGetTransactionInfo } from "../../services/requests/usePalarotary";
+import { draw } from "../../hooks/useCanvas";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -17,18 +32,33 @@ const Success = () => {
   const navigate = useNavigate();
   const containerRef = useRef(null);
 
+  const tn = location.search || {};
+  const [itemPreviews, setItemPreviews] = useState({});
+  const [previewsLoading, setPreviewsLoading] = useState(false);
+
+  console.log(location.search);
+
   const {
-    orderId,
-    orders = [],
-    totalAmount = 0,
-    memberData,
-    email,
-    mobileNumber,
-  } = location.state || {};
+    data: transactionData,
+    isLoading,
+    isSuccess,
+  } = useGetTransactionInfo(tn);
+
+  console.log(transactionData?.data);
+  // Extract data from API response
+  const transaction = transactionData?.data?.transaction || {};
+  const attendee = transactionData?.data?.attendee || {};
+  const merchandiseItems = transactionData?.data?.merchandiseItems || [];
+  const totalAmount = transactionData?.data?.transaction?.totalAmount || {};
+
+  const orderId = transaction.transactionNumber;
+  const email = attendee.email;
+  const mobileNumber = attendee.mobileNumber;
+  const zone = attendee.zone;
 
   useEffect(() => {
-    // Trigger confetti animation on mount
-    if (orderId) {
+    // Trigger confetti animation when transaction is successfully fetched
+    if (isSuccess) {
       const duration = 3 * 1000;
       const animationEnd = Date.now() + duration;
       const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
@@ -48,17 +78,52 @@ const Success = () => {
           ...defaults,
           particleCount,
           origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
+          zIndex: 9999,
         });
         confetti({
           ...defaults,
           particleCount,
           origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
+          zIndex: 9999,
         });
       }, 250);
 
       return () => clearInterval(interval);
     }
-  }, [orderId]);
+  }, [isSuccess]);
+
+  // Generate previews for merchandise items
+  useEffect(() => {
+    const generatePreviews = async () => {
+      if (!zone || !merchandiseItems || merchandiseItems.length === 0) return;
+
+      setPreviewsLoading(true);
+      const previews = {};
+
+      for (const item of merchandiseItems) {
+        try {
+          const preview = await draw({
+            name: item.name || "SHIRT NAME",
+            zone: zone,
+            number: item.shirtNumber || "00",
+          });
+          previews[item.merchandiseId] = preview;
+        } catch (error) {
+          console.error(
+            `Failed to generate preview for item ${item.merchandiseId}:`,
+            error
+          );
+        }
+      }
+
+      setItemPreviews(previews);
+      setPreviewsLoading(false);
+    };
+
+    if (isSuccess && zone) {
+      generatePreviews();
+    }
+  }, [isSuccess, zone, merchandiseItems]);
 
   // GSAP animations
   useGSAP(
@@ -106,12 +171,42 @@ const Success = () => {
     navigate("/shirt-order");
   };
 
-  if (!orderId) {
+  // Show loading state
+  if (isLoading) {
     return (
       <div
         style={{
           minHeight: "100vh",
-          background: "linear-gradient(135deg, #1E3A71 0%, #0f2847 100%)",
+          background: "linear-gradient(135deg, #f8f9fc 0%, #e8edf5 100%)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "20px",
+        }}
+      >
+        <Card
+          style={{
+            maxWidth: "500px",
+            borderRadius: "16px",
+            textAlign: "center",
+          }}
+        >
+          <Spin />
+          <Title level={3} style={{ color: "#1c3c6d" }}>
+            Loading your order details...
+          </Title>
+        </Card>
+      </div>
+    );
+  }
+
+  // Show error state if no transaction number or failed to fetch
+  if (!tn || !orderId) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          background: "linear-gradient(135deg, #f8f9fc 0%, #e8edf5 100%)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -131,7 +226,7 @@ const Success = () => {
                 icon={<HomeOutlined />}
                 style={{
                   background:
-                    "linear-gradient(135deg, #1E3A71 0%, #0f2847 100%)",
+                    "linear-gradient(135deg, #1c3c6d 0%, #0f2847 100%)",
                   border: "none",
                 }}
               >
@@ -149,266 +244,449 @@ const Success = () => {
       ref={containerRef}
       style={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #1E3A71 0%, #0f2847 100%)",
+        background: "linear-gradient(135deg, #f8f9fc 0%, #e8edf5 100%)",
         padding: "40px 20px",
+        position: "relative",
+        overflow: "hidden",
       }}
     >
-      <div style={{ maxWidth: "900px", margin: "0 auto" }}>
-        {/* Success Result */}
-        <Card
-          className="success-card"
+      {/* Floating background elements */}
+      {[...Array(8)].map((_, i) => (
+        <motion.div
+          key={i}
           style={{
-            borderRadius: "24px",
-            boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
-            marginBottom: "24px",
-            textAlign: "center",
+            position: "absolute",
+            width: `${Math.random() * 100 + 50}px`,
+            height: `${Math.random() * 100 + 50}px`,
+            borderRadius: "50%",
+            background:
+              i % 3 === 0
+                ? `rgba(28, 60, 109, ${Math.random() * 0.06 + 0.02})`
+                : i % 3 === 1
+                ? `rgba(247, 165, 10, ${Math.random() * 0.06 + 0.02})`
+                : `rgba(213, 72, 57, ${Math.random() * 0.06 + 0.02})`,
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+            pointerEvents: "none",
           }}
+          animate={{
+            opacity: [0.15, 0.4, 0.15],
+            scale: [1, 1.2, 1],
+            y: [0, -30, 0],
+          }}
+          transition={{
+            duration: Math.random() * 5 + 4,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+      ))}
+
+      <div
+        style={{
+          maxWidth: "1200px",
+          margin: "0 auto",
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        {/* Success Result */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
         >
-          <div className="success-icon">
-            <CheckCircleOutlined
-              style={{ fontSize: "80px", color: "#52c41a" }}
-            />
-          </div>
-
-          <Title
-            level={1}
-            className="success-title"
-            style={{ marginTop: "24px", color: "#1E3A71" }}
-          >
-            Order Submitted Successfully!
-          </Title>
-
-          <Paragraph
-            style={{ fontSize: "16px", color: "#666", marginTop: "16px" }}
-          >
-            Your custom shirt order has been received and is being processed.
-          </Paragraph>
-
-          <div
+          <Card
+            className="success-card"
             style={{
-              background: "linear-gradient(135deg, #1E3A71 0%, #0f2847 100%)",
-              padding: "20px",
-              borderRadius: "12px",
-              marginTop: "24px",
+              borderRadius: "24px",
+              boxShadow: "0 10px 40px rgba(28, 60, 109, 0.15)",
+              marginBottom: "24px",
+              textAlign: "center",
+              background: "rgba(255, 255, 255, 0.95)",
+              backdropFilter: "blur(10px)",
             }}
           >
-            <Text style={{ color: "rgba(255,255,255,0.9)", fontSize: "14px" }}>
-              Order ID
-            </Text>
-            <Title level={2} style={{ color: "white", margin: "8px 0 0 0" }}>
-              {orderId}
-            </Title>
-          </div>
+            <div className="success-icon">
+              <CheckCircleOutlined
+                style={{ fontSize: "80px", color: "#f7a50a" }}
+              />
+            </div>
 
-          <Paragraph
-            type="secondary"
-            style={{ marginTop: "24px", fontSize: "14px" }}
-          >
-            Please save your order ID for reference. You will be contacted
-            regarding payment and delivery details.
-          </Paragraph>
-        </Card>
+            <Title
+              level={1}
+              className="success-title"
+              style={{ marginTop: "24px", color: "#1c3c6d" }}
+            >
+              Order Submitted Successfully!
+            </Title>
+
+            <Paragraph
+              style={{ fontSize: "16px", color: "#666", marginTop: "16px" }}
+            >
+              Your custom shirt order has been received and is being processed.
+            </Paragraph>
+
+            <div
+              style={{
+                background: "linear-gradient(135deg, #1c3c6d 0%, #0f2847 100%)",
+                padding: "20px",
+                borderRadius: "12px",
+                marginTop: "24px",
+              }}
+            >
+              <Text
+                style={{ color: "rgba(255,255,255,0.9)", fontSize: "14px" }}
+              >
+                Transaction Number
+              </Text>
+              <Title level={2} style={{ color: "white", margin: "8px 0 0 0" }}>
+                {orderId}
+              </Title>
+            </div>
+
+            <Paragraph
+              type="secondary"
+              style={{ marginTop: "24px", fontSize: "14px" }}
+            >
+              Please save your order ID for reference. You will be contacted
+              regarding payment and delivery details.
+            </Paragraph>
+          </Card>
+        </motion.div>
 
         {/* Contact Information */}
-        <Card
-          className="success-card"
-          style={{
-            borderRadius: "24px",
-            boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
-            marginBottom: "24px",
-          }}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
         >
-          <Title level={4} style={{ marginBottom: "16px", color: "#1E3A71" }}>
-            Contact Information
-          </Title>
-          <Space direction="vertical" size="small" style={{ width: "100%" }}>
-            <div>
-              <Text type="secondary">Email: </Text>
-              <Text strong>{email}</Text>
-            </div>
-            <div>
-              <Text type="secondary">Mobile: </Text>
-              <Text strong>{mobileNumber}</Text>
-            </div>
-            <div>
-              <Text type="secondary">Zone: </Text>
-              <Tag color="blue">{memberData?.zone}</Tag>
-            </div>
-          </Space>
-        </Card>
-
-        {/* Order Summary */}
-        <Card
-          className="success-card"
-          style={{
-            borderRadius: "24px",
-            boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
-            marginBottom: "24px",
-          }}
-        >
-          <div
+          <Card
+            className="success-card"
             style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "16px",
+              borderRadius: "24px",
+              boxShadow: "0 10px 40px rgba(28, 60, 109, 0.15)",
+              marginBottom: "24px",
             }}
           >
-            <Title level={4} style={{ margin: 0, color: "#1E3A71" }}>
-              Order Summary
+            <Title level={4} style={{ marginBottom: "16px", color: "#1c3c6d" }}>
+              Contact Information
             </Title>
-            <Text strong style={{ fontSize: "20px", color: "#1E3A71" }}>
-              ₱{totalAmount}
-            </Text>
-          </div>
-
-          <Divider />
-
-          <Space direction="vertical" size="middle" style={{ width: "100%" }}>
-            {orders.map((order, index) => (
-              <div
-                key={order.id || index}
-                style={{
-                  background: "#f5f7fa",
-                  padding: "16px",
-                  borderRadius: "12px",
-                  border: "1px solid #e8edf2",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "start",
-                  }}
-                >
-                  <Space direction="vertical" size={2}>
-                    <Text strong style={{ fontSize: "16px" }}>
-                      {index + 1}. {order.name}
-                    </Text>
-                    <Text type="secondary">Size: {order.size}</Text>
-                    {order.shirtNumber && (
-                      <Text type="secondary">Number: {order.shirtNumber}</Text>
-                    )}
-                    {order.desiredNumber && (
-                      <Text
-                        type="secondary"
-                        style={{ fontStyle: "italic", color: "#faad14" }}
-                      >
-                        Desired Number: {order.desiredNumber}
-                      </Text>
-                    )}
-                  </Space>
-                  <Text strong style={{ fontSize: "18px", color: "#1E3A71" }}>
-                    ₱{order.price}
-                  </Text>
-                </div>
+            <Space direction="vertical" size="small" style={{ width: "100%" }}>
+              <div>
+                <Text type="secondary">Email: </Text>
+                <Text strong>{email}</Text>
               </div>
-            ))}
-          </Space>
-        </Card>
+              <div>
+                <Text type="secondary">Mobile: </Text>
+                <Text strong>{mobileNumber}</Text>
+              </div>
+              <div>
+                <Text type="secondary">Zone: </Text>
+                <Tag color="blue">{attendee?.zone}</Tag>
+              </div>
+            </Space>
+          </Card>
+        </motion.div>
 
-        {/* What's Next */}
-        <Card
-          className="success-card"
-          style={{
-            borderRadius: "24px",
-            boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
-            marginBottom: "24px",
-            background: "#fffbf0",
-            border: "2px solid #ffd591",
-          }}
+        {/* Order Summary */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
         >
-          <Title level={4} style={{ marginBottom: "16px", color: "#fa8c16" }}>
-            📋 What's Next?
-          </Title>
-          <Space direction="vertical" size="small">
-            <div style={{ display: "flex", alignItems: "start" }}>
-              <Text style={{ marginRight: "8px" }}>✓</Text>
-              <Text>Our team will review your order</Text>
-            </div>
-            <div style={{ display: "flex", alignItems: "start" }}>
-              <Text style={{ marginRight: "8px" }}>✓</Text>
-              <Text>
-                If you requested a desired number, it will be reviewed for
-                approval
-              </Text>
-            </div>
-            <div style={{ display: "flex", alignItems: "start" }}>
-              <Text style={{ marginRight: "8px" }}>✓</Text>
-              <Text>You will receive the receipt via email</Text>
-            </div>
-            <div style={{ display: "flex", alignItems: "start" }}>
-              <Text style={{ marginRight: "8px" }}>✓</Text>
-              <Text>
-                You will receive a confirmation call regarding delivery and
-                desired number
-              </Text>
-            </div>
-            <div style={{ display: "flex", alignItems: "start" }}>
-              <Text style={{ marginRight: "8px" }}>✓</Text>
-              <Text>Your custom shirts will be prepared and shipped</Text>
-            </div>
-          </Space>
-        </Card>
-
-        {/* Action Buttons */}
-        <Card
-          className="success-card"
-          style={{
-            borderRadius: "24px",
-            boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
-          }}
-        >
-          <Space
-            direction="vertical"
-            size="large"
-            style={{ width: "100%", textAlign: "center" }}
+          <Card
+            className="success-card"
+            style={{
+              borderRadius: "24px",
+              boxShadow: "0 10px 40px rgba(28, 60, 109, 0.15)",
+              marginBottom: "24px",
+            }}
           >
             <div
               style={{
                 display: "flex",
-                flexDirection: "column",
-                gap: "12px",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "16px",
               }}
             >
-              <Button
-                type="primary"
-                size="large"
-                block
-                icon={<HomeOutlined />}
-                onClick={handleGoHome}
-                style={{
-                  background:
-                    "linear-gradient(135deg, #1E3A71 0%, #0f2847 100%)",
-                  border: "none",
-                  height: "56px",
-                  fontSize: "16px",
-                  fontWeight: "600",
-                  borderRadius: "12px",
-                }}
-              >
-                Go to Home
-              </Button>
-              <Button
-                size="large"
-                block
-                icon={<ShoppingCartOutlined />}
-                onClick={handleOrderAgain}
-                style={{
-                  height: "56px",
-                  fontSize: "16px",
-                  fontWeight: "600",
-                  borderRadius: "12px",
-                  borderColor: "#1E3A71",
-                  color: "#1E3A71",
-                }}
-              >
-                Order More Shirts
-              </Button>
+              <Title level={4} style={{ margin: 0, color: "#1c3c6d" }}>
+                Order Summary
+              </Title>
+              <Text strong style={{ fontSize: "20px", color: "#1c3c6d" }}>
+                ₱{totalAmount}
+              </Text>
             </div>
-          </Space>
-        </Card>
+
+            <Divider />
+            <div className=" flex flex-wrap justify-center items-center gap-4">
+              {merchandiseItems.map((item, index) => (
+                <motion.div
+                  key={item.merchandiseId || index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <Card
+                    style={{
+                      borderRadius: "16px",
+                      border: "2px solid #e8edf5",
+                      overflow: "hidden",
+                      height: "100%",
+                    }}
+                    styles={{
+                      body: {
+                        padding: "16px",
+                      },
+                    }}
+                  >
+                    {/* Preview Image */}
+                    <div
+                      style={{
+                        maxWidth: "350px",
+                        // height: "200px",
+                        background:
+                          "linear-gradient(135deg, #f8f9fc 0%, #e8edf5 100%)",
+                        borderRadius: "12px",
+                        marginBottom: "16px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        overflow: "hidden",
+                        position: "relative",
+                      }}
+                    >
+                      {previewsLoading ? (
+                        <Spin size="large" />
+                      ) : itemPreviews[item.merchandiseId] ? (
+                        <Image
+                          src={itemPreviews[item.merchandiseId]}
+                          alt={item.name}
+                          style={{
+                            minWidth: "200px",
+                            height: "100%",
+                            objectFit: "contain",
+                          }}
+                        />
+                      ) : (
+                        // <motion.img
+                        //   initial={{ scale: 0.8, opacity: 0 }}
+                        //   animate={{ scale: 1, opacity: 1 }}
+                        //   transition={{ duration: 0.5 }}
+                        //   src={itemPreviews[item.merchandiseId]}
+                        //   alt={item.name}
+                        //   style={{
+                        //     width: "100%",
+                        //     height: "100%",
+                        //     objectFit: "cover",
+                        //   }}
+                        // />
+                        <Text type="secondary">No preview available</Text>
+                      )}
+                    </div>
+
+                    {/* Item Details */}
+                    <Space
+                      direction="vertical"
+                      size={4}
+                      style={{ width: "100%" }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "start",
+                        }}
+                      >
+                        <Text
+                          strong
+                          style={{ fontSize: "16px", color: "#1c3c6d" }}
+                        >
+                          {item.name}
+                        </Text>
+                        <Tag color="blue" style={{ fontSize: "12px" }}>
+                          #{index + 1}
+                        </Tag>
+                      </div>
+
+                      <div style={{ marginTop: "8px" }}>
+                        <Text
+                          type="secondary"
+                          style={{ fontSize: "13px", display: "block" }}
+                        >
+                          Size: <Text strong>{item.size}</Text>
+                        </Text>
+
+                        {item.shirtNumber && (
+                          <Text
+                            type="secondary"
+                            style={{ fontSize: "13px", display: "block" }}
+                          >
+                            Number:{" "}
+                            <Text strong style={{ color: "#1c3c6d" }}>
+                              {item.shirtNumber}
+                            </Text>
+                          </Text>
+                        )}
+
+                        {item.desiredShirtNumber && (
+                          <Text
+                            style={{
+                              fontSize: "13px",
+                              fontStyle: "italic",
+                              color: "#f7a50a",
+                              display: "block",
+                            }}
+                          >
+                            Desired: {item.desiredShirtNumber}
+                          </Text>
+                        )}
+                      </div>
+
+                      {/* <Divider style={{ margin: "12px 0" }} />
+
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Text type="secondary" style={{ fontSize: "13px" }}>
+                          Price
+                        </Text>
+                        <Text
+                          strong
+                          style={{
+                            fontSize: "20px",
+                            color: "#d54839",
+                          }}
+                        >
+                          ₱{item.subtotal}
+                        </Text>
+                      </div> */}
+                    </Space>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </Card>
+        </motion.div>
+
+        {/* What's Next */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
+          <Card
+            className="success-card"
+            style={{
+              borderRadius: "24px",
+              boxShadow: "0 10px 40px rgba(28, 60, 109, 0.15)",
+              marginBottom: "24px",
+              background: "#fffbf0",
+              border: "2px solid #ffd591",
+            }}
+          >
+            <Title level={4} style={{ marginBottom: "16px", color: "#f7a50a" }}>
+              📋 What's Next?
+            </Title>
+            <Space direction="vertical" size="small">
+              <div style={{ display: "flex", alignItems: "start" }}>
+                <Text style={{ marginRight: "8px" }}>✓</Text>
+                <Text>Our team will review your order</Text>
+              </div>
+              <div style={{ display: "flex", alignItems: "start" }}>
+                <Text style={{ marginRight: "8px" }}>✓</Text>
+                <Text>
+                  If you requested a desired number, it will be reviewed for
+                  approval
+                </Text>
+              </div>
+              <div style={{ display: "flex", alignItems: "start" }}>
+                <Text style={{ marginRight: "8px" }}>✓</Text>
+                <Text>You will receive the receipt via email</Text>
+              </div>
+              <div style={{ display: "flex", alignItems: "start" }}>
+                <Text style={{ marginRight: "8px" }}>✓</Text>
+                <Text>
+                  You will receive a confirmation call regarding delivery and
+                  desired number
+                </Text>
+              </div>
+              <div style={{ display: "flex", alignItems: "start" }}>
+                <Text style={{ marginRight: "8px" }}>✓</Text>
+                <Text>Your custom shirts will be prepared and shipped</Text>
+              </div>
+            </Space>
+          </Card>
+        </motion.div>
+
+        {/* Action Buttons */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+        >
+          <Card
+            className="success-card"
+            style={{
+              borderRadius: "24px",
+              boxShadow: "0 10px 40px rgba(28, 60, 109, 0.15)",
+            }}
+          >
+            <Space
+              direction="vertical"
+              size="large"
+              style={{ width: "100%", textAlign: "center" }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "12px",
+                }}
+              >
+                <Button
+                  type="primary"
+                  size="large"
+                  block
+                  icon={<HomeOutlined />}
+                  onClick={handleGoHome}
+                  style={{
+                    background:
+                      "linear-gradient(135deg, #1c3c6d 0%, #0f2847 100%)",
+                    border: "none",
+                    height: "56px",
+                    fontSize: "16px",
+                    fontWeight: "600",
+                    borderRadius: "12px",
+                  }}
+                >
+                  Go to Home
+                </Button>
+                <Button
+                  size="large"
+                  block
+                  icon={<ShoppingCartOutlined />}
+                  onClick={handleOrderAgain}
+                  style={{
+                    height: "56px",
+                    fontSize: "16px",
+                    fontWeight: "600",
+                    borderRadius: "12px",
+                    borderColor: "#1c3c6d",
+                    color: "#1c3c6d",
+                  }}
+                >
+                  Order More Shirts
+                </Button>
+              </div>
+            </Space>
+          </Card>
+        </motion.div>
       </div>
 
       {/* Responsive CSS */}

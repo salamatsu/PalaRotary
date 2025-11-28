@@ -17,7 +17,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { shirtTemplate } from "../../assets/images/Other";
+import { cloud, cloudCut, shirtTemplate } from "../../assets/images/Other";
 import { logo2, logoBanner } from "../../assets/images/logos";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -193,7 +193,7 @@ export default function PalarotaryLandingPage() {
       ref={containerRef}
       style={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #1c3c6d 0%, #0f2847 100%)",
+        background: "linear-gradient(135deg, #f8f9fc 0%, #e8edf5 100%)",
         position: "relative",
         overflow: "hidden",
       }}
@@ -208,14 +208,19 @@ export default function PalarotaryLandingPage() {
             width: `${Math.random() * 120 + 60}px`,
             height: `${Math.random() * 120 + 60}px`,
             borderRadius: i % 3 === 0 ? "50%" : i % 3 === 1 ? "20%" : "30%",
-            background: `rgba(255, 255, 255, ${Math.random() * 0.12 + 0.03})`,
+            background:
+              i % 3 === 0
+                ? `rgba(28, 60, 109, ${Math.random() * 0.08 + 0.02})` // Navy blue
+                : i % 3 === 1
+                ? `rgba(247, 165, 10, ${Math.random() * 0.08 + 0.02})` // Orange
+                : `rgba(213, 72, 57, ${Math.random() * 0.08 + 0.02})`, // Red
             left: `${Math.random() * 100}%`,
             top: `${Math.random() * 100}%`,
             pointerEvents: "none",
             filter: "blur(2px)",
           }}
           animate={{
-            opacity: [0.2, 0.5, 0.2],
+            opacity: [0.15, 0.4, 0.15],
             scale: [1, 1.3, 1],
           }}
           transition={{
@@ -226,27 +231,21 @@ export default function PalarotaryLandingPage() {
         />
       ))}
 
-      <div
-        style={{
-          maxWidth: "1200px",
-          margin: "0 auto",
-          padding: "40px 20px",
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
+      <div className=" my-0 mx-auto relative px-0 py-20 ">
+        <img src={cloud} className=" absolute z-0 w-full bottom-0 top-0 l-0 " />
         {/* Hero Section */}
         <motion.div
           ref={heroRef}
           style={{ y: yHero, opacity }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
+          className=" h-screen flex flex-col justify-center items-center"
         >
           <div
             style={{
               textAlign: "center",
               marginBottom: "60px",
-              color: "white",
+              color: "#1a1a2e",
             }}
           >
             <motion.div
@@ -254,30 +253,9 @@ export default function PalarotaryLandingPage() {
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <Title
-                level={1}
-                style={{
-                  color: "white",
-                  fontSize: "clamp(40px, 8vw, 72px)",
-                  marginBottom: "16px",
-                  fontWeight: "900",
-                  textShadow: "0 4px 20px rgba(0,0,0,0.3)",
-                  letterSpacing: "2px",
-                }}
-              >
-                <motion.span
-                  animate={{
-                    textShadow: [
-                      "0 4px 20px rgba(0,0,0,0.3)",
-                      "0 8px 40px rgba(255,255,255,0.4)",
-                      "0 4px 20px rgba(0,0,0,0.3)",
-                    ],
-                  }}
-                  transition={{ duration: 3, repeat: Infinity }}
-                >
-                  <img src={logo2} />
-                </motion.span>
-              </Title>
+              <center>
+                <img src={logo2} className=" w-full max-w-[1000px]" />
+              </center>
             </motion.div>
 
             <motion.div
@@ -286,20 +264,9 @@ export default function PalarotaryLandingPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <Title
-                level={3}
-                style={{
-                  color: "rgba(255,255,255,0.95)",
-                  fontWeight: "400",
-                  marginBottom: "24px",
-                  fontSize: "clamp(18px, 3vw, 28px)",
-                  textAlign: "center",
-                }}
-              >
-                <center>
-                  <img src={logoBanner} className=" max-w-[500px]" />
-                </center>
-              </Title>
+              <center>
+                <img src={logoBanner} className=" w-full max-w-[500px]" />
+              </center>
             </motion.div>
 
             <div
@@ -322,21 +289,27 @@ export default function PalarotaryLandingPage() {
               ].map((item, index) => (
                 <motion.div
                   key={index}
-                  className="info-badge"
+                  className="info-badge w-full max-w-[300px] flex items-center justify-center"
                   whileHover={{
                     scale: 1.1,
                     y: -5,
-                    boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
+                    boxShadow: "0 10px 30px rgba(28, 60, 109, 0.25)",
                   }}
                   whileTap={{ scale: 0.95 }}
                   style={{
-                    background: "rgba(255,255,255,0.25)",
+                    background: "#ffffff",
                     padding: "16px 28px",
                     borderRadius: "16px",
                     backdropFilter: "blur(10px)",
-                    border: "1px solid rgba(255,255,255,0.3)",
-                    boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
-                    cursor: "pointer",
+                    border:
+                      "2px solid " +
+                      (index === 0
+                        ? "#1c3c6d"
+                        : index === 1
+                        ? "#f7a50a"
+                        : "#d54839"),
+                    boxShadow: "0 8px 32px rgba(28, 60, 109, 0.1)",
+                    // cursor: "pointer",
                   }}
                 >
                   <motion.div
@@ -345,23 +318,45 @@ export default function PalarotaryLandingPage() {
                     animate="animate"
                   >
                     <item.icon
-                      style={{ fontSize: "24px", marginRight: "12px" }}
+                      style={{
+                        fontSize: "24px",
+                        marginRight: "12px",
+                        color:
+                          index === 0
+                            ? "#1c3c6d"
+                            : index === 1
+                            ? "#f7a50a"
+                            : "#d54839",
+                      }}
                     />
                   </motion.div>
-                  <strong style={{ fontSize: "16px" }}>{item.text}</strong>
+                  <strong style={{ fontSize: "16px", color: "#1a1a2e" }}>
+                    {item.text}
+                  </strong>
                 </motion.div>
               ))}
             </div>
           </div>
         </motion.div>
+      </div>
 
+      <div
+        style={{
+          maxWidth: "1200px",
+          margin: "0 auto",
+          position: "relative",
+          zIndex: 1,
+          padding: "0 20px",
+        }}
+        className="bg-transparent"
+      >
         {/* Registration Cards */}
         <div ref={cardsRef}>
           <Row gutter={[32, 32]} style={{ marginBottom: "60px" }}>
             {/* Member Registration Card */}
             <Col xs={24} lg={12}>
               <motion.div
-                className="registration-card"
+                className="registration-card h-full"
                 variants={cardVariants}
                 initial="hidden"
                 whileInView="visible"
@@ -372,129 +367,138 @@ export default function PalarotaryLandingPage() {
                   style={{
                     height: "100%",
                     borderRadius: "24px",
-                    boxShadow: "0 10px 40px rgba(0,0,0,0.15)",
-                    border: "none",
+                    boxShadow: "0 10px 40px rgba(247, 165, 10, 0.15)",
+                    border: "2px solid #fff3d6",
                     overflow: "hidden",
                     background:
-                      "linear-gradient(135deg, #ffffff 0%, #f0fff4 100%)",
+                      "linear-gradient(135deg, #ffffff 0%, #fff9eb 100%)",
+                  }}
+                  styles={{
+                    body: {
+                      height: "100%",
+                    },
                   }}
                 >
-                  <div style={{ padding: "20px" }}>
-                    <motion.div
-                      style={{ textAlign: "center", marginBottom: "24px" }}
-                      whileHover={{ scale: 1.1, rotate: [0, -10, 10, 0] }}
-                      transition={{ duration: 0.5 }}
-                    >
-                      <div
-                        style={{
-                          width: "100px",
-                          height: "100px",
-                          borderRadius: "50%",
-                          background:
-                            "linear-gradient(135deg, #10b981 0%, #059669 100%)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          margin: "0 auto 20px",
-                          boxShadow: "0 10px 30px rgba(16, 185, 129, 0.3)",
-                        }}
+                  <div className="p-0 md:p-4 flex h-full flex-col">
+                    <div className=" flex-1">
+                      <motion.div
+                        style={{ textAlign: "center", marginBottom: "24px" }}
+                        whileHover={{ scale: 1.1, rotate: [0, -10, 10, 0] }}
+                        transition={{ duration: 0.5 }}
                       >
-                        <TeamOutlined
-                          style={{ fontSize: "48px", color: "white" }}
-                        />
-                      </div>
-                    </motion.div>
+                        <div
+                          style={{
+                            width: "100px",
+                            height: "100px",
+                            borderRadius: "50%",
+                            background:
+                              "linear-gradient(135deg, #f7a50a 0%, #c68408 100%)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            margin: "0 auto 20px",
+                            boxShadow: "0 10px 30px rgba(247, 165, 10, 0.3)",
+                          }}
+                        >
+                          <TeamOutlined
+                            style={{ fontSize: "48px", color: "white" }}
+                          />
+                        </div>
+                      </motion.div>
 
-                    <Title
-                      level={2}
-                      style={{
-                        marginBottom: "12px",
-                        textAlign: "center",
-                        fontSize: "28px",
-                      }}
-                    >
-                      Member Registration
-                    </Title>
-                    <Paragraph
-                      style={{
-                        fontSize: "16px",
-                        color: "#666",
-                        marginBottom: "24px",
-                        textAlign: "center",
-                      }}
-                    >
-                      Join as an individual member
-                    </Paragraph>
-
-                    <motion.div
-                      whileHover={{ scale: 1.03 }}
-                      animate={{
-                        boxShadow: [
-                          "0 4px 15px rgba(16, 185, 129, 0.2)",
-                          "0 8px 25px rgba(16, 185, 129, 0.3)",
-                          "0 4px 15px rgba(16, 185, 129, 0.2)",
-                        ],
-                      }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                      style={{
-                        background:
-                          "linear-gradient(135deg, #10b98120 0%, #05966920 100%)",
-                        padding: "20px",
-                        borderRadius: "16px",
-                        marginBottom: "24px",
-                        border: "2px solid #10b98140",
-                      }}
-                    >
                       <Title
-                        level={3}
+                        level={2}
                         style={{
-                          margin: 0,
-                          color: "#10b981",
-                          fontSize: "32px",
+                          marginBottom: "12px",
+                          textAlign: "center",
+                          fontSize: "28px",
                         }}
                       >
-                        FREE
+                        Member Registration
                       </Title>
                       <Paragraph
                         style={{
-                          margin: "8px 0 0 0",
-                          fontSize: "14px",
+                          fontSize: "16px",
                           color: "#666",
+                          marginBottom: "24px",
+                          textAlign: "center",
                         }}
                       >
-                        No registration fee for members
+                        Join as an individual member
                       </Paragraph>
-                    </motion.div>
 
-                    <div style={{ marginBottom: "28px" }}>
-                      {[
-                        "Select your registered club",
-                        "Fill in your information",
-                        "Get digital badge instantly",
-                        "QR code sent via email",
-                      ].map((text, i) => (
-                        <motion.div
-                          key={i}
-                          className="feature-item"
-                          initial={{ opacity: 0, x: -20 }}
-                          whileInView={{ opacity: 1, x: 0 }}
-                          transition={{ delay: i * 0.1 }}
-                          viewport={{ once: true }}
+                      <motion.div
+                        whileHover={{ scale: 1.03 }}
+                        animate={{
+                          boxShadow: [
+                            "0 4px 15px rgba(247, 165, 10, 0.2)",
+                            "0 8px 25px rgba(247, 165, 10, 0.3)",
+                            "0 4px 15px rgba(247, 165, 10, 0.2)",
+                          ],
+                        }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        style={{
+                          background:
+                            "linear-gradient(135deg, #fff3d620 0%, #ffe7ad20 100%)",
+                          padding: "20px",
+                          borderRadius: "16px",
+                          marginBottom: "24px",
+                          border: "2px solid #f7a50a40",
+                        }}
+                      >
+                        <Title
+                          level={3}
                           style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "12px",
-                            marginBottom: "12px",
+                            margin: 0,
+                            color: "#f7a50a",
+                            fontSize: "32px",
                           }}
                         >
-                          <CheckCircleOutlined
-                            style={{ fontSize: "18px", color: "#10b981" }}
-                          />
-                          <span style={{ fontSize: "15px", color: "#333" }}>
-                            {text}
-                          </span>
-                        </motion.div>
-                      ))}
+                          FREE
+                        </Title>
+                        <Paragraph
+                          style={{
+                            margin: "8px 0 0 0",
+                            fontSize: "14px",
+                            color: "#6b7280",
+                          }}
+                        >
+                          No registration fee for members
+                        </Paragraph>
+                      </motion.div>
+
+                      <div style={{ marginBottom: "28px" }}>
+                        {[
+                          "Select your registered club",
+                          "Fill in your information",
+                          "Get digital badge instantly",
+                          "QR code sent via email",
+                        ].map((text, i) => (
+                          <motion.div
+                            key={i}
+                            className="feature-item"
+                            initial={{ opacity: 0, x: -20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            transition={{ delay: i * 0.1 }}
+                            viewport={{ once: true }}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "12px",
+                              marginBottom: "12px",
+                            }}
+                          >
+                            <CheckCircleOutlined
+                              style={{ fontSize: "18px", color: "#f7a50a" }}
+                            />
+                            <span
+                              style={{ fontSize: "15px", color: "#1a1a2e" }}
+                            >
+                              {text}
+                            </span>
+                          </motion.div>
+                        ))}
+                      </div>
                     </div>
 
                     <motion.div
@@ -511,13 +515,13 @@ export default function PalarotaryLandingPage() {
                         onClick={() => navigate("/register-member")}
                         style={{
                           background:
-                            "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                            "linear-gradient(135deg, #f7a50a 0%, #c68408 100%)",
                           border: "none",
                           height: "56px",
                           fontSize: "17px",
                           fontWeight: "600",
                           borderRadius: "12px",
-                          boxShadow: "0 6px 20px rgba(16, 185, 129, 0.4)",
+                          boxShadow: "0 6px 20px rgba(247, 165, 10, 0.4)",
                         }}
                       >
                         Register as Member
@@ -542,120 +546,136 @@ export default function PalarotaryLandingPage() {
                   style={{
                     height: "100%",
                     borderRadius: "24px",
-                    boxShadow: "0 10px 40px rgba(0,0,0,0.15)",
-                    border: "none",
+                    boxShadow: "0 10px 40px rgba(28, 60, 109, 0.15)",
+                    border: "2px solid #e1e5ef",
                     overflow: "hidden",
                     background:
-                      "linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%)",
+                      "linear-gradient(135deg, #ffffff 0%, #f0f2f7 100%)",
+                  }}
+                  styles={{
+                    body: {
+                      height: "100%",
+                    },
                   }}
                 >
-                  <div style={{ padding: "20px" }}>
-                    <motion.div
-                      style={{ textAlign: "center", marginBottom: "24px" }}
-                      whileHover={{ scale: 1.05, y: -5 }}
-                      transition={{ duration: 0.5 }}
-                    >
-                      <img
-                        src={shirtTemplate}
-                        alt="Shirt Template"
-                        onClick={() => setPreviewVisible(true)}
-                        style={{
-                          width: "100%",
-                          maxWidth: "280px",
-                          height: "auto",
-                          margin: "0 auto 20px",
-                          borderRadius: "12px",
-                          boxShadow: "0 10px 30px rgba(28, 60, 109, 0.2)",
-                          cursor: "pointer",
-                        }}
-                      />
-                    </motion.div>
+                  <div className="p-0 md:p-4 flex h-full flex-col">
+                    <div className=" flex-1">
+                      <motion.div
+                        style={{ textAlign: "center", marginBottom: "24px" }}
+                        whileHover={{ scale: 1.05, y: -5 }}
+                        transition={{ duration: 0.5 }}
+                      >
+                        <img
+                          src={shirtTemplate}
+                          alt="Shirt Template"
+                          onClick={() => setPreviewVisible(true)}
+                          style={{
+                            width: "100%",
+                            maxWidth: "280px",
+                            height: "auto",
+                            margin: "0 auto 20px",
+                            borderRadius: "12px",
+                            boxShadow: "0 10px 30px rgba(28, 60, 109, 0.2)",
+                            cursor: "pointer",
+                          }}
+                        />
+                      </motion.div>
 
-                    <Title
-                      level={2}
-                      style={{
-                        marginBottom: "12px",
-                        textAlign: "center",
-                        fontSize: "28px",
-                      }}
-                    >
-                      Order Customized Shirt
-                    </Title>
-                    <Paragraph
-                      style={{
-                        fontSize: "16px",
-                        color: "#666",
-                        marginBottom: "24px",
-                        textAlign: "center",
-                      }}
-                    >
-                      Get your personalized PALAROTARY 2026 shirt
-                    </Paragraph>
-
-                    <motion.div
-                      whileHover={{ scale: 1.03 }}
-                      style={{
-                        background:
-                          "linear-gradient(135deg, #1c3c6d15 0%, #0f284715 100%)",
-                        padding: "20px",
-                        borderRadius: "16px",
-                        marginBottom: "24px",
-                        border: "2px solid #1c3c6d30",
-                      }}
-                    >
                       <Title
-                        level={3}
+                        level={2}
                         style={{
-                          margin: 0,
-                          color: "#1c3c6d",
-                          fontSize: "32px",
+                          marginBottom: "12px",
+                          textAlign: "center",
+                          fontSize: "28px",
                         }}
                       >
-                        ₱300
+                        Order Customized Shirt
                       </Title>
                       <Paragraph
                         style={{
-                          margin: "8px 0 0 0",
-                          fontSize: "14px",
-                          color: "#666",
+                          fontSize: "16px",
+                          color: "#6b7280",
+                          marginBottom: "24px",
+                          textAlign: "center",
                         }}
                       >
-                        All sizes - with custom name and number (00-99)
+                        Get your personalized PALAROTARY 2026 shirt
                       </Paragraph>
-                    </motion.div>
 
-                    <div style={{ marginBottom: "28px" }}>
-                      {[
-                        "Must be a registered member",
-                        "Upload / scan your member badge",
-                        "Choose your size",
-                        "Add your name and 2-digit number (00-99)",
-                        "Secure online payment",
-                      ].map((text, i) => (
-                        <motion.div
-                          key={i}
-                          className="feature-item"
-                          initial={{ opacity: 0, x: -20 }}
-                          whileInView={{ opacity: 1, x: 0 }}
-                          transition={{ delay: i * 0.1 }}
-                          viewport={{ once: true }}
+                      <motion.div
+                        whileHover={{ scale: 1.03 }}
+                        animate={{
+                          boxShadow: [
+                            "0 4px 15px rgba(213, 72, 57, 0.2)",
+                            "0 8px 25px rgba(213, 72, 57, 0.3)",
+                            "0 4px 15px rgba(213, 72, 57, 0.2)",
+                          ],
+                        }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        style={{
+                          background:
+                            "linear-gradient(135deg, #fde5e320 0%, #fbcbc720 100%)",
+                          padding: "20px",
+                          borderRadius: "16px",
+                          marginBottom: "24px",
+                          border: "2px solid #d5483940",
+                        }}
+                      >
+                        <Title
+                          level={3}
                           style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "12px",
-                            marginBottom: "12px",
+                            margin: 0,
+                            color: "#d54839",
+                            fontSize: "32px",
                           }}
                         >
-                          <CheckCircleOutlined
-                            style={{ fontSize: "18px", color: "#1c3c6d" }}
-                          />
-                          <span style={{ fontSize: "15px", color: "#333" }}>
-                            {text}
-                          </span>
-                        </motion.div>
-                      ))}
-                    </div>
+                          ₱300
+                        </Title>
+                        <Paragraph
+                          style={{
+                            margin: "8px 0 0 0",
+                            fontSize: "14px",
+                            color: "#6b7280",
+                          }}
+                        >
+                          All sizes - with custom name and number (00-99)
+                        </Paragraph>
+                      </motion.div>
 
+                      <div style={{ marginBottom: "28px" }}>
+                        {[
+                          "Must be a registered member",
+                          "Upload / scan your member badge",
+                          "Choose your size",
+                          "Add your name and 2-digit number (00-99)",
+                          "Secure online payment",
+                        ].map((text, i) => (
+                          <motion.div
+                            key={i}
+                            className="feature-item"
+                            initial={{ opacity: 0, x: -20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            transition={{ delay: i * 0.1 }}
+                            viewport={{ once: true }}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "12px",
+                              marginBottom: "12px",
+                            }}
+                          >
+                            <CheckCircleOutlined
+                              style={{ fontSize: "18px", color: "#d54839" }}
+                            />
+                            <span
+                              style={{ fontSize: "15px", color: "#1a1a2e" }}
+                            >
+                              {text}
+                            </span>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </div>
                     <motion.div
                       variants={buttonVariants}
                       initial="rest"
@@ -670,7 +690,7 @@ export default function PalarotaryLandingPage() {
                         onClick={() => navigate("/shirt-order")}
                         style={{
                           background:
-                            "linear-gradient(135deg, #1c3c6d 0%, #0f2847 100%)",
+                            "linear-gradient(135deg, #1c3c6d 0%, #173052 100%)",
                           border: "none",
                           height: "56px",
                           fontSize: "17px",
@@ -691,7 +711,12 @@ export default function PalarotaryLandingPage() {
 
         {/* Footer */}
         <motion.div
-          style={{ textAlign: "center", marginTop: "60px", color: "white" }}
+          style={{
+            textAlign: "center",
+            marginTop: "60px",
+            padding: "40px 20px",
+            borderTop: "2px solid #e8edf5",
+          }}
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
@@ -700,7 +725,7 @@ export default function PalarotaryLandingPage() {
           <Paragraph
             style={{
               fontSize: "15px",
-              color: "rgba(255,255,255,0.9)",
+              color: "#6b7280",
               marginBottom: "12px",
             }}
           >
@@ -710,7 +735,7 @@ export default function PalarotaryLandingPage() {
           <Paragraph
             style={{
               fontSize: "13px",
-              color: "rgba(255,255,255,0.7)",
+              color: "#9ca3af",
               marginTop: "16px",
             }}
           >

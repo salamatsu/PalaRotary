@@ -191,7 +191,7 @@ const ShirtValidation = () => {
 
         {!scanning && (
           <div className="flex flex-col gap-3">
-            <Button
+            {/* <Button
               type="primary"
               size="large"
               icon={<Scan size={20} />}
@@ -200,7 +200,7 @@ const ShirtValidation = () => {
               block
             >
               Scan QR Code with Camera
-            </Button>
+            </Button> */}
 
             <Upload
               beforeUpload={handleUpload}

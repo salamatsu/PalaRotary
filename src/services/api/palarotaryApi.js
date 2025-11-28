@@ -55,6 +55,13 @@ export const submitShirtOrder = async (orderData) => {
   return response.data;
 };
 
+export const getTransactionInfo = async (tnNumber) => {
+  const response = await axiosInstance.get(
+    `/api/v1/users/visitors/merchandise/transaction${tnNumber}`
+  );
+  return response.data;
+};
+
 // ============================================
 // PUBLIC APIS - Club Registration
 // ============================================

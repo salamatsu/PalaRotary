@@ -18,6 +18,7 @@ import {
   getMemberDetails,
   getPaymentInfo,
   getRegisteredClub,
+  getTransactionInfo,
   getVerifyQrCode,
   registerClub,
   registerMember,
@@ -59,6 +60,14 @@ export const useGetCheckAvailability = () => {
 export const useSubmitShirtOrder = () => {
   return useMutation({
     mutationFn: submitShirtOrder,
+  });
+};
+
+export const useGetTransactionInfo = (tn) => {
+  return useQuery({
+    queryKey: ["getTransactionInfo", tn],
+    queryFn: () => getTransactionInfo(tn),
+    enabled: !!tn,
   });
 };
 

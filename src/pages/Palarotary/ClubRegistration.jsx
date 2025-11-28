@@ -1,4 +1,5 @@
 import {
+  ArrowLeftOutlined,
   BankOutlined,
   CheckCircleOutlined,
   InfoCircleOutlined,
@@ -18,6 +19,7 @@ import {
 } from "antd";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router";
 import gsap from "gsap";
 import {
   usePaymentInfo,
@@ -26,6 +28,7 @@ import {
 
 export default function ClubRegistration() {
   const { message } = App.useApp();
+  const navigate = useNavigate();
   const [form] = Form.useForm();
   const [currentStep, setCurrentStep] = useState(0);
   const [clubData, setClubData] = useState(null);
@@ -321,7 +324,7 @@ export default function ClubRegistration() {
       animate={{ opacity: 1 }}
       style={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #1E3A71 0%, #2A5298 100%)",
+        background: "linear-gradient(135deg, #f8f9fc 0%, #e8edf5 100%)",
         padding: "20px",
         display: "flex",
         alignItems: "center",
@@ -340,13 +343,17 @@ export default function ClubRegistration() {
             width: `${Math.random() * 100 + 50}px`,
             height: `${Math.random() * 100 + 50}px`,
             borderRadius: "50%",
-            background: `rgba(255, 255, 255, ${Math.random() * 0.1 + 0.05})`,
+            background: i % 3 === 0
+              ? `rgba(28, 60, 109, ${Math.random() * 0.08 + 0.02})`  // Navy blue
+              : i % 3 === 1
+              ? `rgba(247, 165, 10, ${Math.random() * 0.08 + 0.02})`  // Orange
+              : `rgba(213, 72, 57, ${Math.random() * 0.08 + 0.02})`,  // Red
             left: `${Math.random() * 100}%`,
             top: `${Math.random() * 100}%`,
             pointerEvents: "none",
           }}
           animate={{
-            opacity: [0.3, 0.6, 0.3],
+            opacity: [0.15, 0.4, 0.15],
             scale: [1, 1.2, 1],
           }}
           transition={{
@@ -383,6 +390,27 @@ export default function ClubRegistration() {
             backdropFilter: "blur(10px)",
           }}
         >
+          {/* Back Button */}
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            style={{ marginBottom: "16px" }}
+          >
+            <Button
+              type="text"
+              icon={<ArrowLeftOutlined />}
+              onClick={() => navigate("/")}
+              style={{
+                color: "#1c3c6d",
+                fontWeight: "600",
+                fontSize: "15px",
+              }}
+            >
+              Back to Home
+            </Button>
+          </motion.div>
+
           {/* Header */}
           <motion.div
             ref={headerRef}
@@ -393,7 +421,7 @@ export default function ClubRegistration() {
           >
             <motion.h1
               style={{
-                background: "linear-gradient(135deg, #1E3A71 0%, #2A5298 100%)",
+                background: "linear-gradient(135deg, #1c3c6d 0%, #173052 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 fontSize: "28px",
@@ -413,7 +441,7 @@ export default function ClubRegistration() {
               PALAROTARY 2026
             </motion.h1>
             <motion.p
-              style={{ fontSize: "14px", color: "#666", margin: 0 }}
+              style={{ fontSize: "14px", color: "#6b7280", margin: 0 }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
@@ -428,8 +456,8 @@ export default function ClubRegistration() {
               <Progress
                 percent={progressPercent}
                 strokeColor={{
-                  "0%": "#1E3A71",
-                  "100%": "#2A5298",
+                  "0%": "#1c3c6d",
+                  "100%": "#f7a50a",
                 }}
                 showInfo={false}
                 strokeWidth={8}
@@ -458,9 +486,9 @@ export default function ClubRegistration() {
                       index === currentStep
                         ? {
                             boxShadow: [
-                              "0 4px 15px rgba(30, 58, 113, 0.4)",
-                              "0 8px 25px rgba(30, 58, 113, 0.6)",
-                              "0 4px 15px rgba(30, 58, 113, 0.4)",
+                              "0 4px 15px rgba(28, 60, 109, 0.4)",
+                              "0 8px 25px rgba(247, 165, 10, 0.6)",
+                              "0 4px 15px rgba(28, 60, 109, 0.4)",
                             ],
                           }
                         : {}
@@ -474,7 +502,7 @@ export default function ClubRegistration() {
                       borderRadius: "50%",
                       background:
                         index <= currentStep
-                          ? "linear-gradient(135deg, #1E3A71 0%, #2A5298 100%)"
+                          ? "linear-gradient(135deg, #1c3c6d 0%, #173052 100%)"
                           : "#e0e0e0",
                       display: "flex",
                       alignItems: "center",
@@ -492,7 +520,7 @@ export default function ClubRegistration() {
                     style={{
                       fontSize: "12px",
                       fontWeight: "500",
-                      color: "#666",
+                      color: "#6b7280",
                     }}
                   >
                     {step}
@@ -518,13 +546,14 @@ export default function ClubRegistration() {
                   whileHover={{ scale: 1.02 }}
                   style={{
                     background:
-                      "linear-gradient(135deg, #1E3A7115 0%, #2A529815 100%)",
+                      "linear-gradient(135deg, #fde5e315 0%, #fbcbc715 100%)",
                     padding: "12px 16px",
                     borderRadius: "12px",
                     marginBottom: "20px",
                     display: "flex",
                     alignItems: "center",
                     gap: "12px",
+                    border: "2px solid #d5483930",
                   }}
                 >
                   <motion.div
@@ -536,11 +565,11 @@ export default function ClubRegistration() {
                     }}
                   >
                     <InfoCircleOutlined
-                      style={{ fontSize: "20px", color: "#1E3A71" }}
+                      style={{ fontSize: "20px", color: "#d54839" }}
                     />
                   </motion.div>
                   <div>
-                    <strong style={{ color: "#1E3A71" }}>
+                    <strong style={{ color: "#d54839" }}>
                       Registration Fee: ₱4,000.00
                     </strong>
                   </div>
@@ -684,17 +713,17 @@ export default function ClubRegistration() {
                     variants={itemVariants}
                     style={{
                       background:
-                        "linear-gradient(135deg, #1E3A7108 0%, #2A529808 100%)",
+                        "linear-gradient(135deg, #fde5e308 0%, #fbcbc708 100%)",
                       padding: "16px",
                       borderRadius: "12px",
                       marginBottom: "16px",
-                      border: "2px solid #1E3A7120",
+                      border: "2px solid #d5483920",
                     }}
                   >
                     <div
                       style={{
                         fontSize: "14px",
-                        color: "#666",
+                        color: "#6b7280",
                         marginBottom: "4px",
                       }}
                     >
@@ -704,7 +733,7 @@ export default function ClubRegistration() {
                       style={{
                         fontSize: "28px",
                         fontWeight: "800",
-                        color: "#1E3A71",
+                        color: "#d54839",
                         marginBottom: "16px",
                       }}
                     >
@@ -716,11 +745,11 @@ export default function ClubRegistration() {
                         key={index}
                         whileHover={{ scale: 1.02 }}
                         style={{
-                          background: "#f8f9fa",
+                          background: "#ffffff",
                           padding: "12px",
                           marginBottom: "8px",
                           borderRadius: "8px",
-                          border: "1px solid #e9ecef",
+                          border: "2px solid #e8edf5",
                         }}
                       >
                         <div
@@ -733,11 +762,11 @@ export default function ClubRegistration() {
                         >
                           {method.payment_method === "BDO" ? (
                             <BankOutlined
-                              style={{ fontSize: "18px", color: "#1E3A71" }}
+                              style={{ fontSize: "18px", color: "#1c3c6d" }}
                             />
                           ) : (
                             <MobileOutlined
-                              style={{ fontSize: "18px", color: "#1E3A71" }}
+                              style={{ fontSize: "18px", color: "#f7a50a" }}
                             />
                           )}
                           <h4
@@ -745,7 +774,7 @@ export default function ClubRegistration() {
                               margin: 0,
                               fontWeight: "700",
                               fontSize: "14px",
-                              color: "#333",
+                              color: "#1a1a2e",
                             }}
                           >
                             {method.payment_method === "BDO"
@@ -756,7 +785,7 @@ export default function ClubRegistration() {
                         <div
                           style={{
                             fontSize: "12px",
-                            color: "#666",
+                            color: "#6b7280",
                             lineHeight: "1.5",
                           }}
                         >
@@ -802,8 +831,8 @@ export default function ClubRegistration() {
                       maxCount={1}
                       style={{
                         background:
-                          "linear-gradient(135deg, #1E3A7105 0%, #2A529805 100%)",
-                        border: "2px dashed #1E3A71",
+                          "linear-gradient(135deg, #e8edf505 0%, #c3cbdf05 100%)",
+                        border: "2px dashed #1c3c6d",
                         borderRadius: "12px",
                         padding: "20px",
                       }}
@@ -813,7 +842,7 @@ export default function ClubRegistration() {
                           <UploadOutlined
                             style={{
                               fontSize: "48px",
-                              color: "#1E3A71",
+                              color: "#1c3c6d",
                             }}
                           />
                         </p>
@@ -822,7 +851,7 @@ export default function ClubRegistration() {
                             margin: 0,
                             fontSize: "16px",
                             fontWeight: "600",
-                            color: "#1E3A71",
+                            color: "#1c3c6d",
                             marginBottom: "4px",
                           }}
                         >
@@ -832,7 +861,7 @@ export default function ClubRegistration() {
                           style={{
                             margin: 0,
                             fontSize: "13px",
-                            color: "#666",
+                            color: "#6b7280",
                           }}
                         >
                           Support for image files (JPG, PNG, Max 5MB)
@@ -856,13 +885,13 @@ export default function ClubRegistration() {
                         loading={registerClub.isPending}
                         style={{
                           background:
-                            "linear-gradient(135deg, #1E3A71 0%, #2A5298 100%)",
+                            "linear-gradient(135deg, #f7a50a 0%, #c68408 100%)",
                           border: "none",
                           height: "48px",
                           borderRadius: "12px",
                           fontWeight: "600",
                           fontSize: "16px",
-                          boxShadow: "0 4px 15px rgba(30, 58, 113, 0.4)",
+                          boxShadow: "0 4px 15px rgba(247, 165, 10, 0.4)",
                         }}
                       >
                         Submit Registration
@@ -899,12 +928,12 @@ export default function ClubRegistration() {
                     height: "80px",
                     borderRadius: "50%",
                     background:
-                      "linear-gradient(135deg, #1E3A71 0%, #2A5298 100%)",
+                      "linear-gradient(135deg, #f7a50a 0%, #c68408 100%)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     margin: "0 auto 20px",
-                    boxShadow: "0 8px 25px rgba(30, 58, 113, 0.3)",
+                    boxShadow: "0 8px 25px rgba(247, 165, 10, 0.3)",
                     cursor: "pointer",
                   }}
                 >
@@ -918,7 +947,7 @@ export default function ClubRegistration() {
                   style={{
                     fontSize: "24px",
                     fontWeight: "800",
-                    color: "#1E3A71",
+                    color: "#f7a50a",
                     marginBottom: "8px",
                   }}
                 >
@@ -928,7 +957,7 @@ export default function ClubRegistration() {
                   variants={itemVariants}
                   style={{
                     fontSize: "16px",
-                    color: "#666",
+                    color: "#6b7280",
                     marginBottom: "24px",
                   }}
                 >
@@ -940,12 +969,12 @@ export default function ClubRegistration() {
                   whileHover={{ scale: 1.02 }}
                   style={{
                     background:
-                      "linear-gradient(135deg, #1E3A7108 0%, #2A529808 100%)",
+                      "linear-gradient(135deg, #e8edf508 0%, #c3cbdf08 100%)",
                     padding: "20px",
                     borderRadius: "16px",
                     marginBottom: "20px",
                     textAlign: "left",
-                    border: "1px solid #1E3A7120",
+                    border: "2px solid #e8edf5",
                   }}
                 >
                   <h3
@@ -953,7 +982,7 @@ export default function ClubRegistration() {
                       fontSize: "16px",
                       fontWeight: "700",
                       marginBottom: "12px",
-                      color: "#333",
+                      color: "#1c3c6d",
                     }}
                   >
                     What's Next?
@@ -961,7 +990,7 @@ export default function ClubRegistration() {
                   <div
                     style={{
                       fontSize: "14px",
-                      color: "#666",
+                      color: "#6b7280",
                       lineHeight: "1.8",
                     }}
                   >
@@ -976,7 +1005,7 @@ export default function ClubRegistration() {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.5 + i * 0.1 }}
-                        style={{ margin: "6px 0" }}
+                        style={{ margin: "6px 0", color: "#1a1a2e" }}
                       >
                         ✓ {item}
                       </motion.p>
@@ -1039,8 +1068,8 @@ export default function ClubRegistration() {
                       borderRadius: "12px",
                       fontWeight: "600",
                       fontSize: "16px",
-                      border: "2px solid #1E3A71",
-                      color: "#1E3A71",
+                      border: "2px solid #1c3c6d",
+                      color: "#1c3c6d",
                       background: "white",
                     }}
                     block
