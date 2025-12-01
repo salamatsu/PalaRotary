@@ -1,13 +1,26 @@
 import { Navigate, Outlet } from "react-router";
+import { useCurrentActiveUserToken } from "../store/useAdminAuthStore";
+import { useEffect } from "react";
 
 export const Auth = ({ store, redirect }) => {
-  const { token, admin, isAuthenticated } = store();
+  const { token, userData } = store();
+  const { setToken, setUser } = useCurrentActiveUserToken();
 
-  return isAuthenticated && token ? <Outlet /> : <Navigate to={redirect} />;
+  useEffect(() => {
+    if (token) {
+      setToken(token);
+    }
+
+    if (userData) {
+      setUser(userData?.userTypeAuth);
+    }
+  }, [token, userData]);
+
+  return userData && token ? <Outlet /> : <Navigate to={redirect} />;
 };
 
 export const UnAuth = ({ store, redirect = "/" }) => {
-  const { token, admin, isAuthenticated } = store();
+  const { token, userData } = store();
 
-  return isAuthenticated && token ? <Navigate to={redirect} /> : <Outlet />;
+  return userData && token ? <Navigate to={redirect} /> : <Outlet />;
 };

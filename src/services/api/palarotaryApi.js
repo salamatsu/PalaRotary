@@ -13,6 +13,17 @@ export const getCsrfToken = async () => {
 };
 
 // ============================================
+// ADMIN AUTH
+// ============================================
+
+export const loginAdminApi = async (credentials) => {
+  const response = await axiosInstance.post(
+    "/api/v1/clubs/auth/login",
+    credentials
+  );
+  return response.data;
+};
+// ============================================
 // PUBLIC APIS - Member Registration
 // ============================================
 
@@ -94,18 +105,12 @@ export const getRegisteredClub = async () => {
   return response.data;
 };
 
+// =====================================================================================================================================================================
+// ------------------------------------------
+
 // ============================================
 // OLD API - must remove when done
 // ============================================
-
-// ============================================
-// ADMIN AUTH
-// ============================================
-
-export const loginAdminApi = async (credentials) => {
-  const response = await axiosInstance.post("/api/admin/login", credentials);
-  return response.data;
-};
 
 // ============================================
 // PUBLIC APIS - Club Registration

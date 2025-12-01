@@ -20,12 +20,6 @@ import { Auth, UnAuth } from "../ValidateAuth";
 const AdminLogin = lazy(() => import("../../pages/Palarotary/AdminLogin"));
 
 const PalarotaryAdminRoute = () => {
-  const isAuthenticated = useAdminAuthStore((state) => state.isAuthenticated);
-
-  if (!isAuthenticated) {
-    return <Navigate to="/admin" replace />;
-  }
-
   const navigations = [
     {
       route: "/dashboard",

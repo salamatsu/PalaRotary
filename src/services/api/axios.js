@@ -1,6 +1,9 @@
 import { message } from "antd";
 import axios from "axios";
-import { useAdminAuthStore } from "../../store/useAdminAuthStore";
+import {
+  useAdminAuthStore,
+  useCurrentActiveUserToken,
+} from "../../store/useAdminAuthStore";
 import { useCsrfStore } from "../../store/useCsrfStore";
 
 export const axiosInstance = axios.create({
@@ -9,6 +12,18 @@ export const axiosInstance = axios.create({
     "Access-Control-Allow-Origin": "*",
   },
 });
+
+export const userTypeAuth = {
+  admin: "admin",
+};
+
+export const tokens = {
+  [userTypeAuth.admin]: useAdminAuthStore,
+};
+
+export const getUserToken = (user = getUsersValues.receptionist) => {
+  return tokens[user].getState();
+};
 
 // Add CSRF token interceptor to axiosInstance
 axiosInstance.interceptors.request.use(
@@ -65,8 +80,7 @@ axiosInstance.interceptors.response.use(
 );
 
 export const createAxiosInstanceWithInterceptor = (type = "data") => {
-  const auth = useAdminAuthStore.getState();
-  const token = auth.token;
+  const { token, user } = useCurrentActiveUserToken.getState();
 
   // if (!token) {
   //   message.warning("Authentication required");
@@ -157,9 +171,9 @@ export const createAxiosInstanceWithInterceptor = (type = "data") => {
           "Unable to process transaction. You have to login again."
         );
 
+        const { reset } = getUserToken(user);
         // Logout user
-        const auth = useAdminAuthStore.getState();
-        auth.logout();
+        reset();
       }
 
       return Promise.reject(error);

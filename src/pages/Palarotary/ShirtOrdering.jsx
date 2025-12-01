@@ -128,7 +128,7 @@ const ShirtOrdering = () => {
 
     if (!data) {
       message.warning("Please validate your badge first");
-      navigate("/shirt-validation");
+      navigate("/shirt-order");
       return;
     }
 

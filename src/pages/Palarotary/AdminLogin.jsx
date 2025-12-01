@@ -1,28 +1,42 @@
-import { Card, Form, Input, Button, message } from "antd";
+import { Card, Form, Input, Button, message, App, Spin } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router";
 import { loginAdminApi } from "../../services/api/palarotaryApi";
 import { useAdminAuthStore } from "../../store/useAdminAuthStore";
 
+import { motion } from "framer-motion";
+import { logo2, logoBanner } from "../../assets/images/logos";
+import { useLoginAdminAuth } from "../../services/requests/useAuth";
+
 export default function AdminLogin() {
   const [form] = Form.useForm();
-  const navigate = useNavigate();
-  const setAuth = useAdminAuthStore((state) => state.setAuth);
+  const { modal, message } = App.useApp();
+  const { mutate, isPending } = useLoginAdminAuth();
 
-  const onFinish = async (values) => {
-    try {
-      const response = await loginAdminApi(values);
+  const onFinish = (values) => {
+    modal.success({
+      icon: <></>,
+      iconType: "loading",
+      content: (
+        <div className=" flex flex-col gap-2 text-center justify-center items-center">
+          <Spin />
+          <span>Loading...</span>
+        </div>
+      ),
+      title: null,
+      closable: false,
+      footer: null,
+      centered: true,
+    });
 
-      if (response.success) {
-        setAuth(response.data.token, response.data.admin);
-        message.success("Login successful!");
-        navigate("/admin/dashboard");
-      } else {
-        message.error(response.message || "Login failed");
-      }
-    } catch (error) {
-      message.error(error.response?.data?.message || "Invalid credentials");
-    }
+    mutate(values, {
+      onSuccess: () => {
+        form.resetFields();
+      },
+      onError: (error) => {
+        message.error(error.response?.data?.message);
+      },
+    });
   };
 
   return (
@@ -32,23 +46,50 @@ export default function AdminLogin() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        background: "linear-gradient(135deg, #ffffff 0%, #1E3A71 100%)",
         padding: "20px",
       }}
     >
       <Card style={{ maxWidth: "400px", width: "100%" }}>
-        <div style={{ textAlign: "center", marginBottom: "32px" }}>
-          <h1
-            style={{ color: "#fe0808", fontSize: "28px", marginBottom: "8px" }}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className=" flex flex-col justify-center items-center"
+        >
+          <div
+            style={{
+              textAlign: "center",
+              color: "#1a1a2e",
+            }}
           >
-            PALAROTARY 2026
-          </h1>
+            <motion.div
+              className="hero-title"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <center>
+                <img src={logo2} className=" w-full max-w-[400px]" />
+              </center>
+            </motion.div>
+          </div>
+        </motion.div>
+
+        <div style={{ textAlign: "center", marginBottom: "32px" }}>
           <h2 style={{ fontSize: "18px", color: "#666", fontWeight: "normal" }}>
             Admin Login
           </h2>
         </div>
 
-        <Form form={form} layout="vertical" onFinish={onFinish}>
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={onFinish}
+          initialValues={{
+            username: "tangnacow@gmail.com",
+            password: "Aaaa1!",
+          }}
+          disabled={isPending}
+        >
           <Form.Item
             name="username"
             rules={[{ required: true, message: "Please enter your username" }]}
@@ -77,7 +118,7 @@ export default function AdminLogin() {
               htmlType="submit"
               size="large"
               block
-              style={{ background: "#fe0808", borderColor: "#fe0808" }}
+              loading={isPending}
             >
               Login
             </Button>

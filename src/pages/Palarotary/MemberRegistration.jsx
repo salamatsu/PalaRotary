@@ -1,21 +1,21 @@
 import {
+  ArrowLeftOutlined,
   CheckCircleOutlined,
   DownloadOutlined,
   QrcodeOutlined,
   UserAddOutlined,
-  ArrowLeftOutlined,
 } from "@ant-design/icons";
-import { Button, Card, Form, Input, Select, App } from "antd";
-import { motion, AnimatePresence } from "framer-motion";
+import { App, Button, Card, Form, Input, Select } from "antd";
+import { motion } from "framer-motion";
+import gsap from "gsap";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import gsap from "gsap";
+import { logo2, logoBanner } from "../../assets/images/logos";
 import {
   useApprovedClubs,
   useRegisterMember,
 } from "../../services/requests/usePalarotary";
 import { imageToBase64 } from "../../utils/tobase64";
-import { logo2, logoBanner } from "../../assets/images/logos";
 // {
 //     "attendeeId": "KUZW80G76FL4HGW7",
 //     "qrCode": "P20251MIFRH18N1126",
