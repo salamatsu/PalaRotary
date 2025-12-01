@@ -52,3 +52,39 @@ export const getSex = (data) => {
     return "N/A";
   }
 };
+
+export const formatQueryParams = (obj, options = {}) => {
+  const {
+    skipNull = true,
+    skipUndefined = true,
+    skipEmpty = false,
+    arrayBrackets = false,
+  } = options;
+
+  const params = new URLSearchParams();
+
+  Object.entries(obj).forEach(([key, value]) => {
+    // Skip based on options
+    if (skipNull && value === null) return;
+    if (skipUndefined && value === undefined) return;
+    if (skipEmpty && value === "") return;
+
+    // Handle arrays
+    if (Array.isArray(value)) {
+      value.forEach((item) => {
+        const paramKey = arrayBrackets ? `${key}[]` : key;
+        params.append(paramKey, item);
+      });
+    }
+    // Handle objects (convert to JSON string)
+    else if (typeof value === "object" && value !== null) {
+      params.append(key, JSON.stringify(value));
+    }
+    // Handle primitives
+    else {
+      params.append(key, value);
+    }
+  });
+
+  return params.toString();
+};

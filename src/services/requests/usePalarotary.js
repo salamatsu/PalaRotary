@@ -9,6 +9,9 @@ import {
   getAdminClubs,
   getAdminDashboard,
   getAdminMembers,
+  getAdminMerchandiseByIdApi,
+  getAdminMerchandisesApi,
+  getAdminTransactionsApi,
   getAdminZones,
   getApprovedClubs,
   getAttendanceStats,
@@ -25,6 +28,8 @@ import {
   rejectClub,
   scanQRCode,
   submitShirtOrder,
+  updateAdminMerchandiseApi,
+  updateAdminTransactionsApi,
   uploadPaymentProof,
 } from "../api/palarotaryApi";
 
@@ -91,6 +96,55 @@ export const useUploadPaymentProof = () => {
     mutationFn: uploadPaymentProof,
   });
 };
+
+// ============================================
+// ADMIN HOOKS - DASHBOARD
+// ============================================
+
+export const useGetAdminTransactionsApi = (payload) => {
+  return useQuery({
+    queryKey: ["getAdminTransactionsApi", payload],
+    queryFn: () => getAdminTransactionsApi(payload),
+  });
+};
+
+export const useUpdateAdminTransactionsApi = () => {
+  return useMutation({
+    mutationFn: updateAdminTransactionsApi,
+  });
+};
+
+// ============================================
+// ADMIN HOOKS - MERCHANDISE
+// ============================================
+
+// getAdminMerchandisesApi
+// getAdminMerchandiseByIdApi
+// getAdminMerchandiseByZoneApi
+// getAdminMerchandisesStatsApi
+// updateAdminMerchandiseApi
+
+export const useGetAdminMerchandisesApi = (payload) => {
+  return useQuery({
+    queryKey: ["getAdminMerchandisesApi", payload],
+    queryFn: () => getAdminMerchandisesApi(payload),
+  });
+};
+
+export const useGetAdminMerchandiseByIdApi = (merchandiseId) => {
+  return useQuery({
+    queryKey: ["getAdminMerchandiseByIdApi", merchandiseId],
+    queryFn: () => getAdminMerchandiseByIdApi(merchandiseId),
+    enabled: !!merchandiseId,
+  });
+};
+
+export const useUpdateAdminMerchandiseApi = () => {
+  return useMutation({
+    mutationFn: updateAdminMerchandiseApi,
+  });
+};
+// ======================================================================================================================================
 
 // ============================================
 // OLD HOOKS

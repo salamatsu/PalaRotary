@@ -18,6 +18,12 @@ import { useAdminAuthStore } from "../../store/useAdminAuthStore";
 import { Auth, UnAuth } from "../ValidateAuth";
 
 const AdminLogin = lazy(() => import("../../pages/Palarotary/AdminLogin"));
+const AdminTransactions = lazy(() =>
+  import("../../pages/Palarotary/AdminTransactions")
+);
+const AdminMerchandise = lazy(() =>
+  import("../../pages/Palarotary/AdminMerchandise")
+);
 
 const PalarotaryAdminRoute = () => {
   const navigations = [
@@ -35,39 +41,26 @@ const PalarotaryAdminRoute = () => {
       isShow: true,
     },
     {
-      route: "/scanner",
-      name: "Scanner",
-      label: "Event Scanner",
-      icon: <ScanOutlined className="h-5 w-5" />,
-      component: (
-        <Suspense fallback={<ComponentLoader />}>
-          <Scanner />
-        </Suspense>
-      ),
-      isFilter: true,
-      isShow: true,
-    },
-    {
       route: "/clubs",
-      name: "Clubs",
+      name: "clubs",
       label: "Clubs",
       icon: <BankOutlined className="h-5 w-5" />,
       component: (
         <Suspense fallback={<ComponentLoader />}>
-          <AdminClubs />
+          <AdminTransactions />
         </Suspense>
       ),
       isFilter: true,
       isShow: true,
     },
     {
-      route: "/members",
-      name: "Members",
-      label: "Members",
-      icon: <TeamOutlined className="h-5 w-5" />,
+      route: "/merchandise",
+      name: "merchandise",
+      label: "Merchandise",
+      icon: <ScanOutlined className="h-5 w-5" />,
       component: (
         <Suspense fallback={<ComponentLoader />}>
-          <AdminMembers />
+          <AdminMerchandise />
         </Suspense>
       ),
       isFilter: true,
