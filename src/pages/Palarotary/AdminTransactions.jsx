@@ -206,8 +206,8 @@ const AdminTransactions = () => {
     },
   ];
 
-  const transactions = data?.data?.transactions || [];
-  const pagination = data?.data?.pagination || {};
+  const transactions = data?.transactions || [];
+  const pagination = data?.pagination || {};
 
   return (
     <div className=" p-4 pb-0">

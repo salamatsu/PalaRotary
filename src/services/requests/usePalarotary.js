@@ -27,7 +27,6 @@ import {
   rejectClub,
   scanQRCodeApi,
   submitShirtOrder,
-  updateAdminMerchandiseApi,
   updateAdminMerchandiseStatusApi,
   updateAdminTransactionsApi,
   uploadPaymentProof,
@@ -178,7 +177,24 @@ export const useUpdateAdminMerchandiseStatusApi = () => {
 };
 
 // ============================================
-// api/v1/scanner/scans
+// ADMIN - CLUB
+// ============================================
+
+export const useGetAdminTransactionsApi = (payload) => {
+  return useQuery({
+    queryKey: ["getAdminMerchandiseByIdApi", payload],
+    queryFn: () => getAdminTransactionsApi(payload),
+  });
+};
+
+export const useUpdateAdminTransactionsApi = () => {
+  return useMutation({
+    mutationFn: updateAdminTransactionsApi,
+  });
+};
+
+// ============================================
+// SCANNER
 // ============================================
 export const useScanQRCode = () => {
   return useMutation({

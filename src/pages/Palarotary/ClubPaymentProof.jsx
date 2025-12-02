@@ -449,7 +449,10 @@ export default function ClubPaymentProof() {
                   }
                   options={clubs.map((club) => ({
                     value: club.token,
-                    label: `${club.clubName} - ${club.zone}`,
+                    label:
+                      `${club.clubName} - ${club.zone}` +
+                      (club.status === "APPROVED" ? " (Approved)" : ` `),
+                    disabled: club.status === "APPROVED",
                   }))}
                 />
               </Form.Item>
