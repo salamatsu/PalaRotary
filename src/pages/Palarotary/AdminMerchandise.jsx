@@ -337,6 +337,23 @@ const AdminMerchandise = () => {
   const merchandises = data?.data?.merchandises || [];
   const pagination = data?.data?.pagination || {};
 
+  // Check if there's a conflict for the selected order
+  const hasConflict = useMemo(() => {
+    if (!selectedOrder?.merchandiseId || !zoneData?.pendingRequests) {
+      return false;
+    }
+
+    const orderData = getAdminMerchandiseByIdApi.data;
+    if (!orderData?.shirtNumber) return false;
+
+    // Count how many pending requests exist for this shirt number
+    const conflictingRequests = zoneData.pendingRequests.filter(
+      (item) => item.shirtNumber === orderData.shirtNumber
+    );
+
+    return conflictingRequests.length > 1;
+  }, [selectedOrder, zoneData, getAdminMerchandiseByIdApi.data]);
+
   // Generate grid numbers (00-99) with status
   const gridNumbers = useMemo(() => {
     const numbers = [];
@@ -934,38 +951,57 @@ const AdminMerchandise = () => {
 
             {(getAdminMerchandiseByIdApi.data?.orderStatus === "PENDING" ||
               getAdminMerchandiseByIdApi.data?.orderStatus === "pending") && (
-              <Space
-                style={{
-                  marginTop: 16,
-                  width: "100%",
-                  justifyContent: "flex-end",
-                }}
-              >
-                <Button
-                  type="primary"
-                  icon={<CheckOutlined />}
-                  onClick={() => toggleModal("approve", true, selectedOrder)}
-                  style={{ background: "#52c41a", borderColor: "#52c41a" }}
-                  disabled={
-                    getAdminMerchandiseByIdApi.isFetching ||
-                    getAdminMerchandiseByIdApi.data?.paymentStatus !== "PAID"
-                  }
-                >
-                  Approve Order
-                </Button>
-                <Button
-                  danger
-                  icon={<CloseOutlined />}
-                  onClick={() => toggleModal("reject", true, selectedOrder)}
-                >
-                  Reject Order
-                </Button>
-              </Space>
-            )}
-            {getAdminMerchandiseByIdApi.data?.paymentStatus !== "PAID" && (
-              <small className=" text-red-600 font-semibold">
-                cannot approve until payment is confirmed
-              </small>
+              <>
+                {hasConflict &&
+                getAdminMerchandiseByIdApi.data?.paymentStatus === "PAID" ? (
+                  <Space
+                    style={{
+                      marginTop: 16,
+                      width: "100%",
+                      justifyContent: "flex-end",
+                    }}
+                  >
+                    <Button
+                      type="primary"
+                      icon={<CheckOutlined />}
+                      onClick={() => toggleModal("approve", true, selectedOrder)}
+                      style={{ background: "#52c41a", borderColor: "#52c41a" }}
+                      disabled={getAdminMerchandiseByIdApi.isFetching}
+                    >
+                      Approve Order
+                    </Button>
+                    <Button
+                      danger
+                      icon={<CloseOutlined />}
+                      onClick={() => toggleModal("reject", true, selectedOrder)}
+                    >
+                      Reject Order
+                    </Button>
+                  </Space>
+                ) : (
+                  <div
+                    style={{
+                      marginTop: 16,
+                      padding: "12px",
+                      background: "#fffbe6",
+                      borderRadius: "4px",
+                      border: "1px solid #ffe58f",
+                    }}
+                  >
+                    {getAdminMerchandiseByIdApi.data?.paymentStatus !== "PAID" ? (
+                      <small style={{ color: "#d48806", fontWeight: 600 }}>
+                        ⏳ Waiting for payment confirmation. Actions will be
+                        available after payment is confirmed.
+                      </small>
+                    ) : (
+                      <small style={{ color: "#389e0d", fontWeight: 600 }}>
+                        ✓ Payment confirmed. No conflicts detected - order will be
+                        auto-approved.
+                      </small>
+                    )}
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}
@@ -1134,9 +1170,42 @@ const AdminMerchandise = () => {
         <div style={{ maxHeight: "70vh", overflowY: "auto" }}>
           <p style={{ marginBottom: 12, color: "#666" }}>
             Multiple users have requested shirt number #
-            {selectedNumberConflicts?.number}. Assign a shirt number to each
-            request and approve.
+            {selectedNumberConflicts?.number}. You can only assign and approve
+            orders with confirmed payment (PAID status).
           </p>
+
+          {selectedNumberConflicts?.pendingRequests && (
+            <div
+              style={{
+                marginBottom: 16,
+                padding: "12px",
+                background: "#f6ffed",
+                borderRadius: "4px",
+                border: "1px solid #b7eb8f",
+              }}
+            >
+              <Space size="large">
+                <span style={{ color: "#389e0d", fontWeight: 600 }}>
+                  ✓{" "}
+                  {
+                    selectedNumberConflicts.pendingRequests.filter(
+                      (r) => r.paymentStatus === "PAID"
+                    ).length
+                  }{" "}
+                  Paid
+                </span>
+                <span style={{ color: "#d48806", fontWeight: 600 }}>
+                  ⏳{" "}
+                  {
+                    selectedNumberConflicts.pendingRequests.filter(
+                      (r) => r.paymentStatus !== "PAID"
+                    ).length
+                  }{" "}
+                  Pending Payment
+                </span>
+              </Space>
+            </div>
+          )}
 
           {zoneData?.availableNumbers && zoneData.availableNumbers.length > 0 && (
             <div
