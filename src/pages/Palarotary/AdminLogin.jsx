@@ -81,7 +81,7 @@ export default function AdminLogin() {
           layout="vertical"
           onFinish={onFinish}
           initialValues={{
-            username: "tangnacow@gmail.com",
+            username: "berting@gmail.com",
             password: "Aaaa1!",
           }}
           disabled={isPending}
