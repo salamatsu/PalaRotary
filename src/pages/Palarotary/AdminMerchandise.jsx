@@ -206,9 +206,10 @@ const AdminMerchandise = () => {
     const formattedNumber = String(assignedNumber).padStart(2, "0");
     const originalNumber = selectedNumberConflicts?.number;
 
-    const remarks = originalNumber === formattedNumber
-      ? `Approved with original requested shirt number #${formattedNumber}`
-      : `Shirt number changed from #${originalNumber} to #${formattedNumber} due to conflict`;
+    const remarks =
+      originalNumber === formattedNumber
+        ? `Approved with original requested shirt number #${formattedNumber}`
+        : `Shirt number changed from #${originalNumber} to #${formattedNumber} due to conflict`;
 
     await updateMerchandise.mutateAsync(
       {
@@ -746,6 +747,7 @@ const AdminMerchandise = () => {
           <GridView />
         )}
       </Card>
+
       <Modal
         title="Order Details"
         open={getAdminMerchandiseByIdApi.data && modals.details}
@@ -832,7 +834,8 @@ const AdminMerchandise = () => {
                 </Tag>
               </Descriptions.Item>
               <Descriptions.Item label="Taken By">
-                {getAdminMerchandiseByIdApi.data?.shirtNumberTakenBy || "N/A"}
+                {getAdminMerchandiseByIdApi.data?.shirtNumberTakenBy?.name ||
+                  "N/A"}
               </Descriptions.Item>
               <Descriptions.Item label="Desired Number Available">
                 {getAdminMerchandiseByIdApi.data?.isDesiredNumberAvailable !==
@@ -853,7 +856,8 @@ const AdminMerchandise = () => {
                 )}
               </Descriptions.Item>
               <Descriptions.Item label="Taken By">
-                {getAdminMerchandiseByIdApi.data?.desiredNumberTakenBy || "N/A"}
+                {getAdminMerchandiseByIdApi.data?.desiredNumberTakenBy?.name ||
+                  "N/A"}
               </Descriptions.Item>
             </Descriptions>
 
@@ -964,7 +968,9 @@ const AdminMerchandise = () => {
                     <Button
                       type="primary"
                       icon={<CheckOutlined />}
-                      onClick={() => toggleModal("approve", true, selectedOrder)}
+                      onClick={() =>
+                        toggleModal("approve", true, selectedOrder)
+                      }
                       style={{ background: "#52c41a", borderColor: "#52c41a" }}
                       disabled={getAdminMerchandiseByIdApi.isFetching}
                     >
@@ -988,15 +994,16 @@ const AdminMerchandise = () => {
                       border: "1px solid #ffe58f",
                     }}
                   >
-                    {getAdminMerchandiseByIdApi.data?.paymentStatus !== "PAID" ? (
+                    {getAdminMerchandiseByIdApi.data?.paymentStatus !==
+                    "PAID" ? (
                       <small style={{ color: "#d48806", fontWeight: 600 }}>
                         ⏳ Waiting for payment confirmation. Actions will be
                         available after payment is confirmed.
                       </small>
                     ) : (
                       <small style={{ color: "#389e0d", fontWeight: 600 }}>
-                        ✓ Payment confirmed. No conflicts detected - order will be
-                        auto-approved.
+                        ✓ Payment confirmed. No conflicts detected - order will
+                        be auto-approved.
                       </small>
                     )}
                   </div>
@@ -1207,26 +1214,29 @@ const AdminMerchandise = () => {
             </div>
           )}
 
-          {zoneData?.availableNumbers && zoneData.availableNumbers.length > 0 && (
-            <div
-              style={{
-                marginBottom: 16,
-                padding: "12px",
-                background: "#f0f9ff",
-                borderRadius: "4px",
-                border: "1px solid #bae0ff",
-              }}
-            >
-              <div style={{ marginBottom: 6, fontWeight: 500, color: "#0958d9" }}>
-                💡 Available Numbers in {filters.zone}:
+          {zoneData?.availableNumbers &&
+            zoneData.availableNumbers.length > 0 && (
+              <div
+                style={{
+                  marginBottom: 16,
+                  padding: "12px",
+                  background: "#f0f9ff",
+                  borderRadius: "4px",
+                  border: "1px solid #bae0ff",
+                }}
+              >
+                <div
+                  style={{ marginBottom: 6, fontWeight: 500, color: "#0958d9" }}
+                >
+                  💡 Available Numbers in {filters.zone}:
+                </div>
+                <div style={{ fontSize: "12px", color: "#1677ff" }}>
+                  {zoneData.availableNumbers.slice(0, 20).join(", ")}
+                  {zoneData.availableNumbers.length > 20 &&
+                    ` and ${zoneData.availableNumbers.length - 20} more...`}
+                </div>
               </div>
-              <div style={{ fontSize: "12px", color: "#1677ff" }}>
-                {zoneData.availableNumbers.slice(0, 20).join(", ")}
-                {zoneData.availableNumbers.length > 20 &&
-                  ` and ${zoneData.availableNumbers.length - 20} more...`}
-              </div>
-            </div>
-          )}
+            )}
 
           <Space direction="vertical" style={{ width: "100%" }} size="middle">
             {selectedNumberConflicts?.pendingRequests.map((request, index) => (
@@ -1275,9 +1285,7 @@ const AdminMerchandise = () => {
                       </div>
                       {request.desiredNumber && (
                         <div>
-                          <span style={{ color: "#666" }}>
-                            Desired Number:
-                          </span>{" "}
+                          <span style={{ color: "#666" }}>Desired Number:</span>{" "}
                           <Tag color="blue">{request.desiredNumber}</Tag>
                         </div>
                       )}
