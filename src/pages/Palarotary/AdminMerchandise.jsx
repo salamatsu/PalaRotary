@@ -99,6 +99,7 @@ const AdminMerchandise = () => {
 
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [selectedNumberConflicts, setSelectedNumberConflicts] = useState(null);
+  const [conflictAssignedNumbers, setConflictAssignedNumbers] = useState({});
   const [modals, setModals] = useState({
     details: false,
     reject: false,
@@ -194,6 +195,51 @@ const AdminMerchandise = () => {
     } catch (error) {
       message.error(error.response?.data?.message || "Failed to reject order");
     }
+  };
+
+  const handleConflictApprove = async (request, assignedNumber) => {
+    if (!assignedNumber && assignedNumber !== 0) {
+      message.error("Please enter a shirt number");
+      return;
+    }
+
+    const formattedNumber = String(assignedNumber).padStart(2, "0");
+    const originalNumber = selectedNumberConflicts?.number;
+
+    const remarks = originalNumber === formattedNumber
+      ? `Approved with original requested shirt number #${formattedNumber}`
+      : `Shirt number changed from #${originalNumber} to #${formattedNumber} due to conflict`;
+
+    await updateMerchandise.mutateAsync(
+      {
+        merchandiseId: request.merchandiseId,
+        status: SHIRT_ORDER_STATUS.approved,
+        assignedNumber: formattedNumber,
+        remarks: remarks,
+      },
+      {
+        onSuccess: () => {
+          message.success(`Order approved with shirt #${formattedNumber}`);
+          refetch();
+          if (filters.zone) refetchZone();
+          // Clear the assigned number for this request
+          setConflictAssignedNumbers((prev) => {
+            const updated = { ...prev };
+            delete updated[request.merchandiseId];
+            return updated;
+          });
+        },
+        onError: (error) => {
+          modal.warning({
+            title: "Failed to approve order",
+            content:
+              error.response?.data?.data?.message ||
+              error.response?.data?.message ||
+              "Failed to approve order",
+          });
+        },
+      }
+    );
   };
 
   // Table Columns
@@ -337,6 +383,7 @@ const AdminMerchandise = () => {
             merchandiseId: item.merchandiseId,
             name: item.name,
             email: item.email,
+            mobileNumber: item.mobileNumber,
             size: item.size,
             desiredNumber: item.desiredNumber,
             paymentStatus: item.paymentStatus,
@@ -369,8 +416,8 @@ const AdminMerchandise = () => {
     const getCardStyle = (item) => {
       if (item.isTaken) {
         return {
-          backgroundColor: "#fff1f0",
-          borderColor: "#ffa39e",
+          backgroundColor: "#f6ffed",
+          borderColor: "#b7eb8f",
           cursor: "default",
         };
       } else if (item.isPending) {
@@ -381,17 +428,17 @@ const AdminMerchandise = () => {
         };
       } else {
         return {
-          backgroundColor: "#f6ffed",
-          borderColor: "#b7eb8f",
+          backgroundColor: "#ff333310",
+          borderColor: "#ff333350",
           cursor: "default",
         };
       }
     };
 
     const getNumberColor = (item) => {
-      if (item.isTaken) return "#cf1322";
+      if (item.isTaken) return "#52c41a";
       if (item.isPending) return "#faad14";
-      return "#52c41a";
+      return "#ff333350";
     };
 
     const getTooltipContent = (item) => {
@@ -484,6 +531,17 @@ const AdminMerchandise = () => {
                           pendingRequests: item.pendingInfo,
                           count: item.pendingCount,
                         });
+
+                        // Initialize assigned numbers with the current requested number
+                        const initialNumbers = {};
+                        item.pendingInfo.forEach((request) => {
+                          initialNumbers[request.merchandiseId] = parseInt(
+                            item.number,
+                            10
+                          );
+                        });
+                        setConflictAssignedNumbers(initialNumbers);
+
                         setModals((prev) => ({ ...prev, conflicts: true }));
                       }
                     }}
@@ -1068,16 +1126,38 @@ const AdminMerchandise = () => {
         onCancel={() => {
           setModals((prev) => ({ ...prev, conflicts: false }));
           setSelectedNumberConflicts(null);
+          setConflictAssignedNumbers({});
         }}
         footer={null}
-        width={900}
+        width={1000}
       >
         <div style={{ maxHeight: "70vh", overflowY: "auto" }}>
-          <p style={{ marginBottom: 16, color: "#666" }}>
+          <p style={{ marginBottom: 12, color: "#666" }}>
             Multiple users have requested shirt number #
-            {selectedNumberConflicts?.number}. Review each request and approve
-            or view details.
+            {selectedNumberConflicts?.number}. Assign a shirt number to each
+            request and approve.
           </p>
+
+          {zoneData?.availableNumbers && zoneData.availableNumbers.length > 0 && (
+            <div
+              style={{
+                marginBottom: 16,
+                padding: "12px",
+                background: "#f0f9ff",
+                borderRadius: "4px",
+                border: "1px solid #bae0ff",
+              }}
+            >
+              <div style={{ marginBottom: 6, fontWeight: 500, color: "#0958d9" }}>
+                💡 Available Numbers in {filters.zone}:
+              </div>
+              <div style={{ fontSize: "12px", color: "#1677ff" }}>
+                {zoneData.availableNumbers.slice(0, 20).join(", ")}
+                {zoneData.availableNumbers.length > 20 &&
+                  ` and ${zoneData.availableNumbers.length - 20} more...`}
+              </div>
+            </div>
+          )}
 
           <Space direction="vertical" style={{ width: "100%" }} size="middle">
             {selectedNumberConflicts?.pendingRequests.map((request, index) => (
@@ -1090,8 +1170,8 @@ const AdminMerchandise = () => {
                   }`,
                 }}
               >
-                <Row gutter={[16, 8]}>
-                  <Col span={16}>
+                <Row gutter={[16, 8]} align="middle">
+                  <Col span={12}>
                     <div style={{ marginBottom: 8 }}>
                       <strong style={{ fontSize: "16px" }}>
                         #{index + 1} - {request.name}
@@ -1110,6 +1190,12 @@ const AdminMerchandise = () => {
                         <span style={{ color: "#666" }}>Email:</span>{" "}
                         {request.email}
                       </div>
+                      {request.mobileNumber && (
+                        <div>
+                          <span style={{ color: "#666" }}>Mobile:</span>{" "}
+                          {request.mobileNumber}
+                        </div>
+                      )}
                       <div>
                         <span style={{ color: "#666" }}>Size:</span>{" "}
                         <Tag>{request.size}</Tag>
@@ -1120,57 +1206,83 @@ const AdminMerchandise = () => {
                       </div>
                       {request.desiredNumber && (
                         <div>
-                          <span style={{ color: "#666" }}>Desired Number:</span>{" "}
+                          <span style={{ color: "#666" }}>
+                            Desired Number:
+                          </span>{" "}
                           <Tag color="blue">{request.desiredNumber}</Tag>
                         </div>
                       )}
                     </Space>
                   </Col>
-                  <Col span={8} style={{ textAlign: "right" }}>
-                    <Space direction="vertical" style={{ width: "100%" }}>
-                      {/* <Button
-                        type="default"
-                        icon={<EyeOutlined />}
-                        block
-                        onClick={() => {
-                          setSelectedOrder({
-                            merchandiseId: request.merchandiseId,
-                          });
-                          toggleModal("details", true);
+                  <Col span={6}>
+                    <div style={{ marginBottom: 8 }}>
+                      <label
+                        style={{
+                          display: "block",
+                          fontWeight: 500,
+                          marginBottom: 4,
                         }}
                       >
-                        View Details
-                      </Button> */}
-                      <Button
-                        type="primary"
-                        icon={<CheckOutlined />}
-                        block
-                        style={{
-                          background: "#52c41a",
-                          borderColor: "#52c41a",
-                        }}
-                        onClick={() => {
-                          setSelectedOrder({
-                            merchandiseId: request.merchandiseId,
-                            name: request.name,
-                            email: request.email,
-                            size: request.size,
-                            shirtNumber: selectedNumberConflicts.number,
-                            desiredNumber: request.desiredNumber,
-                            transactionNumber: request.transactionNumber,
-                            paymentStatus: request.paymentStatus,
-                          });
-                          setModals((prev) => ({ ...prev, conflicts: false }));
-                          toggleModal("approve", true);
+                        Assign Shirt #
+                      </label>
+                      <InputNumber
+                        min={0}
+                        max={99}
+                        style={{ width: "100%" }}
+                        placeholder="Enter number"
+                        value={
+                          conflictAssignedNumbers[request.merchandiseId] ??
+                          parseInt(selectedNumberConflicts?.number, 10)
+                        }
+                        formatter={(value) =>
+                          value !== undefined && value !== null
+                            ? String(value).padStart(2, "0")
+                            : ""
+                        }
+                        parser={(value) =>
+                          value ? parseInt(value, 10) : undefined
+                        }
+                        onChange={(val) => {
+                          setConflictAssignedNumbers((prev) => ({
+                            ...prev,
+                            [request.merchandiseId]: val,
+                          }));
                         }}
                         disabled={request.paymentStatus !== "PAID"}
-                      >
-                        Approve
-                      </Button>
-                    </Space>
+                      />
+                    </div>
+                  </Col>
+                  <Col span={6} style={{ textAlign: "right" }}>
+                    <Button
+                      type="primary"
+                      icon={<CheckOutlined />}
+                      block
+                      style={{
+                        background: "#52c41a",
+                        borderColor: "#52c41a",
+                      }}
+                      onClick={() => {
+                        const assignedNum =
+                          conflictAssignedNumbers[request.merchandiseId] ??
+                          parseInt(selectedNumberConflicts?.number, 10);
+                        handleConflictApprove(request, assignedNum);
+                      }}
+                      disabled={request.paymentStatus !== "PAID"}
+                      loading={updateMerchandise.isPending}
+                    >
+                      Approve
+                    </Button>
                     {request.paymentStatus !== "PAID" && (
-                      <small className=" text-red-600 font-semibold">
-                        cannot approve until payment is confirmed
+                      <small
+                        style={{
+                          display: "block",
+                          color: "#cf1322",
+                          fontWeight: 600,
+                          marginTop: 8,
+                          fontSize: "11px",
+                        }}
+                      >
+                        Payment required
                       </small>
                     )}
                   </Col>
