@@ -157,33 +157,85 @@ export const getRegisteredClub = async () => {
 export const getAdminDashboardOverviewApi = async () => {
   try {
     const response = await axios.get("/api/v1/clubs/cms/dashboard/overview");
-    return response.data;
+    return response.data?.data;
   } catch (error) {
     handleApiError(error);
   }
 };
 
 export const getAdminDashboardClubsDetailedApi = async (payload) => {
+  // query:  page,limit,status
   try {
     const response = await axios.get(
       `/api/v1/clubs/cms/dashboard/clubs?${formatQueryParams(payload, {
         skipEmpty: true,
       })}`
     );
-    return response.data;
+    return response.data?.data;
   } catch (error) {
     handleApiError(error);
   }
 };
 
 export const getAdminDashboardAttendeesApi = async (payload) => {
+  // query:  page, limit, search(optional), clubId(optional), registerAs(optional):
   try {
     const response = await axios.get(
       `/api/v1/clubs/cms/dashboard/attendees?${formatQueryParams(payload, {
         skipEmpty: true,
       })}`
     );
-    return response.data;
+    return response.data?.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+};
+
+export const getAdminDashboardPaymentProofApi = async (payload) => {
+  // query:  page, limit, status(optional), clubId(optional)
+  try {
+    const response = await axios.get(
+      `/api/v1/clubs/cms/dashboard/payment-proofs?${formatQueryParams(payload, {
+        skipEmpty: true,
+      })}`
+    );
+    return response.data?.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+};
+export const getAdminDashboardDailyRegistrationsApi = async (payload) => {
+  // query:  days
+  try {
+    const response = await axios.get(
+      `/api/v1/clubs/cms/dashboard/daily-registrations?${formatQueryParams(
+        payload,
+        {
+          skipEmpty: true,
+        }
+      )}`
+    );
+    return response.data?.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+};
+
+export const getAdminDashboardClubAttendeesApi = async ({
+  clubId,
+  ...payload
+}) => {
+  // query:  page, limit
+  try {
+    const response = await axios.get(
+      `/api/v1/clubs/cms/dashboard/clubs/${clubId}/attendees?${formatQueryParams(
+        payload,
+        {
+          skipEmpty: true,
+        }
+      )}`
+    );
+    return response.data?.data;
   } catch (error) {
     handleApiError(error);
   }
@@ -267,7 +319,7 @@ export const getAdminMerchandisesStatsApi = async () => {
   }
 };
 
-export const updateAdminMerchandiseApi = async (payload) => {
+export const updateAdminMerchandiseStatusApi = async (payload) => {
   // merchandiseId, status, assignedNumber, remarks:
   try {
     const response = await axios.post(
@@ -281,70 +333,13 @@ export const updateAdminMerchandiseApi = async (payload) => {
 };
 
 // ============================================
-// OLD API - must remove when done
+// SCANNER
 // ============================================
 
-export const getPaymentInfo = async () => {
+export const scanQRCodeApi = async (payload) => {
+  // merchandiseId, status, assignedNumber, remarks:
   try {
-    const response = await axiosInstance.get("/api/clubs/payment-info");
-    return response.data;
-  } catch (error) {
-    handleApiError(error);
-  }
-};
-
-export const checkClubStatus = async (clubId) => {
-  try {
-    const response = await axiosInstance.get(`/api/clubs/${clubId}/status`);
-    return response.data;
-  } catch (error) {
-    handleApiError(error);
-  }
-};
-
-export const getMemberBadge = async (memberId) => {
-  try {
-    const response = await axiosInstance.get(`/api/members/${memberId}/badge`);
-    return response.data;
-  } catch (error) {
-    handleApiError(error);
-  }
-};
-
-export const getMemberDetails = async (memberId) => {
-  try {
-    const response = await axiosInstance.get(`/api/members/${memberId}`);
-    return response.data;
-  } catch (error) {
-    handleApiError(error);
-  }
-};
-
-// ============================================
-// ADMIN APIS - Dashboard & Analytics
-// ============================================
-
-export const getAdminDashboard = async () => {
-  try {
-    const response = await axios.get("/api/admin/dashboard");
-    return response.data;
-  } catch (error) {
-    handleApiError(error);
-  }
-};
-
-export const getAdminAnalytics = async () => {
-  try {
-    const response = await axios.get("/api/admin/analytics");
-    return response.data;
-  } catch (error) {
-    handleApiError(error);
-  }
-};
-
-export const getAdvancedAnalytics = async () => {
-  try {
-    const response = await axios.get("/api/admin/analytics/advanced");
+    const response = await axios.post(`/api/v1/scanner/scans`, payload);
     return response.data;
   } catch (error) {
     handleApiError(error);
@@ -422,87 +417,6 @@ export const deleteMember = async (memberId) => {
 export const getAdminZones = async () => {
   try {
     const response = await axios.get("/api/admin/zones");
-    return response.data;
-  } catch (error) {
-    handleApiError(error);
-  }
-};
-
-// ============================================
-// SCANNER APIS - Attendance & QR Scanning
-// ============================================
-
-export const scanQRCode = async (data) => {
-  try {
-    const response = await axios.post("/api/scanner/scan", data);
-    return response.data;
-  } catch (error) {
-    handleApiError(error);
-  }
-};
-
-export const getAttendanceStats = async () => {
-  try {
-    const response = await axios.get("/api/scanner/stats");
-    return response.data;
-  } catch (error) {
-    handleApiError(error);
-  }
-};
-
-export const getMemberAttendance = async (memberId) => {
-  try {
-    const response = await axios.get(`/api/scanner/member/${memberId}`);
-    return response.data;
-  } catch (error) {
-    handleApiError(error);
-  }
-};
-
-export const exportAttendance = async (date) => {
-  try {
-    const response = await axios.get("/api/scanner/export", {
-      params: { date },
-    });
-    return response.data;
-  } catch (error) {
-    handleApiError(error);
-  }
-};
-
-// ============================================
-// SHIRT ORDER APIS
-// ============================================
-
-export const getShirtOrders = async (params) => {
-  try {
-    const response = await axios.get("/api/admin/shirts/orders", { params });
-    return response.data;
-  } catch (error) {
-    handleApiError(error);
-  }
-};
-
-export const updateShirtOrderStatus = async (orderId, status) => {
-  try {
-    const response = await axios.put(
-      `/api/admin/shirts/orders/${orderId}/status`,
-      {
-        status,
-      }
-    );
-    return response.data;
-  } catch (error) {
-    handleApiError(error);
-  }
-};
-
-export const approveSpecialNumber = async (orderId, itemId, approved) => {
-  try {
-    const response = await axios.put(
-      `/api/admin/shirts/orders/${orderId}/items/${itemId}/special-number`,
-      { approved }
-    );
     return response.data;
   } catch (error) {
     handleApiError(error);

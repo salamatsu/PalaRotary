@@ -1,41 +1,37 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   approveClub,
-  checkClubStatus,
   deleteMember,
-  exportAttendance,
-  getAdminAnalytics,
   getAdminClubDetails,
   getAdminClubs,
-  getAdminDashboard,
+  getAdminDashboardAttendeesApi,
+  getAdminDashboardClubAttendeesApi,
+  getAdminDashboardClubsDetailedApi,
+  getAdminDashboardDailyRegistrationsApi,
+  getAdminDashboardOverviewApi,
+  getAdminDashboardPaymentProofApi,
   getAdminMembers,
   getAdminMerchandiseByIdApi,
+  getAdminMerchandiseByZoneApi,
   getAdminMerchandisesApi,
+  getAdminMerchandisesStatsApi,
   getAdminTransactionsApi,
   getAdminZones,
   getApprovedClubs,
-  getAttendanceStats,
   getCheckAvailability,
-  getMemberAttendance,
-  getMemberBadge,
-  getMemberDetails,
-  getPaymentInfo,
   getRegisteredClub,
   getTransactionInfo,
   getVerifyQrCode,
   registerClub,
   registerMember,
   rejectClub,
-  scanQRCode,
+  scanQRCodeApi,
   submitShirtOrder,
   updateAdminMerchandiseApi,
+  updateAdminMerchandiseStatusApi,
   updateAdminTransactionsApi,
   uploadPaymentProof,
 } from "../api/palarotaryApi";
-
-// ============================================
-// PUBLIC HOOKS - AUTHENTICATION
-// ============================================
 
 // ============================================
 // PUBLIC HOOKS - Member Registration
@@ -101,16 +97,45 @@ export const useUploadPaymentProof = () => {
 // ADMIN HOOKS - DASHBOARD
 // ============================================
 
-export const useGetAdminTransactionsApi = (payload) => {
+export const useGetAdminDashboardOverviewApi = () => {
   return useQuery({
-    queryKey: ["getAdminTransactionsApi", payload],
-    queryFn: () => getAdminTransactionsApi(payload),
+    queryKey: ["getAdminDashboardOverviewApi"],
+    queryFn: () => getAdminDashboardOverviewApi(),
   });
 };
 
-export const useUpdateAdminTransactionsApi = () => {
-  return useMutation({
-    mutationFn: updateAdminTransactionsApi,
+export const useGetAdminDashboardClubsDetailedApi = (payload) => {
+  return useQuery({
+    queryKey: ["getAdminDashboardClubsDetailedApi", payload],
+    queryFn: () => getAdminDashboardClubsDetailedApi(payload),
+  });
+};
+
+export const useGetAdminDashboardAttendeesApi = (payload) => {
+  return useQuery({
+    queryKey: ["getAdminDashboardAttendeesApi", payload],
+    queryFn: () => getAdminDashboardAttendeesApi(payload),
+  });
+};
+
+export const useGetAdminDashboardPaymentProofApi = (payload) => {
+  return useQuery({
+    queryKey: ["getAdminDashboardPaymentProofApi", payload],
+    queryFn: () => getAdminDashboardPaymentProofApi(payload),
+  });
+};
+
+export const useGetAdminDashboardDailyRegistrationsApi = (payload) => {
+  return useQuery({
+    queryKey: ["getAdminDashboardDailyRegistrationsApi", payload],
+    queryFn: () => getAdminDashboardDailyRegistrationsApi(payload),
+  });
+};
+
+export const useGetAdminDashboardClubAttendeesApi = (payload) => {
+  return useQuery({
+    queryKey: ["getAdminDashboardClubAttendeesApi", payload],
+    queryFn: () => getAdminDashboardClubAttendeesApi(payload),
   });
 };
 
@@ -118,16 +143,22 @@ export const useUpdateAdminTransactionsApi = () => {
 // ADMIN HOOKS - MERCHANDISE
 // ============================================
 
-// getAdminMerchandisesApi
-// getAdminMerchandiseByIdApi
-// getAdminMerchandiseByZoneApi
-// getAdminMerchandisesStatsApi
-// updateAdminMerchandiseApi
-
 export const useGetAdminMerchandisesApi = (payload) => {
   return useQuery({
     queryKey: ["getAdminMerchandisesApi", payload],
     queryFn: () => getAdminMerchandisesApi(payload),
+  });
+};
+export const useGetAdminMerchandiseByZoneApi = (zone) => {
+  return useQuery({
+    queryKey: ["getAdminMerchandiseByZoneApi", zone],
+    queryFn: () => getAdminMerchandiseByZoneApi(zone),
+  });
+};
+export const useGetAdminMerchandisesStatsApi = () => {
+  return useQuery({
+    queryKey: ["getAdminMerchandisesStatsApi"],
+    queryFn: () => getAdminMerchandisesStatsApi(),
   });
 };
 
@@ -139,94 +170,29 @@ export const useGetAdminMerchandiseByIdApi = (merchandiseId) => {
   });
 };
 
-export const useUpdateAdminMerchandiseApi = () => {
+export const useUpdateAdminMerchandiseStatusApi = () => {
+  // payload: merchandiseId, status, assignedNumber, remarks,
   return useMutation({
-    mutationFn: updateAdminMerchandiseApi,
+    mutationFn: updateAdminMerchandiseStatusApi,
   });
 };
-// ======================================================================================================================================
 
 // ============================================
-// OLD HOOKS
+// api/v1/scanner/scans
+// ============================================
+export const useScanQRCode = () => {
+  return useMutation({
+    mutationFn: scanQRCodeApi,
+  });
+};
+
+// ============================================
+// OLD HOOKS - Club Registration (legacy)
 // ============================================
 
 export const useRegisterClub = () => {
   return useMutation({
     mutationFn: registerClub,
-  });
-};
-
-// export const useUploadPaymentProof = () => {
-//   const queryClient = useQueryClient();
-//   return useMutation({
-//     mutationFn: ({ clubId, file }) => uploadPaymentProof(clubId, file),
-//     onSuccess: () => {
-//       queryClient.invalidateQueries(["club-status"]);
-//     },
-//   });
-// };
-
-export const usePaymentInfo = () => {
-  return useQuery({
-    queryKey: ["payment-info"],
-    queryFn: getPaymentInfo,
-    staleTime: 1000 * 60 * 60, // 1 hour
-  });
-};
-
-export const useClubStatus = (clubId, enabled = true) => {
-  return useQuery({
-    queryKey: ["club-status", clubId],
-    queryFn: () => checkClubStatus(clubId),
-    enabled: !!clubId && enabled,
-  });
-};
-
-// ============================================
-// PUBLIC HOOKS - Member Registration
-// ============================================
-
-export const useMemberBadge = (memberId, enabled = true) => {
-  return useQuery({
-    queryKey: ["member-badge", memberId],
-    queryFn: () => getMemberBadge(memberId),
-    enabled: !!memberId && enabled,
-  });
-};
-
-export const useMemberDetails = (memberId, enabled = true) => {
-  return useQuery({
-    queryKey: ["member-details", memberId],
-    queryFn: () => getMemberDetails(memberId),
-    enabled: !!memberId && enabled,
-  });
-};
-
-// ============================================
-// ADMIN HOOKS - Dashboard & Analytics
-// ============================================
-
-export const useAdminDashboard = () => {
-  return useQuery({
-    queryKey: ["admin-dashboard"],
-    queryFn: getAdminDashboard,
-    refetchInterval: 60000, // Refetch every minute
-  });
-};
-
-export const useAdminAnalytics = () => {
-  return useQuery({
-    queryKey: ["admin-analytics"],
-    queryFn: getAdminAnalytics,
-  });
-};
-
-export const useAdvancedAnalytics = () => {
-  return useQuery({
-    queryKey: ["advanced-analytics"],
-    queryFn: () =>
-      import("../api/palarotaryApi").then((m) => m.getAdvancedAnalytics()),
-    refetchInterval: 60000, // Refetch every minute
   });
 };
 
@@ -305,41 +271,5 @@ export const useAdminZones = () => {
   return useQuery({
     queryKey: ["admin-zones"],
     queryFn: getAdminZones,
-  });
-};
-
-// ============================================
-// SCANNER HOOKS - Attendance & QR Scanning
-// ============================================
-
-export const useScanQRCode = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: scanQRCode,
-    onSuccess: () => {
-      queryClient.invalidateQueries(["attendance-stats"]);
-    },
-  });
-};
-
-export const useAttendanceStats = () => {
-  return useQuery({
-    queryKey: ["attendance-stats"],
-    queryFn: getAttendanceStats,
-    refetchInterval: 30000, // Refetch every 30 seconds
-  });
-};
-
-export const useMemberAttendance = (memberId, enabled = true) => {
-  return useQuery({
-    queryKey: ["member-attendance", memberId],
-    queryFn: () => getMemberAttendance(memberId),
-    enabled: !!memberId && enabled,
-  });
-};
-
-export const useExportAttendance = () => {
-  return useMutation({
-    mutationFn: exportAttendance,
   });
 };

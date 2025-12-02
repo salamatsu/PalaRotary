@@ -1,18 +1,15 @@
 import {
+  BarcodeOutlined,
+  CameraOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
   ReloadOutlined,
-  CameraOutlined,
-  BarcodeOutlined,
 } from "@ant-design/icons";
 import { App, Button, Card, Divider, Input, Switch } from "antd";
 import { AnimatePresence, motion } from "framer-motion";
 import { Html5QrcodeScanner } from "html5-qrcode";
 import { useEffect, useRef, useState } from "react";
-import {
-  useAttendanceStats,
-  useScanQRCode,
-} from "../../services/requests/usePalarotary";
+import { useScanQRCode } from "../../services/requests/usePalarotary";
 
 const Scanner = () => {
   const { message } = App.useApp();
@@ -24,9 +21,6 @@ const Scanner = () => {
   const inputRef = useRef(null);
 
   const scanMutation = useScanQRCode();
-  const { data: statsData, refetch: refetchStats } = useAttendanceStats();
-
-  const stats = statsData?.data || {};
 
   // Auto-start scanner or focus input on mount
   useEffect(() => {
@@ -115,9 +109,6 @@ const Scanner = () => {
           isValid: true,
           alreadyCheckedIn: response.data.attendance.already_checked_in,
         });
-
-        // Refetch stats to update dashboard
-        refetchStats();
       }
     } catch (error) {
       console.error("Scan validation error:", error);

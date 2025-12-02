@@ -323,16 +323,16 @@ const AdminMerchandise = () => {
               size="small"
             >
               <Descriptions.Item label="Name">
-                {getAdminMerchandiseByIdApi.data.name}
+                {getAdminMerchandiseByIdApi.data?.name}
               </Descriptions.Item>
               <Descriptions.Item label="Email">
-                {getAdminMerchandiseByIdApi.data.email}
+                {getAdminMerchandiseByIdApi.data?.email}
               </Descriptions.Item>
               <Descriptions.Item label="Zone">
-                {getAdminMerchandiseByIdApi.data.zone}
+                {getAdminMerchandiseByIdApi.data?.zone}
               </Descriptions.Item>
               <Descriptions.Item label="QR Code">
-                {getAdminMerchandiseByIdApi.data.qrCode}
+                {getAdminMerchandiseByIdApi.data?.qrCode}
               </Descriptions.Item>
             </Descriptions>
 
@@ -346,25 +346,25 @@ const AdminMerchandise = () => {
               size="small"
             >
               <Descriptions.Item label="Transaction Number" span={2}>
-                {getAdminMerchandiseByIdApi.data.transactionNumber}
+                {getAdminMerchandiseByIdApi.data?.transactionNumber}
               </Descriptions.Item>
               <Descriptions.Item label="Transaction ID">
-                {getAdminMerchandiseByIdApi.data.transactionId}
+                {getAdminMerchandiseByIdApi.data?.transactionId}
               </Descriptions.Item>
               <Descriptions.Item label="Details ID">
-                {getAdminMerchandiseByIdApi.data.transactionDetailsId}
+                {getAdminMerchandiseByIdApi.data?.transactionDetailsId}
               </Descriptions.Item>
               <Descriptions.Item label="Size">
-                {getAdminMerchandiseByIdApi.data.size}
+                {getAdminMerchandiseByIdApi.data?.size}
               </Descriptions.Item>
               <Descriptions.Item label="Shirt Number">
-                {getAdminMerchandiseByIdApi.data.shirtNumber}
+                {getAdminMerchandiseByIdApi.data?.shirtNumber}
               </Descriptions.Item>
               <Descriptions.Item label="Desired Number">
-                {getAdminMerchandiseByIdApi.data.desiredNumber || "N/A"}
+                {getAdminMerchandiseByIdApi.data?.desiredNumber || "N/A"}
               </Descriptions.Item>
               <Descriptions.Item label="Duplicate Count">
-                {getAdminMerchandiseByIdApi.data.duplicateCount}
+                {getAdminMerchandiseByIdApi.data?.duplicateCount}
               </Descriptions.Item>
             </Descriptions>
 
@@ -379,32 +379,40 @@ const AdminMerchandise = () => {
             >
               <Descriptions.Item label="Shirt Number Available">
                 <Tag
-                  color={getAdminMerchandiseByIdApi.data.isShirtNumberAvailable ? "green" : "red"}
+                  color={
+                    getAdminMerchandiseByIdApi.data?.isShirtNumberAvailable
+                      ? "green"
+                      : "red"
+                  }
                 >
-                  {getAdminMerchandiseByIdApi.data.isShirtNumberAvailable ? "Available" : "Taken"}
+                  {getAdminMerchandiseByIdApi.data?.isShirtNumberAvailable
+                    ? "Available"
+                    : "Taken"}
                 </Tag>
               </Descriptions.Item>
               <Descriptions.Item label="Taken By">
-                {getAdminMerchandiseByIdApi.data.shirtNumberTakenBy || "N/A"}
+                {getAdminMerchandiseByIdApi.data?.shirtNumberTakenBy || "N/A"}
               </Descriptions.Item>
               <Descriptions.Item label="Desired Number Available">
-                {getAdminMerchandiseByIdApi.data.isDesiredNumberAvailable !== null ? (
+                {getAdminMerchandiseByIdApi.data?.isDesiredNumberAvailable !==
+                null ? (
                   <Tag
                     color={
-                      getAdminMerchandiseByIdApi.data.isDesiredNumberAvailable ? "green" : "red"
+                      getAdminMerchandiseByIdApi.data?.isDesiredNumberAvailable
+                        ? "green"
+                        : "red"
                     }
                   >
-                    {getAdminMerchandiseByIdApi.data.isDesiredNumberAvailable
+                    {getAdminMerchandiseByIdApi.data?.isDesiredNumberAvailable
                       ? "Available"
                       : "Taken"}
                   </Tag>
                 ) : (
                   "N/A"
                 )}
-                {getAdminMerchandiseByIdApi.data.desiredNumberTakenBy?.name}
               </Descriptions.Item>
               <Descriptions.Item label="Taken By">
-                {getAdminMerchandiseByIdApi.data.desiredNumberTakenBy?.name || "N/A"}
+                {getAdminMerchandiseByIdApi.data?.desiredNumberTakenBy || "N/A"}
               </Descriptions.Item>
             </Descriptions>
 
@@ -420,39 +428,43 @@ const AdminMerchandise = () => {
               <Descriptions.Item label="Payment Status">
                 <Tag
                   color={
-                    getAdminMerchandiseByIdApi.data.paymentStatus === "PENDING"
+                    getAdminMerchandiseByIdApi.data?.paymentStatus === "PENDING"
                       ? "orange"
                       : "green"
                   }
                 >
-                  {getAdminMerchandiseByIdApi.data.paymentStatus}
+                  {getAdminMerchandiseByIdApi.data?.paymentStatus}
                 </Tag>
               </Descriptions.Item>
               <Descriptions.Item label="Order Status">
                 <Tag
                   color={
-                    getAdminMerchandiseByIdApi.data.orderStatus === "pending" ? "orange" : "green"
+                    getAdminMerchandiseByIdApi.data?.orderStatus === "pending"
+                      ? "orange"
+                      : "green"
                   }
                 >
-                  {getAdminMerchandiseByIdApi.data.orderStatus.toUpperCase()}
+                  {getAdminMerchandiseByIdApi.data?.orderStatus.toUpperCase()}
                 </Tag>
               </Descriptions.Item>
               <Descriptions.Item label="Total Amount">
-                ₱{getAdminMerchandiseByIdApi.data.totalAmount.toFixed(2)}
+                ₱{getAdminMerchandiseByIdApi.data?.totalAmount.toFixed(2)}
               </Descriptions.Item>
               <Descriptions.Item label="Paid Amount">
                 {getAdminMerchandiseByIdApi.data?.paidAmount
-                  ? formatPHPCurrency(getAdminMerchandiseByIdApi.data.paidAmount)
+                  ? formatPHPCurrency(
+                      getAdminMerchandiseByIdApi.data?.paidAmount
+                    )
                   : "N/A"}
               </Descriptions.Item>
               <Descriptions.Item label="Reference Number" span={2}>
-                {getAdminMerchandiseByIdApi.data.referenceNumber}
+                {getAdminMerchandiseByIdApi.data?.referenceNumber}
               </Descriptions.Item>
               <Descriptions.Item label="Payment Method">
-                {getAdminMerchandiseByIdApi.data.paymentMethod || "N/A"}
+                {getAdminMerchandiseByIdApi.data?.paymentMethod || "N/A"}
               </Descriptions.Item>
               <Descriptions.Item label="Payment Channel">
-                {getAdminMerchandiseByIdApi.data.paymentChannel || "N/A"}
+                {getAdminMerchandiseByIdApi.data?.paymentChannel || "N/A"}
               </Descriptions.Item>
             </Descriptions>
 
@@ -466,16 +478,16 @@ const AdminMerchandise = () => {
               size="small"
             >
               <Descriptions.Item label="Message">
-                {getAdminMerchandiseByIdApi.data.message}
+                {getAdminMerchandiseByIdApi.data?.message}
               </Descriptions.Item>
-              {getAdminMerchandiseByIdApi.data.itemRemarks && (
+              {getAdminMerchandiseByIdApi.data?.itemRemarks && (
                 <Descriptions.Item label="Item Remarks">
-                  {getAdminMerchandiseByIdApi.data.itemRemarks}
+                  {getAdminMerchandiseByIdApi.data?.itemRemarks}
                 </Descriptions.Item>
               )}
-              {getAdminMerchandiseByIdApi.data.transactionRemarks && (
+              {getAdminMerchandiseByIdApi.data?.transactionRemarks && (
                 <Descriptions.Item label="Transaction Remarks">
-                  {getAdminMerchandiseByIdApi.data.transactionRemarks}
+                  {getAdminMerchandiseByIdApi.data?.transactionRemarks}
                 </Descriptions.Item>
               )}
             </Descriptions>
@@ -485,14 +497,19 @@ const AdminMerchandise = () => {
             {/* Timestamps */}
             <Descriptions title="Timestamps" bordered column={2} size="small">
               <Descriptions.Item label="Created At">
-                {new Date(getAdminMerchandiseByIdApi.data.createdAt).toLocaleString()}
+                {new Date(
+                  getAdminMerchandiseByIdApi.data?.createdAt
+                ).toLocaleString()}
               </Descriptions.Item>
               <Descriptions.Item label="Updated At">
-                {new Date(getAdminMerchandiseByIdApi.data.updatedAt).toLocaleString()}
+                {new Date(
+                  getAdminMerchandiseByIdApi.data?.updatedAt
+                ).toLocaleString()}
               </Descriptions.Item>
             </Descriptions>
 
-            {getAdminMerchandiseByIdApi.data.orderStatus === ORDER_STATUS.PENDING && (
+            {getAdminMerchandiseByIdApi.data?.orderStatus ===
+              ORDER_STATUS.PENDING && (
               <Space
                 style={{
                   marginTop: 16,

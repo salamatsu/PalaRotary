@@ -7,8 +7,6 @@ import {
   ScanOutlined,
   BarChartOutlined,
   DownloadOutlined,
-  RiseOutlined,
-  FallOutlined,
 } from "@ant-design/icons";
 import {
   Alert,
@@ -23,13 +21,6 @@ import {
   Tabs,
 } from "antd";
 import {
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -40,18 +31,29 @@ import {
   Area,
 } from "recharts";
 import {
-  useAdminDashboard,
-  useAttendanceStats,
-  useAdvancedAnalytics,
+  useGetAdminDashboardOverviewApi,
+  useGetAdminDashboardClubsDetailedApi,
+  useGetAdminDashboardAttendeesApi,
+  useGetAdminDashboardDailyRegistrationsApi,
 } from "../../services/requests/usePalarotary";
 
-const COLORS = ["#52c41a", "#1890ff", "#faad14", "#ff4d4f", "#722ed1"];
-
 export default function AdminDashboard() {
-  const { data, isLoading, error } = useAdminDashboard();
-  const { data: attendanceData } = useAttendanceStats();
-  const { data: analyticsData, isLoading: analyticsLoading } =
-    useAdvancedAnalytics();
+  const {
+    data: overview,
+    isLoading,
+    error,
+  } = useGetAdminDashboardOverviewApi();
+  const { data: clubsData } = useGetAdminDashboardClubsDetailedApi({
+    page: 1,
+    limit: 10,
+    status: "ALL",
+  });
+  const { data: attendeesData } = useGetAdminDashboardAttendeesApi({
+    page: 1,
+    limit: 10,
+  });
+  const { data: dailyRegistrations, isLoading: analyticsLoading } =
+    useGetAdminDashboardDailyRegistrationsApi({ days: 30 });
 
   if (isLoading || analyticsLoading) {
     return (
@@ -72,10 +74,32 @@ export default function AdminDashboard() {
     );
   }
 
-  const dashboard = data?.data || {};
-  const clubs = dashboard.clubs || {};
-  const attendance = attendanceData?.data || {};
-  const analytics = analyticsData?.data || {};
+  const dashboard = overview || {};
+  const clubs = clubsData?.clubs || [];
+  const attendees = attendeesData?.attendees || [];
+  const analytics = dailyRegistrations || {};
+
+  // Map API response to component data
+  const clubStats = {
+    total: dashboard.clubs?.total || 0,
+    approved: parseInt(dashboard.clubs?.approved || 0),
+    pending: parseInt(dashboard.clubs?.pending || 0),
+    rejected: parseInt(dashboard.clubs?.rejected || 0),
+  };
+
+  const attendanceStats = {
+    total: dashboard.attendees?.total || 0,
+    clubsWithAttendees: dashboard.attendees?.clubsWithAttendees || 0,
+    recent_scans: attendees,
+  };
+
+  const registrationStats = {
+    today: dashboard.dailyRegistrations?.today || 0,
+    totalAttendees: analytics.totals?.totalAttendees || 0,
+    totalNewClubs: analytics.totals?.totalNewClubs || 0,
+    dailyBreakdown: analytics.dailyBreakdown || [],
+    period: analytics.period || {},
+  };
 
   const exportToCSV = (data, filename) => {
     const csv = convertToCSV(data);
@@ -98,84 +122,63 @@ export default function AdminDashboard() {
   const recentClubsColumns = [
     {
       title: "Club Name",
-      dataIndex: "club_name",
-      key: "club_name",
+      dataIndex: "clubName",
+      key: "clubName",
     },
     {
       title: "Contact Person",
-      dataIndex: "contact_person",
-      key: "contact_person",
+      dataIndex: "contactPerson",
+      key: "contactPerson",
+    },
+    {
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
+    },
+    {
+      title: "Payment Channel",
+      dataIndex: ["transaction", "paymentChannel"],
+      key: "paymentChannel",
+      render: (_, record) => record.transaction?.paymentChannel || "-",
+    },
+    {
+      title: "Amount",
+      dataIndex: ["transaction", "amount"],
+      key: "amount",
+      render: (_, record) =>
+        record.transaction?.amount
+          ? `₱${parseFloat(record.transaction.amount).toFixed(2)}`
+          : "-",
     },
     {
       title: "Status",
-      dataIndex: "payment_status",
-      key: "payment_status",
-      render: (status) => {
+      dataIndex: ["transaction", "status"],
+      key: "status",
+      render: (_, record) => {
+        const status = record.transaction?.status;
         const colorMap = {
-          pending: "default",
-          paid: "processing",
-          approved: "success",
-          rejected: "error",
+          PENDING: "processing",
+          APPROVED: "success",
+          REJECTED: "error",
         };
-        return <Tag color={colorMap[status]}>{status.toUpperCase()}</Tag>;
+        return status ? (
+          <Tag color={colorMap[status]}>{status}</Tag>
+        ) : (
+          <Tag>NO PAYMENT</Tag>
+        );
       },
     },
     {
+      title: "Attendees",
+      dataIndex: "attendeeCount",
+      key: "attendeeCount",
+      render: (count) => count || 0,
+    },
+    {
       title: "Registered",
-      dataIndex: "created_at",
-      key: "created_at",
+      dataIndex: "registeredAt",
+      key: "registeredAt",
       render: (date) => new Date(date).toLocaleDateString(),
-    },
-  ];
-
-  const topClubsColumns = [
-    {
-      title: "Rank",
-      key: "rank",
-      render: (_, __, index) => (
-        <div style={{ fontSize: "16px", fontWeight: "bold" }}>#{index + 1}</div>
-      ),
-      width: 60,
-    },
-    {
-      title: "Club Name",
-      dataIndex: "club_name",
-      key: "club_name",
-    },
-    {
-      title: "Zone",
-      dataIndex: "zone",
-      key: "zone",
-    },
-    {
-      title: "Members",
-      dataIndex: "total_members",
-      key: "total_members",
-    },
-    {
-      title: "Checked In",
-      dataIndex: "checked_in",
-      key: "checked_in",
-      render: (count) => (
-        <Tag color="green" style={{ fontSize: "14px" }}>
-          {count}
-        </Tag>
-      ),
-    },
-    {
-      title: "Rate",
-      dataIndex: "attendance_rate",
-      key: "attendance_rate",
-      render: (rate) => (
-        <div
-          style={{
-            fontWeight: "bold",
-            color: rate >= 75 ? "#52c41a" : rate >= 50 ? "#1890ff" : "#faad14",
-          }}
-        >
-          {rate || 0}%
-        </div>
-      ),
     },
   ];
 
@@ -197,7 +200,7 @@ export default function AdminDashboard() {
           <Card>
             <Statistic
               title="Total Clubs"
-              value={clubs.total || 0}
+              value={clubStats.total}
               prefix={<BankOutlined />}
               valueStyle={{ color: "#3f8600" }}
             />
@@ -206,8 +209,8 @@ export default function AdminDashboard() {
         <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
-              title="Total Members"
-              value={dashboard.total_members || 0}
+              title="Total Attendees"
+              value={attendanceStats.total}
               prefix={<TeamOutlined />}
               valueStyle={{ color: "#1890ff" }}
             />
@@ -216,22 +219,18 @@ export default function AdminDashboard() {
         <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
-              title="Event Check-ins"
-              value={attendance.checked_in_today || 0}
+              title="Clubs with Attendees"
+              value={attendanceStats.clubsWithAttendees}
               prefix={<ScanOutlined />}
               valueStyle={{ color: "#52c41a" }}
             />
-            {/* <div style={{ fontSize: "12px", color: "#999", marginTop: "8px" }}>
-              {analytics.overview?.total_scans_today || 0} total scans
-            </div> */}
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
-              title="Attendance Rate"
-              value={attendance.attendance_rate || 0}
-              suffix="%"
+              title="Registrations Today"
+              value={registrationStats.today}
               prefix={<BarChartOutlined />}
               valueStyle={{ color: "#1E3A71" }}
             />
@@ -247,7 +246,7 @@ export default function AdminDashboard() {
             label: "Overview",
             children: (
               <>
-                {/* Hourly Scan Pattern */}
+                {/* Daily Registrations Pattern */}
                 <Row gutter={[16, 16]} style={{ marginBottom: "24px" }}>
                   <Col xs={24}>
                     <Card
@@ -259,14 +258,17 @@ export default function AdminDashboard() {
                             alignItems: "center",
                           }}
                         >
-                          <span>📊 Hourly Scan Pattern (Today)</span>
+                          <span>
+                            📊 Daily Registration Trend (Last{" "}
+                            {registrationStats.period?.days || 30} Days)
+                          </span>
                           <Button
                             icon={<DownloadOutlined />}
                             size="small"
                             onClick={() =>
                               exportToCSV(
-                                analytics.hourly_scans,
-                                "hourly_scans"
+                                registrationStats.dailyBreakdown,
+                                "daily_registrations"
                               )
                             }
                           >
@@ -275,11 +277,61 @@ export default function AdminDashboard() {
                         </div>
                       }
                     >
+                      <div style={{ marginBottom: "16px" }}>
+                        <Row gutter={16}>
+                          <Col span={12}>
+                            <Card size="small">
+                              <Statistic
+                                title="Total Attendees"
+                                value={registrationStats.totalAttendees}
+                                prefix={<TeamOutlined />}
+                                valueStyle={{ fontSize: "20px" }}
+                              />
+                            </Card>
+                          </Col>
+                          <Col span={12}>
+                            <Card size="small">
+                              <Statistic
+                                title="Total New Clubs"
+                                value={registrationStats.totalNewClubs}
+                                prefix={<BankOutlined />}
+                                valueStyle={{ fontSize: "20px" }}
+                              />
+                            </Card>
+                          </Col>
+                        </Row>
+                      </div>
                       <ResponsiveContainer width="100%" height={300}>
-                        <AreaChart data={analytics.hourly_scans || []}>
+                        <AreaChart
+                          data={registrationStats.dailyBreakdown.map(
+                            (item) => ({
+                              date: item.date,
+                              attendees: item.attendees?.total || 0,
+                              newClubs: item.newClubs || 0,
+                            })
+                          )}
+                        >
                           <defs>
                             <linearGradient
-                              id="colorScans"
+                              id="colorAttendees"
+                              x1="0"
+                              y1="0"
+                              x2="0"
+                              y2="1"
+                            >
+                              <stop
+                                offset="5%"
+                                stopColor="#1890ff"
+                                stopOpacity={0.8}
+                              />
+                              <stop
+                                offset="95%"
+                                stopColor="#1890ff"
+                                stopOpacity={0}
+                              />
+                            </linearGradient>
+                            <linearGradient
+                              id="colorClubs"
                               x1="0"
                               y1="0"
                               x2="0"
@@ -298,95 +350,62 @@ export default function AdminDashboard() {
                             </linearGradient>
                           </defs>
                           <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="time" />
+                          <XAxis dataKey="date" />
                           <YAxis />
                           <Tooltip />
+                          <Legend />
                           <Area
                             type="monotone"
-                            dataKey="scans"
+                            dataKey="attendees"
+                            stroke="#1890ff"
+                            fillOpacity={1}
+                            fill="url(#colorAttendees)"
+                            name="Attendees"
+                          />
+                          <Area
+                            type="monotone"
+                            dataKey="newClubs"
                             stroke="#52c41a"
                             fillOpacity={1}
-                            fill="url(#colorScans)"
+                            fill="url(#colorClubs)"
+                            name="New Clubs"
                           />
                         </AreaChart>
                       </ResponsiveContainer>
-                      {analytics.peak_hours &&
-                        analytics.peak_hours.length > 0 && (
-                          <div
-                            style={{
-                              marginTop: "16px",
-                              padding: "12px",
-                              background: "#f0f2f5",
-                              borderRadius: "8px",
-                            }}
-                          >
-                            <strong>Peak Hours:</strong>{" "}
-                            {analytics.peak_hours.map((p, i) => (
-                              <Tag
-                                key={i}
-                                color="green"
-                                style={{ margin: "4px" }}
-                              >
-                                {p.time} ({p.count} scans)
-                              </Tag>
-                            ))}
-                          </div>
-                        )}
                     </Card>
                   </Col>
                 </Row>
 
                 {/* Club Statistics */}
                 <Row gutter={[16, 16]} style={{ marginBottom: "24px" }}>
-                  <Col xs={24} sm={12} lg={6}>
+                  <Col xs={24} sm={12} lg={8}>
                     <Card>
                       <Statistic
                         title="Approved Clubs"
-                        value={clubs.approved || 0}
+                        value={clubStats.approved}
                         prefix={<CheckCircleOutlined />}
                         valueStyle={{ color: "#52c41a" }}
                       />
                     </Card>
                   </Col>
-                  <Col xs={24} sm={12} lg={6}>
+                  <Col xs={24} sm={12} lg={8}>
                     <Card>
                       <Statistic
                         title="Pending Approval"
-                        value={(clubs.paid || 0) + (clubs.pending || 0)}
+                        value={clubStats.pending}
                         prefix={<ClockCircleOutlined />}
                         valueStyle={{ color: "#faad14" }}
                       />
                     </Card>
                   </Col>
-                  <Col xs={24} sm={12} lg={6}>
+                  <Col xs={24} sm={12} lg={8}>
                     <Card>
                       <Statistic
-                        title="Total Revenue"
-                        value={dashboard.total_revenue || 0}
-                        prefix="₱"
-                        precision={2}
-                        valueStyle={{ color: "#cf1322" }}
-                      />
-                    </Card>
-                  </Col>
-                  <Col xs={24} sm={12} lg={6}>
-                    <Card>
-                      <Statistic
-                        title="Zones Complete"
-                        value={dashboard.zones_complete || 0}
+                        title="Rejected Clubs"
+                        value={clubStats.rejected}
                         prefix={<TrophyOutlined />}
-                        suffix={`/ ${dashboard.zone_stats?.length || 0}`}
-                        valueStyle={{ color: "#722ed1" }}
+                        valueStyle={{ color: "#ff4d4f" }}
                       />
-                      <div
-                        style={{
-                          fontSize: "11px",
-                          color: "#999",
-                          marginTop: "8px",
-                        }}
-                      >
-                        Free Lechon for complete zones
-                      </div>
                     </Card>
                   </Col>
                 </Row>
@@ -394,11 +413,11 @@ export default function AdminDashboard() {
             ),
           },
           {
-            key: "leaderboard",
-            label: "🏆 Leaderboard",
+            key: "clubs",
+            label: "🏆 Clubs",
             children: (
               <Row gutter={[16, 16]}>
-                <Col xs={24} lg={12}>
+                <Col xs={24}>
                   <Card
                     title={
                       <div
@@ -408,13 +427,11 @@ export default function AdminDashboard() {
                           alignItems: "center",
                         }}
                       >
-                        <span>🥇 Top 5 Clubs by Attendance</span>
+                        <span>Registered Clubs</span>
                         <Button
                           icon={<DownloadOutlined />}
                           size="small"
-                          onClick={() =>
-                            exportToCSV(analytics.top_clubs, "top_clubs")
-                          }
+                          onClick={() => exportToCSV(clubs, "clubs")}
                         >
                           Export
                         </Button>
@@ -422,245 +439,66 @@ export default function AdminDashboard() {
                     }
                   >
                     <Table
-                      dataSource={analytics.top_clubs || []}
-                      columns={topClubsColumns}
-                      pagination={false}
-                      size="small"
-                    />
-                  </Card>
-                </Col>
-                <Col xs={24} lg={12}>
-                  <Card
-                    title={
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                        }}
-                      >
-                        <span>🗺️ Top 5 Zones by Attendance</span>
-                        <Button
-                          icon={<DownloadOutlined />}
-                          size="small"
-                          onClick={() =>
-                            exportToCSV(analytics.top_zones, "top_zones")
-                          }
-                        >
-                          Export
-                        </Button>
-                      </div>
-                    }
-                  >
-                    <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={analytics.top_zones || []}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="zone" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Bar
-                          dataKey="checked_in"
-                          fill="#52c41a"
-                          name="Checked In"
-                        />
-                        <Bar
-                          dataKey="total_members"
-                          fill="#1890ff"
-                          name="Total Members"
-                        />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </Card>
-                </Col>
-              </Row>
-            ),
-          },
-          {
-            key: "trends",
-            label: "📈 Trends",
-            children: (
-              <Row gutter={[16, 16]}>
-                <Col xs={24} lg={12}>
-                  <Card title="📅 Member Registration Trend (Last 30 Days)">
-                    <ResponsiveContainer width="100%" height={300}>
-                      <LineChart data={analytics.registration_trend || []}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="date" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Line
-                          type="monotone"
-                          dataKey="count"
-                          stroke="#1890ff"
-                          strokeWidth={2}
-                          name="Registrations"
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </Card>
-                </Col>
-                <Col xs={24} lg={12}>
-                  <Card title="📊 Attendance Trend (Last 7 Days)">
-                    <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={analytics.attendance_trend || []}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="date" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Bar dataKey="count" fill="#52c41a" name="Check-ins" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </Card>
-                </Col>
-              </Row>
-            ),
-          },
-          {
-            key: "participation",
-            label: "🎯 Participation",
-            children: (
-              <Row gutter={[16, 16]}>
-                <Col xs={24} lg={12}>
-                  <Card title="📊 Club Participation Breakdown">
-                    <ResponsiveContainer width="100%" height={300}>
-                      <PieChart>
-                        <Pie
-                          data={analytics.club_participation || []}
-                          dataKey="count"
-                          nameKey="category"
-                          cx="50%"
-                          cy="50%"
-                          outerRadius={100}
-                          fill="#8884d8"
-                          label
-                        >
-                          {(analytics.club_participation || []).map(
-                            (entry, index) => (
-                              <Cell
-                                key={`cell-${index}`}
-                                fill={COLORS[index % COLORS.length]}
-                              />
-                            )
-                          )}
-                        </Pie>
-                        <Tooltip />
-                        <Legend />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </Card>
-                </Col>
-                <Col xs={24} lg={12}>
-                  <Card title="📋 Participation Summary">
-                    <div style={{ padding: "20px" }}>
-                      {(analytics.club_participation || []).map(
-                        (item, index) => (
-                          <div
-                            key={index}
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                              padding: "12px",
-                              marginBottom: "8px",
-                              background: "#f5f5f5",
-                              borderRadius: "8px",
-                              borderLeft: `4px solid ${
-                                COLORS[index % COLORS.length]
-                              }`,
-                            }}
-                          >
-                            <div>
-                              <div
-                                style={{ fontWeight: "600", fontSize: "16px" }}
-                              >
-                                {item.category}
-                              </div>
-                              <div style={{ fontSize: "12px", color: "#999" }}>
-                                Clubs in this range
-                              </div>
-                            </div>
-                            <div
-                              style={{
-                                fontSize: "24px",
-                                fontWeight: "bold",
-                                color: COLORS[index % COLORS.length],
-                              }}
-                            >
-                              {item.count}
-                            </div>
-                          </div>
-                        )
-                      )}
-                    </div>
-                  </Card>
-                </Col>
-              </Row>
-            ),
-          },
-          {
-            key: "recent",
-            label: "Recent Activity",
-            children: (
-              <Row gutter={[16, 16]}>
-                <Col xs={24} lg={8}>
-                  <Card
-                    title="Recent Club Registrations"
-                    extra={<a href="/admin/palarotary/clubs">View All</a>}
-                  >
-                    <Table
-                      dataSource={dashboard.recent_clubs || []}
+                      dataSource={clubs}
                       columns={recentClubsColumns}
-                      pagination={false}
-                      rowKey="id"
+                      rowKey="clubId"
+                      pagination={{ pageSize: 10 }}
                       size="small"
+                      scroll={{ x: 1200 }}
                     />
                   </Card>
                 </Col>
-                <Col xs={24} lg={8}>
+              </Row>
+            ),
+          },
+          {
+            key: "attendees",
+            label: "📈 Attendees",
+            children: (
+              <Row gutter={[16, 16]}>
+                <Col xs={24}>
                   <Card
-                    title="Recent Member Registrations"
-                    extra={<a href="/admin/palarotary/members">View All</a>}
+                    title={
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
+                        <span>📅 Registered Attendees</span>
+                        <Button
+                          icon={<DownloadOutlined />}
+                          size="small"
+                          onClick={() =>
+                            exportToCSV(
+                              attendanceStats.recent_scans,
+                              "attendees"
+                            )
+                          }
+                        >
+                          Export
+                        </Button>
+                      </div>
+                    }
                   >
                     <Table
-                      dataSource={(dashboard.recent_members || []).map((m) => ({
-                        ...m,
-                        name: `${m.first_name} ${m.last_name}`,
-                      }))}
-                      columns={[
-                        { title: "Name", dataIndex: "name", key: "name" },
-                        {
-                          title: "Club",
-                          dataIndex: "club_name",
-                          key: "club_name",
-                        },
-                        {
-                          title: "Date",
-                          dataIndex: "created_at",
-                          key: "created_at",
-                          render: (date) => new Date(date).toLocaleDateString(),
-                        },
-                      ]}
-                      pagination={false}
-                      rowKey="id"
-                      size="small"
-                    />
-                  </Card>
-                </Col>
-                <Col xs={24} lg={8}>
-                  <Card
-                    title="Recent Check-ins"
-                    extra={<a href="/admin/palarotary/scanner">Scanner</a>}
-                  >
-                    <Table
-                      dataSource={attendance.recent_scans?.slice(0, 5) || []}
+                      dataSource={attendanceStats.recent_scans}
                       columns={[
                         {
-                          title: "First Name",
-                          dataIndex: "firstName",
-                          key: "firstName",
+                          title: "Name",
+                          dataIndex: "fullName",
+                          key: "fullName",
+                        },
+                        {
+                          title: "Last Name",
+                          dataIndex: "lastName",
+                          key: "lastName",
+                        },
+                        {
+                          title: "Email",
+                          dataIndex: "email",
+                          key: "email",
                         },
                         {
                           title: "Club",
@@ -668,15 +506,27 @@ export default function AdminDashboard() {
                           key: "clubName",
                         },
                         {
-                          title: "Time",
-                          dataIndex: "scannedAt",
-                          key: "scannedAt",
-                          render: (date) => new Date(date).toLocaleTimeString(),
+                          title: "Registered As",
+                          dataIndex: "registerAs",
+                          key: "registerAs",
+                          render: (type) => (
+                            <Tag color={type === "MEMBER" ? "blue" : "green"}>
+                              {type}
+                            </Tag>
+                          ),
+                        },
+                        {
+                          title: "Registered Date",
+                          dataIndex: "registeredAt",
+                          key: "registeredAt",
+                          render: (date) =>
+                            date ? new Date(date).toLocaleDateString() : "-",
                         },
                       ]}
-                      pagination={false}
-                      rowKey="id"
+                      rowKey={(record) => record.visitorId || record.email}
+                      pagination={{ pageSize: 10 }}
                       size="small"
+                      scroll={{ x: 1000 }}
                     />
                   </Card>
                 </Col>

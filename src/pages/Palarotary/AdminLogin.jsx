@@ -1,11 +1,7 @@
-import { Card, Form, Input, Button, message, App, Spin } from "antd";
+import { Card, Form, Input, Button, App, Spin } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
-import { useNavigate } from "react-router";
-import { loginAdminApi } from "../../services/api/palarotaryApi";
-import { useAdminAuthStore } from "../../store/useAdminAuthStore";
-
 import { motion } from "framer-motion";
-import { logo2, logoBanner } from "../../assets/images/logos";
+import { logo2 } from "../../assets/images/logos";
 import { useLoginAdminAuth } from "../../services/requests/useAuth";
 
 export default function AdminLogin() {

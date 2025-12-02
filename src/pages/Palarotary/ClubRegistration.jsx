@@ -17,15 +17,12 @@ import {
   Progress,
   Upload,
 } from "antd";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import gsap from "gsap";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import gsap from "gsap";
-import {
-  usePaymentInfo,
-  useRegisterClub,
-} from "../../services/requests/usePalarotary";
 import { logo2, logoBanner } from "../../assets/images/logos";
+import { useRegisterClub } from "../../services/requests/usePalarotary";
 
 export default function ClubRegistration() {
   const { message } = App.useApp();
@@ -42,7 +39,6 @@ export default function ClubRegistration() {
   const progressBarRef = useRef(null);
 
   const registerClub = useRegisterClub();
-  const { data: paymentInfo } = usePaymentInfo();
 
   // Advanced GSAP page load animation with timeline
   useEffect(() => {
@@ -261,7 +257,7 @@ export default function ClubRegistration() {
     });
   };
 
-  const paymentMethods = paymentInfo?.data || [];
+  const paymentMethods = [];
   const progressPercent = ((currentStep + 1) / 2) * 100;
 
   // Advanced Framer Motion variants
