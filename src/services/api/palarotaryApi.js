@@ -362,7 +362,7 @@ export const getAdminClubs = async (params) => {
 export const getAdminClubDetails = async (clubId) => {
   try {
     const response = await axios.get(`/api/admin/clubs/${clubId}`);
-    return response.data;
+    return response.data?.data;
   } catch (error) {
     handleApiError(error);
   }

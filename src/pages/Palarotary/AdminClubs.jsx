@@ -244,59 +244,59 @@ export default function AdminClubs() {
         footer={null}
         width={700}
       >
-        {clubDetails?.data?.club && (
+        {clubDetails?.club && (
           <>
             <Descriptions bordered column={1} size="small">
               <Descriptions.Item label="Club Name">
-                {clubDetails.data.club.club_name}
+                {clubDetails.club.club_name}
               </Descriptions.Item>
               <Descriptions.Item label="Contact Person">
-                {clubDetails.data.club.contact_person}
+                {clubDetails.club.contact_person}
               </Descriptions.Item>
               <Descriptions.Item label="Contact Number">
-                {clubDetails.data.club.contact_number}
+                {clubDetails.club.contact_number}
               </Descriptions.Item>
               <Descriptions.Item label="Email">
-                {clubDetails.data.club.email}
+                {clubDetails.club.email}
               </Descriptions.Item>
               <Descriptions.Item label="Zone">
-                {clubDetails.data.club.zone || "Not specified"}
+                {clubDetails.club.zone || "Not specified"}
               </Descriptions.Item>
               <Descriptions.Item label="Payment Method">
-                {clubDetails.data.club.payment_method || "-"}
+                {clubDetails.club.payment_method || "-"}
               </Descriptions.Item>
               <Descriptions.Item label="Registration Fee">
-                ₱{clubDetails.data.club.registration_fee?.toFixed(2)}
+                ₱{clubDetails.club.registration_fee?.toFixed(2)}
               </Descriptions.Item>
               <Descriptions.Item label="Status">
                 <Tag
                   color={
-                    clubDetails.data.club.payment_status === "approved"
+                    clubDetails.club.payment_status === "approved"
                       ? "success"
-                      : clubDetails.data.club.payment_status === "paid"
+                      : clubDetails.club.payment_status === "paid"
                       ? "processing"
-                      : clubDetails.data.club.payment_status === "rejected"
+                      : clubDetails.club.payment_status === "rejected"
                       ? "error"
                       : "default"
                   }
                 >
-                  {clubDetails.data.club.payment_status?.toUpperCase()}
+                  {clubDetails.club.payment_status?.toUpperCase()}
                 </Tag>
               </Descriptions.Item>
               <Descriptions.Item label="Registered Members">
-                {clubDetails.data.member_count || 0}
+                {clubDetails.member_count || 0}
               </Descriptions.Item>
               <Descriptions.Item label="Registered On">
-                {new Date(clubDetails.data.club.created_at).toLocaleString()}
+                {new Date(clubDetails.club.created_at).toLocaleString()}
               </Descriptions.Item>
             </Descriptions>
 
-            {clubDetails.data.club.proof_of_payment_url && (
+            {clubDetails.club.proof_of_payment_url && (
               <div style={{ marginTop: "16px" }}>
                 <h4>Proof of Payment</h4>
                 <Image
                   src={`${import.meta.env.VITE_BASEURL}${
-                    clubDetails.data.club.proof_of_payment_url
+                    clubDetails.club.proof_of_payment_url
                   }`}
                   alt="Proof of Payment"
                   style={{ maxWidth: "100%" }}
@@ -304,7 +304,7 @@ export default function AdminClubs() {
               </div>
             )}
 
-            {clubDetails.data.club.rejection_reason && (
+            {clubDetails.club.rejection_reason && (
               <div style={{ marginTop: "16px" }}>
                 <h4>Rejection Reason</h4>
                 <p
@@ -315,12 +315,12 @@ export default function AdminClubs() {
                     borderRadius: "4px",
                   }}
                 >
-                  {clubDetails.data.club.rejection_reason}
+                  {clubDetails.club.rejection_reason}
                 </p>
               </div>
             )}
 
-            {clubDetails.data.club.payment_status === "paid" && (
+            {clubDetails.club.payment_status === "paid" && (
               <div
                 style={{
                   marginTop: "16px",
@@ -332,7 +332,7 @@ export default function AdminClubs() {
                 <Button
                   type="primary"
                   icon={<CheckOutlined />}
-                  onClick={() => handleApprove(clubDetails.data.club.id)}
+                  onClick={() => handleApprove(clubDetails.club.id)}
                   loading={approveClub.isPending}
                   style={{ background: "#52c41a", borderColor: "#52c41a" }}
                 >
@@ -343,7 +343,7 @@ export default function AdminClubs() {
                   icon={<CloseOutlined />}
                   onClick={() => {
                     setDetailsModal(false);
-                    showRejectModal(clubDetails.data.club);
+                    showRejectModal(clubDetails.club);
                   }}
                 >
                   Reject Club
