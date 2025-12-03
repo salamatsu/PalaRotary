@@ -583,7 +583,7 @@ export default function ClubPaymentProof() {
               <Form.Item
                 label={
                   <Text strong style={{ color: "#1a1a2e" }}>
-                    Payment Channer
+                    Payment Channel
                   </Text>
                 }
                 name="paymentChannel"

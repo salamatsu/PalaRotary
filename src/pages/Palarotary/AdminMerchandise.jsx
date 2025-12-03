@@ -627,10 +627,10 @@ const AdminMerchandise = () => {
               prefix={<ClockCircleOutlined />}
               valueStyle={{ color: "#faad14" }}
             />
-            <div style={{ fontSize: "12px", color: "#999", marginTop: "4px" }}>
+            {/* <div style={{ fontSize: "12px", color: "#999", marginTop: "4px" }}>
               {stats.overview?.pendingPaidOrders || 0} paid /{" "}
               {stats.overview?.pendingUnpaidOrders || 0} unpaid
-            </div>
+            </div> */}
           </Card>
         </Col>
         <Col xs={24} sm={12} md={6}>

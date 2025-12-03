@@ -26,6 +26,7 @@ const ClubPaymentProof = lazy(() =>
 const PalarotaryAdminRoute = lazy(() =>
   import("./pageRoutes/PalarotaryAdminRoute")
 );
+const NotFound = lazy(() => import("../pages/Palarotary/NotFound"));
 
 const RootRoutes = () => {
   const router = createBrowserRouter([
@@ -98,6 +99,14 @@ const RootRoutes = () => {
       element: (
         <Suspense fallback={<LoadingFallback />}>
           <PalarotaryAdminRoute />
+        </Suspense>
+      ),
+    },
+    {
+      path: "*",
+      element: (
+        <Suspense fallback={<LoadingFallback />}>
+          <NotFound />
         </Suspense>
       ),
     },
