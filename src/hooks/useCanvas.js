@@ -21,7 +21,7 @@ loadFont();
 export const draw = async (data) => {
   const name = `${data?.name}`?.toUpperCase()?.trim() || "LAST NAME";
   const number = data?.number || "00"; // shirt number
-  const imageTemplate = SHIRT_ZONES_IMAGE[data.zone || "ZONE 3"];
+  const imageTemplate = SHIRT_ZONES_IMAGE[data.zone || "ZONE 5"];
 
   const width = 800;
   const height = 481;

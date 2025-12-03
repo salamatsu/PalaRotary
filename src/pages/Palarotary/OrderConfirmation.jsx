@@ -104,12 +104,6 @@ const OrderConfirmation = () => {
             </li>
             <li>
               <Text>
-                If you requested a special number, it will be reviewed for
-                approval
-              </Text>
-            </li>
-            <li>
-              <Text>
                 You will receive a confirmation call regarding payment and
                 delivery
               </Text>

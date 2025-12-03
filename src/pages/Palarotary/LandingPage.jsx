@@ -1,24 +1,19 @@
-import { Button, Card, Col, Row, Typography, Modal, Image } from "antd";
 import {
-  TeamOutlined,
-  BankOutlined,
-  CalendarOutlined,
-  EnvironmentOutlined,
-  ClockCircleOutlined,
-  LoginOutlined,
   ArrowRightOutlined,
+  CalendarOutlined,
   CheckCircleOutlined,
-  MobileOutlined,
-  QrcodeOutlined,
-  SafetyOutlined,
+  ClockCircleOutlined,
+  EnvironmentOutlined,
+  TeamOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
-import { motion, useScroll, useTransform, useInView } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router";
+import { Button, Card, Col, Modal, Row, Typography } from "antd";
+import { motion, useScroll, useTransform } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { cloud, cloudCut, shirtTemplate } from "../../assets/images/Other";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router";
+import { cloud, shirtTemplate } from "../../assets/images/Other";
 import { logo2, logoBanner } from "../../assets/images/logos";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -644,8 +639,7 @@ export default function PalarotaryLandingPage() {
 
                       <div style={{ marginBottom: "28px" }}>
                         {[
-                          "Must be a registered member",
-                          "Upload / scan your member badge",
+                          "Customize your shirt",
                           "Choose your size",
                           "Add your name and 2-digit number (00-99)",
                           "Secure online payment",
@@ -687,7 +681,7 @@ export default function PalarotaryLandingPage() {
                         size="large"
                         block
                         icon={<ArrowRightOutlined />}
-                        onClick={() => navigate("/shirt-order")}
+                        onClick={() => navigate("/order-shirt")}
                         style={{
                           background:
                             "linear-gradient(135deg, #1c3c6d 0%, #173052 100%)",

@@ -95,16 +95,23 @@ const Success = () => {
   // Generate previews for merchandise items
   useEffect(() => {
     const generatePreviews = async () => {
-      if (!zone || !merchandiseItems || merchandiseItems.length === 0) return;
+      if (!merchandiseItems || merchandiseItems.length === 0) return;
 
       setPreviewsLoading(true);
       const previews = {};
 
       for (const item of merchandiseItems) {
         try {
+          // Use zone from item or fallback to attendee zone
+          const itemZone = item.zone || zone;
+          if (!itemZone) {
+            console.warn(`No zone found for item ${item.merchandiseId}`);
+            continue;
+          }
+
           const preview = await draw({
             name: item.name || "SHIRT NAME",
-            zone: zone,
+            zone: itemZone,
             number: item.shirtNumber || "00",
           });
           previews[item.merchandiseId] = preview;
@@ -120,7 +127,7 @@ const Success = () => {
       setPreviewsLoading(false);
     };
 
-    if (isSuccess && zone) {
+    if (isSuccess && merchandiseItems.length > 0) {
       generatePreviews();
     }
   }, [isSuccess, zone, merchandiseItems]);
@@ -356,7 +363,7 @@ const Success = () => {
         </motion.div>
 
         {/* Contact Information */}
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
@@ -387,7 +394,7 @@ const Success = () => {
               </div>
             </Space>
           </Card>
-        </motion.div>
+        </motion.div> */}
 
         {/* Order Summary */}
         <motion.div
@@ -470,18 +477,6 @@ const Success = () => {
                           }}
                         />
                       ) : (
-                        // <motion.img
-                        //   initial={{ scale: 0.8, opacity: 0 }}
-                        //   animate={{ scale: 1, opacity: 1 }}
-                        //   transition={{ duration: 0.5 }}
-                        //   src={itemPreviews[item.merchandiseId]}
-                        //   alt={item.name}
-                        //   style={{
-                        //     width: "100%",
-                        //     height: "100%",
-                        //     objectFit: "cover",
-                        //   }}
-                        // />
                         <Text type="secondary">No preview available</Text>
                       )}
                     </div>
@@ -501,13 +496,17 @@ const Success = () => {
                       >
                         <Text
                           strong
-                          style={{ fontSize: "16px", color: "#1c3c6d" }}
+                          style={{
+                            fontSize: "16px",
+                            color: "#1c3c6d",
+                          }}
+                          className="uppercase"
                         >
                           {item.name}
                         </Text>
-                        <Tag color="blue" style={{ fontSize: "12px" }}>
+                        {/* <Tag color="blue" style={{ fontSize: "12px" }}>
                           #{index + 1}
-                        </Tag>
+                        </Tag> */}
                       </div>
 
                       <div style={{ marginTop: "8px" }}>
@@ -597,13 +596,6 @@ const Success = () => {
               <div style={{ display: "flex", alignItems: "start" }}>
                 <Text style={{ marginRight: "8px" }}>✓</Text>
                 <Text>Our team will review your order</Text>
-              </div>
-              <div style={{ display: "flex", alignItems: "start" }}>
-                <Text style={{ marginRight: "8px" }}>✓</Text>
-                <Text>
-                  If you requested a desired number, it will be reviewed for
-                  approval
-                </Text>
               </div>
               <div style={{ display: "flex", alignItems: "start" }}>
                 <Text style={{ marginRight: "8px" }}>✓</Text>

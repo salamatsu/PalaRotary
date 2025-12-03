@@ -1,44 +1,42 @@
 import {
   ArrowRightOutlined,
-  DeleteOutlined,
-  EditOutlined,
-  LockOutlined,
-  ShoppingCartOutlined,
-  SaveOutlined,
   CloseOutlined,
+  DeleteOutlined,
   HomeOutlined,
+  SaveOutlined,
+  ShoppingCartOutlined,
 } from "@ant-design/icons";
+import { useGSAP } from "@gsap/react";
 import {
   Badge,
   Button,
   Card,
   Divider,
+  Drawer,
   Form,
   Image,
   Input,
   message,
   Modal,
   Radio,
+  Select,
   Space,
   Spin,
   Table,
-  Typography,
   Tag,
-  Select,
-  Drawer,
+  Typography,
 } from "antd";
-import { useEffect, useState, useRef, useCallback } from "react";
-import { useLocation, useNavigate } from "react-router";
 import { gsap } from "gsap";
-import { useGSAP } from "@gsap/react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router";
+import { draw } from "../../hooks/useCanvas";
 import {
   ADULT_SHIRT_SIZES,
   KID_SHIRT_SIZES,
   SHIRT_PRICING,
 } from "../../lib/constants";
-import { draw } from "../../hooks/useCanvas";
 import {
-  useGetCheckAvailability,
+  useApprovedClubs,
   useSubmitShirtOrder,
 } from "../../services/requests/usePalarotary";
 
@@ -56,7 +54,6 @@ const ShirtOrdering = () => {
     size: "",
     sizeCategory: "adult",
     shirtNumber: "",
-    desiredNumber: "",
     price: 0,
     preview: null,
   });
@@ -65,20 +62,24 @@ const ShirtOrdering = () => {
   const [previewLoading, setPreviewLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
-  const [isContactEditable, setIsContactEditable] = useState(false);
+  const [isContactEditable, setIsContactEditable] = useState(true);
   const [showEditConfirm, setShowEditConfirm] = useState(false);
   const [editingOrderId, setEditingOrderId] = useState(null);
   const [editingOrderData, setEditingOrderData] = useState(null);
-  const [lastCheckedNumber, setLastCheckedNumber] = useState(null);
-  const [availabilityData, setAvailabilityData] = useState(null);
   const [showCheckoutConfirm, setShowCheckoutConfirm] = useState(false);
 
   const [invoiceUrl, setInvoiceUrl] = useState(null);
   const [isOpenLink, setIsOpenLink] = useState(false);
+  const [selectedZone, setSelectedZone] = useState(null);
 
   const { mutate: submitOrder, isPending: submitting } = useSubmitShirtOrder();
-  const { mutate: checkAvailability, isPending: checkingAvailability } =
-    useGetCheckAvailability();
+  const { data: clubsData, isLoading: loadingClubs } = useApprovedClubs();
+
+  // Extract unique zones from clubs data
+  const clubs = clubsData?.data || [];
+  const zones = [
+    ...new Set(clubs.map((club) => club.zone).filter(Boolean)),
+  ].sort();
 
   // Refs for GSAP animations
   const containerRef = useRef(null);
@@ -127,8 +128,9 @@ const ShirtOrdering = () => {
     const data = location.state?.memberData;
 
     if (!data) {
-      message.warning("Please validate your badge first");
-      navigate("/shirt-order");
+      // message.warning("Please validate your badge first");
+      // navigate("/shirt-order");
+
       return;
     }
 
@@ -152,6 +154,11 @@ const ShirtOrdering = () => {
       form.setFieldValue("name", data.lastName);
     }
 
+    if (data?.zone) {
+      setSelectedZone(data.zone);
+      form.setFieldValue("zone", data.zone);
+    }
+
     const generateInitialPreview = async () => {
       if (data?.zone) {
         try {
@@ -170,35 +177,18 @@ const ShirtOrdering = () => {
       }
     };
 
-    // Fetch initial availability data
-    const fetchInitialAvailability = () => {
-      if (data?.zone) {
-        checkAvailability(
-          { zone: data.zone, shirtNumber: "00" },
-          {
-            onSuccess: ({ data: responseData }) => {
-              setAvailabilityData(responseData);
-            },
-            onError: (error) => {
-              console.error("Failed to fetch availability:", error);
-            },
-          }
-        );
-      }
-    };
-
     generateInitialPreview();
-    fetchInitialAvailability();
-  }, [location, navigate, form, checkAvailability]);
+  }, [location, navigate, form]);
 
-  const generatePreview = async (orderData) => {
-    if (!memberData?.zone || !orderData.name) return null;
+  const generatePreview = async (orderData, zoneOverride = null) => {
+    const zone = zoneOverride || orderData.zone || selectedZone;
+    if (!zone || !orderData.name) return null;
 
     try {
       setPreviewLoading(true);
       const preview = await draw({
         name: orderData.name,
-        zone: memberData.zone,
+        zone: zone,
         number: orderData.shirtNumber || "00",
       });
       return preview;
@@ -208,73 +198,6 @@ const ShirtOrdering = () => {
     } finally {
       setPreviewLoading(false);
     }
-  };
-
-  const handleCheckAvailability = (shirtNumber) => {
-    if (!shirtNumber || !memberData?.zone) return;
-
-    setLastCheckedNumber(shirtNumber);
-
-    checkAvailability(
-      { zone: memberData.zone, shirtNumber },
-      {
-        onSuccess: ({ data, message: msgdata }) => {
-          // Update availability data
-          setAvailabilityData(data);
-
-          if (!data.available) {
-            const takenBy = data.takenBy;
-            Modal.confirm({
-              width: 500,
-              title: "Shirt Number Not Available",
-              content: (
-                <div>
-                  <p>
-                    Shirt number <strong>{data.shirtNumber}</strong> in{" "}
-                    <strong>{data.zone}</strong> is already taken.
-                  </p>
-                  <br />
-                  <p>Would you like to add it as your desired number?</p>
-                </div>
-              ),
-              okText: "Use as Desired Number",
-              cancelText: "Choose Different Number",
-              onOk: () => {
-                form.setFieldValue("desiredNumber", shirtNumber);
-                setCurrentOrder((prev) => ({
-                  ...prev,
-                  desiredNumber: shirtNumber,
-                }));
-                form.setFieldValue("shirtNumber", "");
-                setCurrentOrder((prev) => ({
-                  ...prev,
-                  shirtNumber: "",
-                }));
-                message.info("Please choose a different shirt number");
-              },
-              onCancel: () => {
-                form.setFieldValue("shirtNumber", "");
-                setCurrentOrder((prev) => ({
-                  ...prev,
-                  shirtNumber: "",
-                }));
-              },
-            });
-          } else {
-            message.success(msgdata);
-          }
-        },
-        onError: (error) => {
-          console.error("Availability check error:", error);
-          message.error("Failed to check availability");
-          form.setFieldValue("shirtNumber", "");
-          setCurrentOrder((prev) => ({
-            ...prev,
-            shirtNumber: "",
-          }));
-        },
-      }
-    );
   };
 
   const handleFieldChange = async (field, value) => {
@@ -363,7 +286,6 @@ const ShirtOrdering = () => {
         size: "",
         sizeCategory: "adult",
         shirtNumber: "",
-        desiredNumber: "",
         price: 0,
         preview: null,
       });
@@ -371,7 +293,7 @@ const ShirtOrdering = () => {
       form.resetFields();
       form.setFieldValue("email", email);
       form.setFieldValue("mobileNumber", mobileNumber);
-      setLastCheckedNumber(null);
+      form.setFieldValue("zone", selectedZone);
 
       // Scroll to cart with smooth animation
       if (cartRef.current) {
@@ -477,13 +399,12 @@ const ShirtOrdering = () => {
     const orderData = {
       qrCode: memberData?.qrCode,
       email: email,
-      zone: memberData?.zone,
+      zone: selectedZone,
       mobileNumber: mobileNumber,
       shirtConfig: orders.map((order) => ({
         name: order.name,
         size: order.size,
         shirtNumber: order.shirtNumber,
-        desiredNumber: order.desiredNumber || "",
       })),
     };
 
@@ -645,7 +566,7 @@ const ShirtOrdering = () => {
                       <Text strong style={{ fontSize: "16px" }}>
                         Contact Information
                       </Text>
-                      <Button
+                      {/* <Button
                         type="link"
                         icon={
                           isContactEditable ? (
@@ -657,7 +578,7 @@ const ShirtOrdering = () => {
                         onClick={handleEditContactToggle}
                       >
                         {isContactEditable ? "Lock" : "Edit"}
-                      </Button>
+                      </Button> */}
                     </div>
 
                     <Form.Item
@@ -675,7 +596,6 @@ const ShirtOrdering = () => {
                         placeholder="your.email@example.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        disabled={!isContactEditable}
                         size="large"
                       />
                     </Form.Item>
@@ -698,238 +618,222 @@ const ShirtOrdering = () => {
                         placeholder="09XXXXXXXXX"
                         value={mobileNumber}
                         onChange={(e) => setMobileNumber(e.target.value)}
-                        disabled={!isContactEditable}
                         size="large"
                         maxLength={11}
                       />
                     </Form.Item>
-
-                    {/* Zone Display */}
-                    {memberData?.zone && (
-                      <div style={{ marginTop: "16px" }}>
-                        <Text strong style={{ marginRight: "8px" }}>
-                          Zone:
-                        </Text>
-                        <Tag
-                          color="blue"
-                          style={{ fontSize: "14px", padding: "4px 12px" }}
-                        >
-                          {memberData.zone}
-                        </Tag>
-                      </div>
-                    )}
                   </div>
 
-                  {/* Name Input */}
-                  <Form.Item
-                    label={<Text strong>Name (on shirt)</Text>}
-                    name="name"
-                    rules={[
-                      { required: true, message: "Please enter the name" },
-                      { max: 20, message: "Name cannot exceed 20 characters" },
-                    ]}
-                  >
-                    <Input
-                      placeholder="Enter last name"
-                      onChange={(e) =>
-                        handleFieldChange("name", e.target.value)
-                      }
-                      size="large"
-                      maxLength={20}
-                    />
-                  </Form.Item>
-
-                  {/* Shirt Number */}
-                  <Form.Item
-                    label={
-                      <Text strong>
-                        Shirt Number <small>(00-99)</small>{" "}
-                      </Text>
-                    }
-                    name="shirtNumber"
-                    rules={[
-                      { required: true, message: "Please enter shirt number" },
-                      {
-                        pattern: /^[0-9]{1,2}$/,
-                        message: "Enter a number between 00-99",
-                      },
-                    ]}
-                    help={
-                      checkingAvailability ? "Checking availability..." : ""
-                    }
-                  >
-                    <Select
-                      placeholder="Select shirt number"
-                      size="large"
-                      options={
-                        availabilityData
-                          ? Array.from({ length: 100 }, (_, i) => {
-                              const numberStr = String(i).padStart(2, "0");
-                              const isAvailable =
-                                availabilityData.availableNumbers?.includes(
-                                  numberStr
-                                );
-                              const takenInfo =
-                                availabilityData.takenNumbers?.find(
-                                  (taken) => taken.shirtNumber === numberStr
-                                );
-
-                              return {
-                                value: numberStr,
-                                label: takenInfo ? `${numberStr}` : numberStr,
-                                disabled: !isAvailable,
-                              };
-                            })
-                          : Array.from({ length: 100 }, (_, i) => ({
-                              value: String(i).padStart(2, "0"),
-                              label: String(i).padStart(2, "0"),
-                            }))
-                      }
-                      allowClear
-                      showSearch
-                      onChange={(value) => {
-                        handleFieldChange("shirtNumber", value);
-                        handleCheckAvailability(value);
-                      }}
-                      loading={checkingAvailability}
-                      disabled={checkingAvailability}
-                    />
-                  </Form.Item>
-
-                  {/* Desired Number */}
-                  <Form.Item
-                    label={
-                      <Space>
-                        <Text strong>
-                          Desired Number{" "}
-                          <Text type="secondary" style={{ fontSize: "12px" }}>
-                            (select from taken numbers only)
-                          </Text>
-                        </Text>
-                      </Space>
-                    }
-                    name="desiredNumber"
-                  >
-                    <Select
-                      placeholder="Select desired number (taken numbers only)"
-                      size="large"
-                      options={
-                        availabilityData?.takenNumbers
-                          ? availabilityData.takenNumbers.map((taken) => ({
-                              value: taken.shirtNumber,
-                              label: `${taken.shirtNumber} `,
-                            }))
-                          : []
-                      }
-                      allowClear
-                      showSearch
-                      onChange={(value) =>
-                        handleFieldChange("desiredNumber", value)
-                      }
-                      notFoundContent={
-                        availabilityData
-                          ? "No taken numbers available"
-                          : "Loading availability data..."
-                      }
-                    />
-                  </Form.Item>
-
-                  {/* Size Category */}
-                  <Form.Item label={<Text strong>Category</Text>}>
-                    <Radio.Group
-                      value={currentOrder.sizeCategory}
-                      onChange={(e) => {
-                        handleFieldChange("sizeCategory", e.target.value);
-                      }}
-                      size="large"
-                      style={{ width: "100%" }}
-                    >
-                      <Radio.Button
-                        value="adult"
-                        style={{ width: "50%", textAlign: "center" }}
-                      >
-                        Adult
-                      </Radio.Button>
-                      <Radio.Button
-                        value="kid"
-                        style={{ width: "50%", textAlign: "center" }}
-                      >
-                        Kids
-                      </Radio.Button>
-                    </Radio.Group>
-                  </Form.Item>
-
-                  {/* Size Selection */}
-                  <Form.Item
-                    label={
-                      <Space>
-                        <Text strong>Size</Text>
-                        <Button
-                          type="link"
-                          size="small"
-                          onClick={() => setShowSizeInfo(true)}
-                        >
-                          View Size Chart
-                        </Button>
-                      </Space>
-                    }
+                  <div
+                    style={{
+                      background:
+                        "linear-gradient(135deg, #f5f7fa 0%, #e8edf2 100%)",
+                      padding: "20px",
+                      borderRadius: "12px",
+                      marginBottom: "24px",
+                    }}
                   >
                     <div
                       style={{
-                        display: "grid",
-                        gridTemplateColumns:
-                          "repeat(auto-fill, minmax(80px, 1fr))",
-                        gap: "8px",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        marginBottom: "16px",
                       }}
                     >
-                      {getSizeOptions().map((sizeOption) => {
-                        const price =
-                          SHIRT_PRICING.sizes[sizeOption.size] ||
-                          SHIRT_PRICING.base;
-                        const isSelected =
-                          currentOrder.size === sizeOption.size;
-
-                        return (
-                          <div
-                            key={sizeOption.size}
-                            className={`size-option-${sizeOption.size}`}
-                            onClick={() => handleSizeClick(sizeOption.size)}
-                            style={{
-                              cursor: "pointer",
-                              padding: "12px 8px",
-                              borderRadius: "8px",
-                              background: isSelected ? "#1E3A71" : "#f5f5f5",
-                              border: isSelected ? "none" : "1px solid #d9d9d9",
-                              textAlign: "center",
-                              transition: "all 0.3s ease",
-                            }}
-                          >
-                            <Text
-                              strong
-                              style={{
-                                display: "block",
-                                color: isSelected ? "white" : "#333",
-                                fontSize: "16px",
-                              }}
-                            >
-                              {sizeOption.size}
-                            </Text>
-                            <Text
-                              style={{
-                                display: "block",
-                                color: isSelected
-                                  ? "rgba(255,255,255,0.8)"
-                                  : "#1E3A71",
-                                fontSize: "12px",
-                              }}
-                            >
-                              ₱{price}
-                            </Text>
-                          </div>
-                        );
-                      })}
+                      <Text strong style={{ fontSize: "16px" }}>
+                        Shirt Information
+                      </Text>
                     </div>
-                  </Form.Item>
+
+                    {/* Zone Selection */}
+                    <Form.Item
+                      label={<Text strong>Zone</Text>}
+                      name="zone"
+                      rules={[
+                        { required: true, message: "Please select a zone" },
+                      ]}
+                    >
+                      <Select
+                        placeholder="Select zone"
+                        size="large"
+                        loading={loadingClubs}
+                        value={selectedZone}
+                        onChange={async (value) => {
+                          setSelectedZone(value);
+                          form.setFieldValue("zone", value);
+
+                          // Regenerate preview if name exists
+                          if (currentOrder.name) {
+                            const preview = await generatePreview(
+                              currentOrder,
+                              value
+                            );
+                            setCurrentOrder((prev) => ({ ...prev, preview }));
+                          }
+                        }}
+                        options={zones.map((zone) => ({
+                          value: zone,
+                          label: zone,
+                        }))}
+                      />
+                    </Form.Item>
+
+                    {/* Name Input */}
+                    <Form.Item
+                      label={<Text strong>Name (on shirt)</Text>}
+                      name="name"
+                      rules={[
+                        { required: true, message: "Please enter the name" },
+                        {
+                          max: 20,
+                          message: "Name cannot exceed 20 characters",
+                        },
+                      ]}
+                      normalize={(value) => value?.toUpperCase()}
+                    >
+                      <Input
+                        placeholder="Enter last name"
+                        onChange={(e) =>
+                          handleFieldChange("name", e.target.value)
+                        }
+                        size="large"
+                        maxLength={20}
+                      />
+                    </Form.Item>
+
+                    {/* Shirt Number */}
+                    <Form.Item
+                      label={
+                        <Text strong>
+                          Shirt Number <small>(00-99)</small>
+                        </Text>
+                      }
+                      name="shirtNumber"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please select shirt number",
+                        },
+                      ]}
+                    >
+                      <Select
+                        placeholder="Select shirt number"
+                        size="large"
+                        showSearch
+                        allowClear
+                        onChange={(value) =>
+                          handleFieldChange("shirtNumber", value)
+                        }
+                        options={Array.from({ length: 100 }, (_, i) => {
+                          const numberStr = String(i).padStart(2, "0");
+                          return {
+                            value: numberStr,
+                            label: numberStr,
+                          };
+                        })}
+                      />
+                    </Form.Item>
+
+                    {/* Size Category */}
+                    <Form.Item label={<Text strong>Category</Text>}>
+                      <Radio.Group
+                        value={currentOrder.sizeCategory}
+                        onChange={(e) => {
+                          handleFieldChange("sizeCategory", e.target.value);
+                        }}
+                        size="large"
+                        style={{ width: "100%" }}
+                      >
+                        <Radio.Button
+                          value="adult"
+                          style={{ width: "50%", textAlign: "center" }}
+                        >
+                          Adult
+                        </Radio.Button>
+                        <Radio.Button
+                          value="kid"
+                          style={{ width: "50%", textAlign: "center" }}
+                        >
+                          Kids
+                        </Radio.Button>
+                      </Radio.Group>
+                    </Form.Item>
+
+                    {/* Size Selection */}
+                    <Form.Item
+                      label={
+                        <Space>
+                          <Text strong>Size</Text>
+                          <Button
+                            type="link"
+                            size="small"
+                            onClick={() => setShowSizeInfo(true)}
+                          >
+                            View Size Chart
+                          </Button>
+                        </Space>
+                      }
+                    >
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns:
+                            "repeat(auto-fill, minmax(80px, 1fr))",
+                          gap: "8px",
+                        }}
+                      >
+                        {getSizeOptions().map((sizeOption) => {
+                          const price =
+                            SHIRT_PRICING.sizes[sizeOption.size] ||
+                            SHIRT_PRICING.base;
+                          const isSelected =
+                            currentOrder.size === sizeOption.size;
+
+                          return (
+                            <div
+                              key={sizeOption.size}
+                              className={`size-option-${sizeOption.size}`}
+                              onClick={() => handleSizeClick(sizeOption.size)}
+                              style={{
+                                cursor: "pointer",
+                                padding: "12px 8px",
+                                borderRadius: "8px",
+                                background: isSelected ? "#1E3A71" : "#f5f5f5",
+                                border: isSelected
+                                  ? "none"
+                                  : "1px solid #d9d9d9",
+                                textAlign: "center",
+                                transition: "all 0.3s ease",
+                              }}
+                            >
+                              <Text
+                                strong
+                                style={{
+                                  display: "block",
+                                  color: isSelected ? "white" : "#333",
+                                  fontSize: "16px",
+                                }}
+                              >
+                                {sizeOption.size}
+                              </Text>
+                              <Text
+                                style={{
+                                  display: "block",
+                                  color: isSelected
+                                    ? "rgba(255,255,255,0.8)"
+                                    : "#1E3A71",
+                                  fontSize: "12px",
+                                }}
+                              >
+                                ₱{price}
+                              </Text>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </Form.Item>
+                  </div>
 
                   {currentOrder.price > 0 && (
                     <div
@@ -1027,11 +931,12 @@ const ShirtOrdering = () => {
                         borderRadius: "12px",
                         boxShadow: "0 8px 30px rgba(0,0,0,0.15)",
                       }}
+                      preview
                     />
                   ) : (
                     <div style={{ textAlign: "center", padding: "40px" }}>
                       <Text type="secondary" style={{ fontSize: "16px" }}>
-                        Fill in zone and name to see preview
+                        Select zone and enter name to see preview
                       </Text>
                     </div>
                   )}
@@ -1102,7 +1007,16 @@ const ShirtOrdering = () => {
                         }}
                       >
                         {order.preview && (
-                          <img
+                          // <img
+                          //   src={order.preview}
+                          //   alt="Order Preview"
+                          //   style={{
+                          //     width: "100%",
+                          //     borderRadius: "8px",
+                          //     marginBottom: "12px",
+                          //   }}
+                          // />
+                          <Image
                             src={order.preview}
                             alt="Order Preview"
                             style={{
@@ -1167,14 +1081,6 @@ const ShirtOrdering = () => {
                               {order.shirtNumber && (
                                 <Text type="secondary">
                                   Number: {order.shirtNumber}
-                                </Text>
-                              )}
-                              {order.desiredNumber && (
-                                <Text
-                                  type="secondary"
-                                  style={{ fontStyle: "italic" }}
-                                >
-                                  Desired: {order.desiredNumber}
                                 </Text>
                               )}
                             </>
@@ -1416,7 +1322,7 @@ const ShirtOrdering = () => {
                     </div>
                     <div>
                       <Text type="secondary">Zone: </Text>
-                      <Tag color="blue">{memberData?.zone}</Tag>
+                      <Tag color="blue">{selectedZone}</Tag>
                     </div>
                   </Space>
                 </div>
@@ -1471,17 +1377,6 @@ const ShirtOrdering = () => {
                                 style={{ fontSize: "13px" }}
                               >
                                 Number: {order.shirtNumber}
-                              </Text>
-                            )}
-                            {order.desiredNumber && (
-                              <Text
-                                type="secondary"
-                                style={{
-                                  fontSize: "13px",
-                                  fontStyle: "italic",
-                                }}
-                              >
-                                Desired: {order.desiredNumber}
                               </Text>
                             )}
                           </Space>

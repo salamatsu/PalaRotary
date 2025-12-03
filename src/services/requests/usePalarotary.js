@@ -152,6 +152,7 @@ export const useGetAdminMerchandiseByZoneApi = (zone) => {
   return useQuery({
     queryKey: ["getAdminMerchandiseByZoneApi", zone],
     queryFn: () => getAdminMerchandiseByZoneApi(zone),
+    enabled: !!zone,
   });
 };
 export const useGetAdminMerchandisesStatsApi = () => {
