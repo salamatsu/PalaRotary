@@ -409,7 +409,7 @@ export default function ClubPaymentProof() {
                 fontWeight: "700",
               }}
             >
-              UPLOAD CLUB PROOF OF PAYMENT
+              CLUB REGISTRATION
             </Title>
             <Text style={{ fontSize: "14px", color: "#6b7280" }}>
               Update your club's payment proof for verification
@@ -430,7 +430,7 @@ export default function ClubPaymentProof() {
             >
               {/* Club Selection */}
               <Form.Item
-                label={<Text strong>Select Club / Zone</Text>}
+                label={<Text strong>Select Zone / Club</Text>}
                 name="clubToken"
                 rules={[{ required: true, message: "Please select a club" }]}
               >
@@ -447,10 +447,15 @@ export default function ClubPaymentProof() {
                       .toLowerCase()
                       .includes(input.toLowerCase())
                   }
+                  filterSort={(optionA, optionB) =>
+                    (optionA?.label ?? "")
+                      .toLowerCase()
+                      .localeCompare((optionB?.label ?? "").toLowerCase())
+                  }
                   options={clubs.map((club) => ({
                     value: club.token,
                     label:
-                      `${club.clubName} - ${club.zone}` +
+                      `${club.zone} - ${club.clubName}` +
                       (club.status === "APPROVED" ? " (Approved)" : ` `),
                     disabled: club.status === "APPROVED",
                   }))}

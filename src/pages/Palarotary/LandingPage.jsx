@@ -797,7 +797,7 @@ export default function PalarotaryLandingPage() {
                     minWidth: "300px",
                   }}
                 >
-                  Upload Payment Proof
+                  Register your club
                 </Button>
               </motion.div>
             </div>
