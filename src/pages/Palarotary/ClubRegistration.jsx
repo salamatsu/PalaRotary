@@ -5,6 +5,7 @@ import {
   InfoCircleOutlined,
   MobileOutlined,
   UploadOutlined,
+  EyeOutlined,
 } from "@ant-design/icons";
 import {
   App,
@@ -12,6 +13,7 @@ import {
   Card,
   Divider,
   Form,
+  Image,
   Input,
   Modal,
   Progress,
@@ -20,6 +22,7 @@ import {
 } from "antd";
 import { AnimatePresence, motion } from "framer-motion";
 import gsap from "gsap";
+import imageCompression from "browser-image-compression";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { logo2, logoBanner } from "../../assets/images/logos";
@@ -31,6 +34,8 @@ export default function ClubRegistration() {
   const [form] = Form.useForm();
   const [currentStep, setCurrentStep] = useState(0);
   const [clubData, setClubData] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
+  const [compressing, setCompressing] = useState(false);
 
   const containerRef = useRef(null);
   const formRef = useRef(null);
@@ -167,6 +172,68 @@ export default function ClubRegistration() {
     }
   }, [currentStep]);
 
+  const handleImageCompress = async (file) => {
+    const isImage = file.type.startsWith("image/");
+    if (!isImage) {
+      message.error("You can only upload image files!");
+      return Upload.LIST_IGNORE;
+    }
+
+    const fileSizeMB = file.size / 1024 / 1024;
+
+    try {
+      setCompressing(true);
+
+      let compressedFile = file;
+
+      // Only compress if file is larger than 5MB
+      if (fileSizeMB > 5) {
+        message.loading({ content: "Compressing image...", key: "compress" });
+
+        const options = {
+          maxSizeMB: 5,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+          fileType: file.type,
+        };
+
+        compressedFile = await imageCompression(file, options);
+
+        const compressedSizeMB = compressedFile.size / 1024 / 1024;
+        message.success({
+          content: `Image compressed from ${fileSizeMB.toFixed(
+            2
+          )}MB to ${compressedSizeMB.toFixed(2)}MB`,
+          key: "compress",
+        });
+      }
+
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(compressedFile);
+      setPreviewImage(previewUrl);
+
+      // Return the compressed file wrapped in a File object
+      const finalFile = new File([compressedFile], file.name, {
+        type: file.type,
+      });
+
+      setCompressing(false);
+      return false; // Prevent auto upload
+    } catch (error) {
+      console.error("Error compressing image:", error);
+      message.error("Failed to process image");
+      setCompressing(false);
+      return Upload.LIST_IGNORE;
+    }
+  };
+
+  const handleRemoveImage = () => {
+    if (previewImage) {
+      URL.revokeObjectURL(previewImage);
+    }
+    setPreviewImage(null);
+  };
+
   const onFinishStep1 = (values) => {
     Modal.confirm({
       title: "Confirm Registration",
@@ -181,10 +248,10 @@ export default function ClubRegistration() {
             </p>
             {values.zone && (
               <p style={{ margin: "4px 0" }}>
-                <strong>Zone:</strong> {values.zone}
+                <strong>Zone:</strong> ZONE {values.zone}
               </p>
             )}
-            <p style={{ margin: "4px 0" }}>
+            {/* <p style={{ margin: "4px 0" }}>
               <strong>Contact Person:</strong> {values.firstName}{" "}
               {values.lastName}
             </p>
@@ -193,7 +260,7 @@ export default function ClubRegistration() {
             </p>
             <p style={{ margin: "4px 0" }}>
               <strong>Mobile:</strong> {values.mobileNumber}
-            </p>
+            </p> */}
             {values.paymentProof && values.paymentProof.length > 0 && (
               <p style={{ margin: "4px 0" }}>
                 <strong>Payment Proof:</strong> {values.paymentProof[0].name}
@@ -209,11 +276,11 @@ export default function ClubRegistration() {
           // Prepare form data
           const formData = new FormData();
           formData.append("clubName", values.clubName);
-          if (values.zone) formData.append("zone", values.zone);
-          formData.append("firstName", values.firstName);
-          formData.append("lastName", values.lastName);
-          formData.append("email", values.email);
-          formData.append("mobileNumber", values.mobileNumber);
+          if (values.zone) formData.append("zone", `ZONE ${values.zone}`);
+          // formData.append("firstName", values.firstName);
+          // formData.append("lastName", values.lastName);
+          // formData.append("email", values.email);
+          // formData.append("mobileNumber", values.mobileNumber);
 
           // Add payment proof if provided
           if (values.paymentProof && values.paymentProof.length > 0) {
@@ -225,7 +292,11 @@ export default function ClubRegistration() {
           const response = await registerClub.mutateAsync(formData);
 
           console.log("SUCCESS DATA", response.data);
-          setClubData(values);
+          setClubData({
+            ...values,
+            zone: values.zone ? `ZONE ${values.zone}` : null,
+          });
+          handleRemoveImage();
 
           // Advanced GSAP exit animation
           const tl = gsap.timeline();
@@ -619,6 +690,7 @@ export default function ClubRegistration() {
                           New Club Name
                         </span>
                       }
+                      normalize={(value) => value?.toUpperCase()}
                       name="clubName"
                       rules={[{ required: true, message: "Required" }]}
                     >
@@ -633,24 +705,33 @@ export default function ClubRegistration() {
                       style={{ gridColumn: "1 / -1" }}
                       label={
                         <span style={{ fontWeight: "600", color: "#333" }}>
-                          Zone
+                          Zone <small>(example: ZONE 1 | ZONE 5A)</small>
                         </span>
                       }
                       name="zone"
+                      normalize={(value) => value?.toUpperCase()}
                       rules={[
                         {
-                          pattern: /^ZONE\s+\d+$/i,
+                          // pattern: /^ZONE\s+\d+$/i,
                           message: "Format: ZONE 1",
                         },
                       ]}
                     >
-                      {/* <Input
+                      <Input
+                        prefix="ZONE "
                         placeholder="ZONE 1"
                         size="large"
-                        style={{ borderRadius: "12px" }}
-                      /> */}
+                        style={{
+                          borderRadius: "12px",
+                          textTransform: "uppercase",
+                        }}
+                        onChange={(e) => {
+                          const upperValue = e.target.value.toUpperCase();
+                          form.setFieldsValue({ zone: upperValue });
+                        }}
+                      />
 
-                      <Select
+                      {/* <Select
                         showSearch
                         size="large"
                         placeholder="Select zone"
@@ -665,7 +746,7 @@ export default function ClubRegistration() {
                             .toLowerCase()
                             .localeCompare(optionB.children.toLowerCase())
                         }
-                      />
+                      /> */}
                     </Form.Item>
 
                     {/* <Divider style={{ gridColumn: "1 / -1" }}>
@@ -862,8 +943,10 @@ export default function ClubRegistration() {
                   >
                     <Upload.Dragger
                       accept="image/*"
-                      beforeUpload={() => false}
+                      beforeUpload={handleImageCompress}
                       maxCount={1}
+                      onRemove={handleRemoveImage}
+                      disabled={compressing}
                       style={{
                         background:
                           "linear-gradient(135deg, #e8edf505 0%, #c3cbdf05 100%)",
@@ -890,7 +973,9 @@ export default function ClubRegistration() {
                             marginBottom: "4px",
                           }}
                         >
-                          Click or drag file to upload
+                          {compressing
+                            ? "Compressing image..."
+                            : "Click or drag file to upload"}
                         </p>
                         <p
                           style={{
@@ -899,11 +984,74 @@ export default function ClubRegistration() {
                             color: "#6b7280",
                           }}
                         >
-                          Support for image files (JPG, PNG, Max 5MB)
+                          {compressing
+                            ? "Please wait..."
+                            : "Support for image files (JPG, PNG). Files over 5MB will be compressed automatically."}
                         </p>
                       </div>
                     </Upload.Dragger>
                   </Form.Item>
+
+                  {/* Image Preview */}
+                  {previewImage && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      style={{
+                        marginBottom: "24px",
+                        padding: "16px",
+                        background:
+                          "linear-gradient(135deg, #e8edf508 0%, #c3cbdf08 100%)",
+                        borderRadius: "12px",
+                        border: "2px solid #e8edf5",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          marginBottom: "12px",
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontWeight: "600",
+                            color: "#1c3c6d",
+                            fontSize: "14px",
+                          }}
+                        >
+                          Image Preview
+                        </span>
+                      </div>
+                      <div style={{ textAlign: "center" }}>
+                        <Image
+                          src={previewImage}
+                          alt="Payment proof preview"
+                          style={{
+                            maxWidth: "100%",
+                            maxHeight: "400px",
+                            borderRadius: "8px",
+                            objectFit: "contain",
+                          }}
+                          preview={{
+                            mask: (
+                              <div
+                                style={{
+                                  display: "flex",
+                                  gap: "8px",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <EyeOutlined /> View Full Size
+                              </div>
+                            ),
+                          }}
+                        />
+                      </div>
+                    </motion.div>
+                  )}
 
                   <Form.Item style={{ marginTop: "8px", marginBottom: 0 }}>
                     <motion.div
@@ -996,7 +1144,12 @@ export default function ClubRegistration() {
                     marginBottom: "24px",
                   }}
                 >
-                  <strong>{clubData?.clubName}</strong> registered successfully
+                  <strong>{clubData?.clubName}</strong>
+                  <br />
+                  {/* zone */}
+                  <strong>{clubData?.zone}</strong>
+                  <br />
+                  registered successfully
                 </motion.p>
 
                 <motion.div

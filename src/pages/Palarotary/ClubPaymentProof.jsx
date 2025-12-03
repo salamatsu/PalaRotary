@@ -11,6 +11,7 @@ import {
   App,
   Spin,
   Modal,
+  Image,
 } from "antd";
 import {
   ArrowLeftOutlined,
@@ -20,8 +21,11 @@ import {
   EditOutlined,
   LockOutlined,
   ExclamationCircleOutlined,
+  EyeOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
 import { motion } from "framer-motion";
+import imageCompression from "browser-image-compression";
 import {
   useGetRegisteredClub,
   useUploadPaymentProof,
@@ -36,15 +40,39 @@ export default function ClubPaymentProof() {
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const [selectedClub, setSelectedClub] = useState(null);
+  const [selectedZone, setSelectedZone] = useState(null);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [isEditable, setIsEditable] = useState(false);
   const [showEditConfirm, setShowEditConfirm] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
+  const [compressing, setCompressing] = useState(false);
 
   const { data: clubsData, isLoading: loadingClubs } = useGetRegisteredClub();
   const { mutate: uploadPayment, isPending: uploading } =
     useUploadPaymentProof();
 
   const clubs = clubsData?.data || [];
+
+  // Get unique zones from clubs
+  const zones = [...new Set(clubs.map((club) => club.zone))].sort();
+
+  // Filter clubs based on selected zone
+  const filteredClubs = selectedZone
+    ? clubs.filter((club) => club.zone === selectedZone)
+    : clubs;
+
+  const handleZoneSelect = (value) => {
+    setSelectedZone(value);
+    // Reset club selection when zone changes
+    setSelectedClub(null);
+    form.setFieldsValue({
+      clubToken: undefined,
+      firstName: undefined,
+      lastName: undefined,
+      email: undefined,
+      mobileNumber: undefined,
+    });
+  };
 
   const handleClubSelect = (value) => {
     const club = clubs.find((c) => c.token === value);
@@ -92,18 +120,64 @@ export default function ClubPaymentProof() {
     return e?.fileList;
   };
 
-  const beforeUpload = (file) => {
+  const handleImageCompress = async (file) => {
     const isImage = file.type.startsWith("image/");
     if (!isImage) {
       message.error("You can only upload image files!");
       return Upload.LIST_IGNORE;
     }
-    const isLt5M = file.size / 1024 / 1024 < 5;
-    if (!isLt5M) {
-      message.error("Image must be smaller than 5MB!");
+
+    const fileSizeMB = file.size / 1024 / 1024;
+
+    try {
+      setCompressing(true);
+
+      let compressedFile = file;
+
+      // Only compress if file is larger than 5MB
+      if (fileSizeMB > 5) {
+        message.loading({ content: "Compressing image...", key: "compress" });
+
+        const options = {
+          maxSizeMB: 5,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+          fileType: file.type,
+        };
+
+        compressedFile = await imageCompression(file, options);
+
+        const compressedSizeMB = compressedFile.size / 1024 / 1024;
+        message.success({
+          content: `Image compressed from ${fileSizeMB.toFixed(2)}MB to ${compressedSizeMB.toFixed(2)}MB`,
+          key: "compress",
+        });
+      }
+
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(compressedFile);
+      setPreviewImage(previewUrl);
+
+      // Return the compressed file wrapped in a File object
+      const finalFile = new File([compressedFile], file.name, {
+        type: file.type,
+      });
+
+      setCompressing(false);
+      return false; // Prevent auto upload
+    } catch (error) {
+      console.error("Error compressing image:", error);
+      message.error("Failed to process image");
+      setCompressing(false);
       return Upload.LIST_IGNORE;
     }
-    return false;
+  };
+
+  const handleRemoveImage = () => {
+    if (previewImage) {
+      URL.revokeObjectURL(previewImage);
+    }
+    setPreviewImage(null);
   };
 
   const handleSubmit = async ({ clubToken, paymentProof, ...values }) => {
@@ -129,7 +203,9 @@ export default function ClubPaymentProof() {
           setUploadSuccess(true);
           form.resetFields();
           setSelectedClub(null);
+          setSelectedZone(null);
           setIsEditable(false);
+          handleRemoveImage();
         },
         onError: (error) => {
           console.log(error);
@@ -428,17 +504,40 @@ export default function ClubPaymentProof() {
               onFinish={handleSubmit}
               requiredMark={false}
             >
+              {/* Zone Selection */}
+              <Form.Item
+                label={<Text strong>Select Zone</Text>}
+                name="zone"
+                rules={[{ required: true, message: "Please select a zone" }]}
+              >
+                <Select
+                  placeholder="Select a zone first"
+                  size="large"
+                  onChange={handleZoneSelect}
+                  loading={loadingClubs}
+                  style={{ borderRadius: "8px" }}
+                  showSearch
+                  options={zones.map((zone) => ({
+                    value: zone,
+                    label: zone,
+                  }))}
+                />
+              </Form.Item>
+
               {/* Club Selection */}
               <Form.Item
-                label={<Text strong>Select Zone / Club</Text>}
+                label={<Text strong>Select Club</Text>}
                 name="clubToken"
                 rules={[{ required: true, message: "Please select a club" }]}
               >
                 <Select
-                  placeholder="Select your club"
+                  placeholder={
+                    selectedZone ? "Select your club" : "Select a zone first"
+                  }
                   size="large"
                   onChange={handleClubSelect}
                   loading={loadingClubs}
+                  disabled={!selectedZone}
                   style={{ borderRadius: "8px" }}
                   optionFilterProp="children"
                   showSearch
@@ -452,18 +551,18 @@ export default function ClubPaymentProof() {
                       .toLowerCase()
                       .localeCompare((optionB?.label ?? "").toLowerCase())
                   }
-                  options={clubs.map((club) => ({
+                  options={filteredClubs.map((club) => ({
                     value: club.token,
                     label:
-                      `${club.zone} - ${club.clubName}` +
-                      (club.status === "APPROVED" ? " (Approved)" : ` `),
+                      club.clubName +
+                      (club.status === "APPROVED" ? " (Approved)" : ""),
                     disabled: club.status === "APPROVED",
                   }))}
                 />
               </Form.Item>
 
               {/* Auto-filled Contact Information */}
-              {selectedClub && (
+              {/* {selectedClub && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
@@ -488,7 +587,7 @@ export default function ClubPaymentProof() {
                       }}
                     >
                       <Text strong style={{ color: "#1c3c6d" }}>
-                        Club Information
+                        Club Information <small>(optional)</small>
                       </Text>
                       <Button
                         type="text"
@@ -583,7 +682,7 @@ export default function ClubPaymentProof() {
                     </Form.Item>
                   </div>
                 </motion.div>
-              )}
+              )} */}
 
               <Form.Item
                 label={
@@ -614,9 +713,11 @@ export default function ClubPaymentProof() {
                 getValueFromEvent={normFile}
               >
                 <Dragger
-                  beforeUpload={beforeUpload}
+                  beforeUpload={handleImageCompress}
                   maxCount={1}
                   accept="image/*"
+                  onRemove={handleRemoveImage}
+                  disabled={compressing}
                   style={{
                     background:
                       "linear-gradient(135deg, #e8edf505 0%, #c3cbdf05 100%)",
@@ -642,7 +743,9 @@ export default function ClubPaymentProof() {
                         marginBottom: "4px",
                       }}
                     >
-                      Click or drag file to upload
+                      {compressing
+                        ? "Compressing image..."
+                        : "Click or drag file to upload"}
                     </p>
                     <p
                       style={{
@@ -651,11 +754,68 @@ export default function ClubPaymentProof() {
                         color: "#6b7280",
                       }}
                     >
-                      Support for image files (JPG, PNG, Max 5MB)
+                      {compressing
+                        ? "Please wait..."
+                        : "Support for image files (JPG, PNG). Files over 5MB will be compressed automatically."}
                     </p>
                   </div>
                 </Dragger>
               </Form.Item>
+
+              {/* Image Preview */}
+              {previewImage && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  style={{
+                    marginBottom: "24px",
+                    padding: "16px",
+                    background:
+                      "linear-gradient(135deg, #e8edf508 0%, #c3cbdf08 100%)",
+                    borderRadius: "12px",
+                    border: "2px solid #e8edf5",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    <Text strong style={{ color: "#1c3c6d" }}>
+                      Image Preview
+                    </Text>
+                  </div>
+                  <div style={{ textAlign: "center" }}>
+                    <Image
+                      src={previewImage}
+                      alt="Payment proof preview"
+                      style={{
+                        maxWidth: "100%",
+                        maxHeight: "400px",
+                        borderRadius: "8px",
+                        objectFit: "contain",
+                      }}
+                      preview={{
+                        mask: (
+                          <div
+                            style={{
+                              display: "flex",
+                              gap: "8px",
+                              alignItems: "center",
+                            }}
+                          >
+                            <EyeOutlined /> View Full Size
+                          </div>
+                        ),
+                      }}
+                    />
+                  </div>
+                </motion.div>
+              )}
 
               {/* Submit Button */}
               <Form.Item shouldUpdate>
