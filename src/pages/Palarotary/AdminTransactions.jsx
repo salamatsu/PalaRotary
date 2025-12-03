@@ -26,6 +26,7 @@ import {
   useGetAdminTransactionsApi,
   useUpdateAdminTransactionsApi,
 } from "../../services/requests/usePalarotary";
+import { formatDateTime } from "../../utils/formatDate";
 
 const { TextArea } = Input;
 
@@ -242,23 +243,11 @@ const AdminTransactions = () => {
         {selectedTransaction && (
           <>
             <Descriptions bordered column={1} size="small">
-              <Descriptions.Item label="Transaction Number">
-                {selectedTransaction.transactionNumber}
-              </Descriptions.Item>
-              <Descriptions.Item label="Club ID">
-                {selectedTransaction.clubId}
-              </Descriptions.Item>
               <Descriptions.Item label="Club Name">
                 {selectedTransaction.clubName}
               </Descriptions.Item>
-              <Descriptions.Item label="Email">
-                {selectedTransaction.email}
-              </Descriptions.Item>
               <Descriptions.Item label="Payment Channel">
                 {selectedTransaction.paymentChannel || "-"}
-              </Descriptions.Item>
-              <Descriptions.Item label="Amount to Pay">
-                ₱{parseFloat(selectedTransaction.amountToPay).toFixed(2)}
               </Descriptions.Item>
               <Descriptions.Item label="Status">
                 <Tag
@@ -275,12 +264,6 @@ const AdminTransactions = () => {
               </Descriptions.Item>
               <Descriptions.Item label="Total Proof Uploads">
                 {selectedTransaction.totalUploads || 0}
-              </Descriptions.Item>
-              <Descriptions.Item label="Created On">
-                {new Date(selectedTransaction.createdAt).toLocaleString()}
-              </Descriptions.Item>
-              <Descriptions.Item label="Last Updated">
-                {new Date(selectedTransaction.updatedAt).toLocaleString()}
               </Descriptions.Item>
             </Descriptions>
 

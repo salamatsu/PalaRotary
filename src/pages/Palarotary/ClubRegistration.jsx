@@ -15,6 +15,7 @@ import {
   Input,
   Modal,
   Progress,
+  Select,
   Upload,
 } from "antd";
 import { AnimatePresence, motion } from "framer-motion";
@@ -176,7 +177,7 @@ export default function ClubRegistration() {
           </p>
           <div style={{ fontSize: "14px", lineHeight: "1.8" }}>
             <p style={{ margin: "4px 0" }}>
-              <strong>Club Name:</strong> {values.clubName}
+              <strong>New Club Name:</strong> {values.clubName}
             </p>
             {values.zone && (
               <p style={{ margin: "4px 0" }}>
@@ -615,7 +616,7 @@ export default function ClubRegistration() {
                       style={{ gridColumn: "1 / -1" }}
                       label={
                         <span style={{ fontWeight: "600", color: "#333" }}>
-                          Club Name
+                          New Club Name
                         </span>
                       }
                       name="clubName"
@@ -643,25 +644,41 @@ export default function ClubRegistration() {
                         },
                       ]}
                     >
-                      <Input
+                      {/* <Input
                         placeholder="ZONE 1"
                         size="large"
                         style={{ borderRadius: "12px" }}
+                      /> */}
+
+                      <Select
+                        showSearch
+                        size="large"
+                        placeholder="Select zone"
+                        optionFilterProp="children"
+                        filterOption={(input, option) =>
+                          option.children
+                            .toLowerCase()
+                            .includes(input.toLowerCase())
+                        }
+                        filterSort={(optionA, optionB) =>
+                          optionA.children
+                            .toLowerCase()
+                            .localeCompare(optionB.children.toLowerCase())
+                        }
                       />
                     </Form.Item>
 
-                    <Divider style={{ gridColumn: "1 / -1" }}>
+                    {/* <Divider style={{ gridColumn: "1 / -1" }}>
                       Contact Information
                     </Divider>
 
                     <Form.Item
                       label={
                         <span style={{ fontWeight: "600", color: "#333" }}>
-                          First Name
+                          First Name <small>(optional)</small>
                         </span>
                       }
                       name="firstName"
-                      rules={[{ required: true, message: "Required" }]}
                     >
                       <Input
                         placeholder="Enter first name"
@@ -673,11 +690,10 @@ export default function ClubRegistration() {
                     <Form.Item
                       label={
                         <span style={{ fontWeight: "600", color: "#333" }}>
-                          Last Name
+                          Last Name <small>(optional)</small>
                         </span>
                       }
                       name="lastName"
-                      rules={[{ required: true, message: "Required" }]}
                     >
                       <Input
                         placeholder="Enter last name"
@@ -690,14 +706,11 @@ export default function ClubRegistration() {
                       style={{ gridColumn: "1 / -1" }}
                       label={
                         <span style={{ fontWeight: "600", color: "#333" }}>
-                          Email Address
+                          Email Address <small>(optional)</small>
                         </span>
                       }
                       name="email"
-                      rules={[
-                        { required: true, message: "Required" },
-                        { type: "email", message: "Invalid email" },
-                      ]}
+                      rules={[{ type: "email", message: "Invalid email" }]}
                     >
                       <Input
                         placeholder="your.email@example.com"
@@ -710,12 +723,11 @@ export default function ClubRegistration() {
                       style={{ gridColumn: "1 / -1" }}
                       label={
                         <span style={{ fontWeight: "600", color: "#333" }}>
-                          Mobile Number
+                          Mobile Number <small>(optional)</small>
                         </span>
                       }
                       name="mobileNumber"
                       rules={[
-                        { required: true, message: "Required" },
                         {
                           pattern: /^09\d{9}$/,
                           message: "Must be 11 digits starting with 09",
@@ -728,7 +740,7 @@ export default function ClubRegistration() {
                         maxLength={11}
                         style={{ borderRadius: "12px" }}
                       />
-                    </Form.Item>
+                    </Form.Item> */}
                   </div>
 
                   {/* Payment Information */}
