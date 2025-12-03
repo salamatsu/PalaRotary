@@ -9,7 +9,7 @@ const axios = createAxiosInstanceWithInterceptor("data");
 
 export const getCsrfToken = async () => {
   try {
-    const response = await axiosInstance.get("/api/v1/users/csrf-token");
+    const response = await axiosInstance.get("/api/v2/users/csrf-token");
     return response.data;
   } catch (error) {
     handleApiError(error);
@@ -23,7 +23,7 @@ export const getCsrfToken = async () => {
 export const loginAdminApi = async (credentials) => {
   try {
     const response = await axiosInstance.post(
-      "/api/v1/clubs/auth/login",
+      "/api/v2/clubs/auth/login",
       credentials
     );
     return response.data;
@@ -38,7 +38,7 @@ export const loginAdminApi = async (credentials) => {
 
 export const getApprovedClubs = async () => {
   try {
-    const response = await axiosInstance.get("/api/v1/users/clubs");
+    const response = await axiosInstance.get("/api/v2/users/clubs");
     return response.data;
   } catch (error) {
     handleApiError(error);
@@ -48,7 +48,7 @@ export const getApprovedClubs = async () => {
 export const registerMember = async (data) => {
   try {
     const response = await axiosInstance.post(
-      "/api/v1/users/register/visitor",
+      "/api/v2/users/register/visitor",
       data
     );
     return response.data;
@@ -60,7 +60,7 @@ export const registerMember = async (data) => {
 export const getVerifyQrCode = async (qrCode) => {
   try {
     const response = await axiosInstance.get(
-      `/api/v1/users/visitors/verify/${qrCode}`
+      `/api/v2/users/visitors/verify/${qrCode}`
     );
     return response.data;
   } catch (error) {
@@ -71,7 +71,7 @@ export const getVerifyQrCode = async (qrCode) => {
 export const getCheckAvailability = async ({ zone, shirtNumber }) => {
   try {
     const response = await axiosInstance.get(
-      `/api/v1/users/visitors/merchandise/check-availability?zone=${zone}&shirtNumber=${shirtNumber}`
+      `/api/v2/users/visitors/merchandise/check-availability?zone=${zone}&shirtNumber=${shirtNumber}`
     );
     return response.data;
   } catch (error) {
@@ -86,7 +86,7 @@ export const getCheckAvailability = async ({ zone, shirtNumber }) => {
 export const submitShirtOrder = async (orderData) => {
   try {
     const response = await axiosInstance.post(
-      "/api/v1/users/visitors/merchandise",
+      "/api/v2/users/visitors/merchandise",
       orderData
     );
     return response.data;
@@ -98,7 +98,7 @@ export const submitShirtOrder = async (orderData) => {
 export const getTransactionInfo = async (tnNumber) => {
   try {
     const response = await axiosInstance.get(
-      `/api/v1/users/visitors/merchandise/transaction${tnNumber}`
+      `/api/v2/users/visitors/merchandise/transaction${tnNumber}`
     );
     return response.data;
   } catch (error) {
@@ -113,7 +113,7 @@ export const getTransactionInfo = async (tnNumber) => {
 export const registerClub = async (data) => {
   try {
     const response = await axiosInstance.post(
-      "/api/v1/clubs/auth/register-club",
+      "/api/v2/clubs/auth/register-club",
       data
     );
     return response.data;
@@ -125,7 +125,7 @@ export const registerClub = async (data) => {
 export const uploadPaymentProof = async ({ token, ...payload }) => {
   try {
     const response = await axiosInstance.post(
-      `/api/v1/clubs/auth/upload-payment-proof?token=${token}`,
+      `/api/v2/clubs/auth/upload-payment-proof?token=${token}`,
       payload,
       {
         headers: {
@@ -142,7 +142,7 @@ export const uploadPaymentProof = async ({ token, ...payload }) => {
 export const getRegisteredClub = async () => {
   try {
     const response = await axiosInstance.get(
-      "/api/v1/clubs/auth/registered-clubs"
+      "/api/v2/clubs/auth/registered-clubs"
     );
     return response.data;
   } catch (error) {
@@ -156,7 +156,7 @@ export const getRegisteredClub = async () => {
 
 export const getAdminDashboardOverviewApi = async () => {
   try {
-    const response = await axios.get("/api/v1/clubs/cms/dashboard/overview");
+    const response = await axios.get("/api/v2/clubs/cms/dashboard/overview");
     return response.data?.data;
   } catch (error) {
     handleApiError(error);
@@ -167,7 +167,7 @@ export const getAdminDashboardClubsDetailedApi = async (payload) => {
   // query:  page,limit,status
   try {
     const response = await axios.get(
-      `/api/v1/clubs/cms/dashboard/clubs?${formatQueryParams(payload, {
+      `/api/v2/clubs/cms/dashboard/clubs?${formatQueryParams(payload, {
         skipEmpty: true,
       })}`
     );
@@ -181,7 +181,7 @@ export const getAdminDashboardAttendeesApi = async (payload) => {
   // query:  page, limit, search(optional), clubId(optional), registerAs(optional):
   try {
     const response = await axios.get(
-      `/api/v1/clubs/cms/dashboard/attendees?${formatQueryParams(payload, {
+      `/api/v2/clubs/cms/dashboard/attendees?${formatQueryParams(payload, {
         skipEmpty: true,
       })}`
     );
@@ -195,7 +195,7 @@ export const getAdminDashboardPaymentProofApi = async (payload) => {
   // query:  page, limit, status(optional), clubId(optional)
   try {
     const response = await axios.get(
-      `/api/v1/clubs/cms/dashboard/payment-proofs?${formatQueryParams(payload, {
+      `/api/v2/clubs/cms/dashboard/payment-proofs?${formatQueryParams(payload, {
         skipEmpty: true,
       })}`
     );
@@ -208,7 +208,7 @@ export const getAdminDashboardDailyRegistrationsApi = async (payload) => {
   // query:  days
   try {
     const response = await axios.get(
-      `/api/v1/clubs/cms/dashboard/daily-registrations?${formatQueryParams(
+      `/api/v2/clubs/cms/dashboard/daily-registrations?${formatQueryParams(
         payload,
         {
           skipEmpty: true,
@@ -228,7 +228,7 @@ export const getAdminDashboardClubAttendeesApi = async ({
   // query:  page, limit
   try {
     const response = await axios.get(
-      `/api/v1/clubs/cms/dashboard/clubs/${clubId}/attendees?${formatQueryParams(
+      `/api/v2/clubs/cms/dashboard/clubs/${clubId}/attendees?${formatQueryParams(
         payload,
         {
           skipEmpty: true,
@@ -247,7 +247,7 @@ export const getAdminDashboardClubAttendeesApi = async ({
 export const getAdminTransactionsApi = async (payload) => {
   try {
     const response = await axios.get(
-      `/api/v1/clubs/cms/transactions?${formatQueryParams(payload, {
+      `/api/v2/clubs/cms/transactions?${formatQueryParams(payload, {
         skipEmpty: true,
       })}`
     );
@@ -260,7 +260,7 @@ export const getAdminTransactionsApi = async (payload) => {
 export const updateAdminTransactionsApi = async (payload) => {
   try {
     const response = await axios.post(
-      `/api/v1/clubs/cms/transactions/validate-club-registration`,
+      `/api/v2/clubs/cms/transactions/validate-club-registration`,
       payload
     );
     return response.data;
@@ -278,7 +278,7 @@ export const getAdminMerchandisesApi = async (payload) => {
   console.log(payload);
   try {
     const response = await axios.get(
-      `/api/v1/clubs/cms/merchandises?${formatQueryParams(payload, {
+      `/api/v2/clubs/cms/merchandises?${formatQueryParams(payload, {
         skipEmpty: true,
       })}`
     );
@@ -291,7 +291,7 @@ export const getAdminMerchandisesApi = async (payload) => {
 export const getAdminMerchandiseByIdApi = async (merchandiseId) => {
   try {
     const response = await axios.get(
-      `/api/v1/clubs/cms/merchandises/${merchandiseId}`
+      `/api/v2/clubs/cms/merchandises/${merchandiseId}`
     );
     return response.data?.data;
   } catch (error) {
@@ -302,7 +302,7 @@ export const getAdminMerchandiseByIdApi = async (merchandiseId) => {
 export const getAdminMerchandiseByZoneApi = async (zone) => {
   try {
     const response = await axios.get(
-      `/api/v1/clubs/cms/merchandises/zone/${zone}`
+      `/api/v2/clubs/cms/merchandises/zone/${zone}`
     );
     return response.data?.data;
   } catch (error) {
@@ -312,7 +312,7 @@ export const getAdminMerchandiseByZoneApi = async (zone) => {
 
 export const getAdminMerchandisesStatsApi = async () => {
   try {
-    const response = await axios.get(`/api/v1/clubs/cms/merchandises/stats`);
+    const response = await axios.get(`/api/v2/clubs/cms/merchandises/stats`);
     return response.data;
   } catch (error) {
     handleApiError(error);
@@ -323,7 +323,7 @@ export const updateAdminMerchandiseStatusApi = async (payload) => {
   // merchandiseId, status, assignedNumber, remarks:
   try {
     const response = await axios.post(
-      `/api/v1/clubs/cms/merchandises/validate`,
+      `/api/v2/clubs/cms/merchandises/validate`,
       payload
     );
     return response.data;
@@ -339,7 +339,7 @@ export const updateAdminMerchandiseStatusApi = async (payload) => {
 export const scanQRCodeApi = async (payload) => {
   // merchandiseId, status, assignedNumber, remarks:
   try {
-    const response = await axios.post(`/api/v1/scanner/scans`, payload);
+    const response = await axios.post(`/api/v2/scanner/scans`, payload);
     return response.data;
   } catch (error) {
     handleApiError(error);
@@ -371,7 +371,7 @@ export const getAdminClubDetails = async (clubId) => {
 export const getAdminChekcNumber = async ({ zone, shirtNumber }) => {
   try {
     const response = await axios.get(
-      `/api/v1/clubs/cms/merchandises/check-number/${zone}/${shirtNumber}`
+      `/api/v2/clubs/cms/merchandises/check-number/${zone}/${shirtNumber}`
     );
     return response.data?.data;
   } catch (error) {

@@ -105,16 +105,6 @@ export default function AdminClubs() {
       fixed: "left",
     },
     {
-      title: "Contact Person",
-      dataIndex: "contact_person",
-      key: "contact_person",
-    },
-    {
-      title: "Contact Number",
-      dataIndex: "contact_number",
-      key: "contact_number",
-    },
-    {
       title: "Zone",
       dataIndex: "zone",
       key: "zone",

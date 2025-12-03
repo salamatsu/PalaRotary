@@ -139,31 +139,15 @@ const AdminTransactions = () => {
       ),
     },
     {
-      title: "Transaction #",
-      dataIndex: "transactionNumber",
-      key: "transactionNumber",
-    },
-    {
       title: "Club Name",
       dataIndex: "clubName",
       key: "clubName",
-    },
-    {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
     },
     {
       title: "Payment Channel",
       dataIndex: "paymentChannel",
       key: "paymentChannel",
       render: (channel) => channel || "-",
-    },
-    {
-      title: "Amount",
-      dataIndex: "amountToPay",
-      key: "amountToPay",
-      render: (amount) => `₱${parseFloat(amount).toFixed(2)}`,
     },
     {
       title: "Status",
@@ -175,7 +159,7 @@ const AdminTransactions = () => {
           APPROVED: "success",
           REJECTED: "error",
         };
-        return <Tag color={colorMap[status]}>{status}</Tag>;
+        return status ? <Tag color={colorMap[status]}>{status}</Tag> : "-";
       },
     },
     {
@@ -197,12 +181,6 @@ const AdminTransactions = () => {
           )}
         </Space>
       ),
-    },
-    {
-      title: "Created",
-      dataIndex: "createdAt",
-      key: "createdAt",
-      render: (date) => new Date(date).toLocaleDateString(),
     },
   ];
 

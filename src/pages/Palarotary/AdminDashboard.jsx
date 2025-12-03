@@ -36,6 +36,7 @@ import {
   useGetAdminDashboardAttendeesApi,
   useGetAdminDashboardDailyRegistrationsApi,
 } from "../../services/requests/usePalarotary";
+import { formatDateTime } from "../../utils/formatDate";
 
 export default function AdminDashboard() {
   const {
@@ -126,29 +127,10 @@ export default function AdminDashboard() {
       key: "clubName",
     },
     {
-      title: "Contact Person",
-      dataIndex: "contactPerson",
-      key: "contactPerson",
-    },
-    {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
-    },
-    {
       title: "Payment Channel",
       dataIndex: ["transaction", "paymentChannel"],
       key: "paymentChannel",
       render: (_, record) => record.transaction?.paymentChannel || "-",
-    },
-    {
-      title: "Amount",
-      dataIndex: ["transaction", "amount"],
-      key: "amount",
-      render: (_, record) =>
-        record.transaction?.amount
-          ? `₱${parseFloat(record.transaction.amount).toFixed(2)}`
-          : "-",
     },
     {
       title: "Status",
@@ -173,12 +155,6 @@ export default function AdminDashboard() {
       dataIndex: "attendeeCount",
       key: "attendeeCount",
       render: (count) => count || 0,
-    },
-    {
-      title: "Registered",
-      dataIndex: "registeredAt",
-      key: "registeredAt",
-      render: (date) => new Date(date).toLocaleDateString(),
     },
   ];
 
@@ -489,6 +465,7 @@ export default function AdminDashboard() {
                           title: "Name",
                           dataIndex: "fullName",
                           key: "fullName",
+                          className: "uppercase",
                         },
                         {
                           title: "Last Name",
@@ -502,25 +479,14 @@ export default function AdminDashboard() {
                         },
                         {
                           title: "Club",
-                          dataIndex: "clubName",
                           key: "clubName",
-                        },
-                        {
-                          title: "Registered As",
-                          dataIndex: "registerAs",
-                          key: "registerAs",
-                          render: (type) => (
-                            <Tag color={type === "MEMBER" ? "blue" : "green"}>
-                              {type}
-                            </Tag>
-                          ),
+                          render: (record) => record.club?.clubName,
                         },
                         {
                           title: "Registered Date",
                           dataIndex: "registeredAt",
                           key: "registeredAt",
-                          render: (date) =>
-                            date ? new Date(date).toLocaleDateString() : "-",
+                          render: (date) => (date ? formatDateTime(date) : "-"),
                         },
                       ]}
                       rowKey={(record) => record.visitorId || record.email}
