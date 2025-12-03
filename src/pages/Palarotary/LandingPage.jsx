@@ -166,7 +166,6 @@ export default function PalarotaryLandingPage() {
     rest: { scale: 1 },
     hover: {
       scale: 1.05,
-      boxShadow: "0 8px 30px rgba(0,0,0,0.3)",
       transition: {
         type: "spring",
         stiffness: 400,
@@ -709,6 +708,101 @@ export default function PalarotaryLandingPage() {
             </Col>
           </Row>
         </div>
+
+        {/* Club Payment Proof Upload Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          style={{ marginBottom: "60px" }}
+        >
+          <Card
+            style={{
+              borderRadius: "24px",
+              boxShadow: "0 10px 40px rgba(247, 165, 10, 0.15)",
+              border: "2px solid #fff3d6",
+              background: "linear-gradient(135deg, #ffffff 0%, #fff9eb 100%)",
+            }}
+          >
+            <div style={{ textAlign: "center", padding: "20px" }}>
+              <motion.div
+                whileHover={{ scale: 1.05, rotate: [0, -5, 5, 0] }}
+                transition={{ duration: 0.5 }}
+                style={{ marginBottom: "20px" }}
+              >
+                <div
+                  style={{
+                    width: "80px",
+                    height: "80px",
+                    borderRadius: "50%",
+                    background:
+                      "linear-gradient(135deg, #f7a50a 0%, #c68408 100%)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    margin: "0 auto",
+                    boxShadow: "0 8px 25px rgba(247, 165, 10, 0.3)",
+                  }}
+                >
+                  <UploadOutlined
+                    style={{ fontSize: "40px", color: "white" }}
+                  />
+                </div>
+              </motion.div>
+
+              <Title
+                level={3}
+                style={{
+                  color: "#1c3c6d",
+                  marginBottom: "12px",
+                  fontWeight: "bold",
+                }}
+              >
+                CLUB REGISTRATION
+              </Title>
+
+              <Paragraph
+                style={{
+                  fontSize: "16px",
+                  color: "#6b7280",
+                  marginBottom: "28px",
+                  maxWidth: "600px",
+                  margin: "0 auto 28px",
+                }}
+              >
+                Upload or update your payment proof for verification
+              </Paragraph>
+
+              <motion.div
+                variants={buttonVariants}
+                initial="rest"
+                whileHover="hover"
+                whileTap="tap"
+              >
+                <Button
+                  type="primary"
+                  size="large"
+                  icon={<ArrowRightOutlined />}
+                  onClick={() => navigate("/club-payment-proof")}
+                  style={{
+                    background:
+                      "linear-gradient(135deg, #f7a50a 0%, #c68408 100%)",
+                    border: "none",
+                    height: "56px",
+                    fontSize: "17px",
+                    fontWeight: "600",
+                    borderRadius: "12px",
+                    boxShadow: "0 6px 20px rgba(247, 165, 10, 0.4)",
+                    minWidth: "300px",
+                  }}
+                >
+                  Upload Payment Proof
+                </Button>
+              </motion.div>
+            </div>
+          </Card>
+        </motion.div>
 
         {/* Footer */}
         <motion.div
