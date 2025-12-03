@@ -41,11 +41,20 @@ export default function MemberRegistration() {
   const containerRef = useRef(null);
   const formRef = useRef(null);
   const badgeRef = useRef(null);
+  const [selectedZone, setSelectedZone] = useState(null);
 
   const registerMember = useRegisterMember();
   const { data: clubsData, isLoading: loadingClubs } = useApprovedClubs();
 
   const clubs = clubsData?.data || [];
+
+  // Extract unique zones from clubs
+  const zones = [...new Set(clubs.map((club) => club.zone).filter(Boolean))].sort();
+
+  // Filter clubs by selected zone
+  const filteredClubs = selectedZone
+    ? clubs.filter((club) => club.zone === selectedZone)
+    : clubs;
 
   // Initial page load animation with GSAP
   useEffect(() => {
@@ -677,6 +686,34 @@ export default function MemberRegistration() {
               <Form.Item
                 label={
                   <span style={{ fontWeight: "600", color: "#333" }}>
+                    Select Zone
+                  </span>
+                }
+                name="zone"
+                rules={[{ required: true, message: "Required" }]}
+              >
+                <Select
+                  placeholder="Choose zone first"
+                  size="large"
+                  loading={loadingClubs}
+                  showSearch
+                  allowClear
+                  style={{ borderRadius: "12px" }}
+                  onChange={(value) => {
+                    setSelectedZone(value);
+                    // Clear club selection when zone changes
+                    form.setFieldValue("clubId", undefined);
+                  }}
+                  options={zones.map((zone) => ({
+                    value: zone,
+                    label: zone,
+                  }))}
+                />
+              </Form.Item>
+
+              <Form.Item
+                label={
+                  <span style={{ fontWeight: "600", color: "#333" }}>
                     Select Your Club
                   </span>
                 }
@@ -684,20 +721,23 @@ export default function MemberRegistration() {
                 rules={[{ required: true, message: "Required" }]}
               >
                 <Select
-                  placeholder="Choose your registered club"
+                  placeholder={
+                    selectedZone
+                      ? "Choose your registered club"
+                      : "Select zone first"
+                  }
                   size="large"
                   loading={loadingClubs}
                   showSearch
                   allowClear
+                  disabled={!selectedZone}
                   style={{ borderRadius: "12px" }}
                   filterOption={(input, option) =>
                     option.children.toLowerCase().includes(input.toLowerCase())
                   }
-                  options={clubs.map((club) => ({
+                  options={filteredClubs.map((club) => ({
                     value: club.clubId,
-                    label: `${club.clubName} ${
-                      club.zone ? `(${club.zone})` : ""
-                    }`,
+                    label: club.clubName,
                   }))}
                 />
               </Form.Item>
