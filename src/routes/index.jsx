@@ -1,5 +1,5 @@
 import { Suspense, lazy } from "react";
-import { RouterProvider, createBrowserRouter } from "react-router";
+import { RouterProvider, createBrowserRouter, ScrollRestoration } from "react-router";
 import LoadingFallback from "../components/LoadingFallback";
 
 // Lazy load pages
@@ -30,105 +30,142 @@ const PalarotaryAdminRoute = lazy(() =>
 );
 const NotFound = lazy(() => import("../pages/Palarotary/NotFound"));
 
+// Layout component with scroll restoration
+const Layout = ({ children }) => (
+  <>
+    <ScrollRestoration />
+    {children}
+  </>
+);
+
 const RootRoutes = () => {
-  const router = createBrowserRouter([
+  const router = createBrowserRouter(
+    [
+      {
+        path: "/",
+        element: (
+          <Layout>
+            <Suspense fallback={<LoadingFallback />}>
+              <PalarotaryLandingPage />
+            </Suspense>
+          </Layout>
+        ),
+      },
+      {
+        path: "/ground-rules",
+        element: (
+          <Layout>
+            <Suspense fallback={<LoadingFallback />}>
+              <GroundRules />
+            </Suspense>
+          </Layout>
+        ),
+      },
+      {
+        path: "/general-guide",
+        element: (
+          <Layout>
+            <Suspense fallback={<LoadingFallback />}>
+              <GeneralGuide />
+            </Suspense>
+          </Layout>
+        ),
+      },
+      {
+        path: "/register-club",
+        element: (
+          <Layout>
+            <Suspense fallback={<LoadingFallback />}>
+              <ClubRegistration />
+            </Suspense>
+          </Layout>
+        ),
+      },
+      {
+        path: "/register-member",
+        element: (
+          <Layout>
+            <Suspense fallback={<LoadingFallback />}>
+              <MemberRegistration />
+            </Suspense>
+          </Layout>
+        ),
+      },
+      {
+        path: "/shirt-order",
+        element: (
+          <Layout>
+            <Suspense fallback={<LoadingFallback />}>
+              <ShirtValidation />
+            </Suspense>
+          </Layout>
+        ),
+      },
+      {
+        path: "/order-shirt",
+        element: (
+          <Layout>
+            <Suspense fallback={<LoadingFallback />}>
+              <ShirtOrdering />
+            </Suspense>
+          </Layout>
+        ),
+      },
+      {
+        path: "/order-confirmation",
+        element: (
+          <Layout>
+            <Suspense fallback={<LoadingFallback />}>
+              <OrderConfirmation />
+            </Suspense>
+          </Layout>
+        ),
+      },
+      {
+        path: "/payment/success",
+        element: (
+          <Layout>
+            <Suspense fallback={<LoadingFallback />}>
+              <Success />
+            </Suspense>
+          </Layout>
+        ),
+      },
+      {
+        path: "/club-payment-proof",
+        element: (
+          <Layout>
+            <Suspense fallback={<LoadingFallback />}>
+              <ClubPaymentProof />
+            </Suspense>
+          </Layout>
+        ),
+      },
+      {
+        path: "/admin/*",
+        element: (
+          <Layout>
+            <Suspense fallback={<LoadingFallback />}>
+              <PalarotaryAdminRoute />
+            </Suspense>
+          </Layout>
+        ),
+      },
+      {
+        path: "*",
+        element: (
+          <Layout>
+            <Suspense fallback={<LoadingFallback />}>
+              <NotFound />
+            </Suspense>
+          </Layout>
+        ),
+      },
+    ],
     {
-      path: "/",
-      element: (
-        <Suspense fallback={<LoadingFallback />}>
-          <PalarotaryLandingPage />
-        </Suspense>
-      ),
-    },
-    {
-      path: "/ground-rules",
-      element: (
-        <Suspense fallback={<LoadingFallback />}>
-          <GroundRules />
-        </Suspense>
-      ),
-    },
-    {
-      path: "/general-guide",
-      element: (
-        <Suspense fallback={<LoadingFallback />}>
-          <GeneralGuide />
-        </Suspense>
-      ),
-    },
-    {
-      path: "/register-club",
-      element: (
-        <Suspense fallback={<LoadingFallback />}>
-          <ClubRegistration />
-        </Suspense>
-      ),
-    },
-    {
-      path: "/register-member",
-      element: (
-        <Suspense fallback={<LoadingFallback />}>
-          <MemberRegistration />
-        </Suspense>
-      ),
-    },
-    {
-      path: "/shirt-order",
-      element: (
-        <Suspense fallback={<LoadingFallback />}>
-          <ShirtValidation />
-        </Suspense>
-      ),
-    },
-    {
-      path: "/order-shirt",
-      element: (
-        <Suspense fallback={<LoadingFallback />}>
-          <ShirtOrdering />
-        </Suspense>
-      ),
-    },
-    {
-      path: "/order-confirmation",
-      element: (
-        <Suspense fallback={<LoadingFallback />}>
-          <OrderConfirmation />
-        </Suspense>
-      ),
-    },
-    {
-      path: "/payment/success",
-      element: (
-        <Suspense fallback={<LoadingFallback />}>
-          <Success />
-        </Suspense>
-      ),
-    },
-    {
-      path: "/club-payment-proof",
-      element: (
-        <Suspense fallback={<LoadingFallback />}>
-          <ClubPaymentProof />
-        </Suspense>
-      ),
-    },
-    {
-      path: "/admin/*",
-      element: (
-        <Suspense fallback={<LoadingFallback />}>
-          <PalarotaryAdminRoute />
-        </Suspense>
-      ),
-    },
-    {
-      path: "*",
-      element: (
-        <Suspense fallback={<LoadingFallback />}>
-          <NotFound />
-        </Suspense>
-      ),
-    },
-  ]);
+      future: { v7_startTransition: true },
+    }
+  );
 
   return <RouterProvider router={router} />;
 };

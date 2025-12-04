@@ -485,7 +485,9 @@ export default function PalarotaryLandingPage() {
                       size="large"
                       block
                       icon={<ArrowRightOutlined />}
-                      onClick={() => navigate("/ground-rules")}
+                      onClick={() =>
+                        navigate("/ground-rules")
+                      }
                       style={{
                         background:
                           "linear-gradient(135deg, #1c3c6d 0%, #173052 100%)",

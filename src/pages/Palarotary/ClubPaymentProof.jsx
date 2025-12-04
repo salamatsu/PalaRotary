@@ -351,7 +351,7 @@ export default function ClubPaymentProof() {
                 size="large"
                 block
                 icon={<ArrowLeftOutlined />}
-                onClick={() => navigate("/")}
+                onClick={() => navigate("/", { preventScrollReset: true })}
                 style={{
                   height: "48px",
                   borderRadius: "12px",
