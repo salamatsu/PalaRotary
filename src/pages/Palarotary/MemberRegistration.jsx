@@ -1455,7 +1455,10 @@ export default function MemberRegistration() {
                   name="mobileNumber"
                   rules={[
                     { required: true, message: "Required" },
-                    { pattern: /^[0-9+\-\s()]+$/, message: "Invalid" },
+                    {
+                      pattern: /^[0-9]{10,11}$/,
+                      message: "Enter valid 10-11 digit phone number",
+                    },
                   ]}
                 >
                   <Input
