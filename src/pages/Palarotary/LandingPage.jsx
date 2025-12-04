@@ -1,16 +1,15 @@
 import {
   ArrowRightOutlined,
+  BookOutlined,
   CalendarOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
   EnvironmentOutlined,
   ShopOutlined,
   TeamOutlined,
-  UploadOutlined,
-  BookOutlined,
   TrophyOutlined,
 } from "@ant-design/icons";
-import { Button, Card, Col, Modal, Row, Typography } from "antd";
+import { Button, Card, Modal, Typography } from "antd";
 import { motion, useScroll, useTransform } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";

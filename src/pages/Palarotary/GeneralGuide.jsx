@@ -1,14 +1,14 @@
 import {
-  HomeOutlined,
   BookOutlined,
-  SafetyOutlined,
-  TeamOutlined,
+  CalendarOutlined,
   ClockCircleOutlined,
   EnvironmentOutlined,
+  HomeOutlined,
+  SafetyOutlined,
+  TeamOutlined,
   TrophyOutlined,
-  CalendarOutlined,
 } from "@ant-design/icons";
-import { Button, Card, Typography, Table, Tag } from "antd";
+import { Button, Card, Tag, Typography } from "antd";
 import { motion } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -391,13 +391,22 @@ export default function GeneralGuide() {
               marginBottom: "30px",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                marginBottom: "20px",
+              }}
+            >
               <TeamOutlined style={{ fontSize: "32px", color: "#1c3c6d" }} />
               <Title level={2} style={{ margin: 0, color: "#1c3c6d" }}>
                 ELIGIBILITY & ATTENDANCE
               </Title>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "16px" }}
+            >
               <motion.div
                 whileHover={{ x: 5 }}
                 style={{
@@ -406,12 +415,15 @@ export default function GeneralGuide() {
                   background: "rgba(28, 60, 109, 0.06)",
                 }}
               >
-                <Title level={4} style={{ color: "#1c3c6d", marginBottom: "8px" }}>
+                <Title
+                  level={4}
+                  style={{ color: "#1c3c6d", marginBottom: "8px" }}
+                >
                   Who Can Participate
                 </Title>
                 <Text style={{ fontSize: "16px", lineHeight: "1.6" }}>
-                  Only Rotarians, their spouses, or children from District 3800 are
-                  eligible to participate in all events.
+                  Only Rotarians, their spouses, or children from District 3800
+                  are eligible to participate in all events.
                 </Text>
               </motion.div>
               <motion.div
@@ -422,13 +434,17 @@ export default function GeneralGuide() {
                   background: "rgba(247, 165, 10, 0.06)",
                 }}
               >
-                <Title level={4} style={{ color: "#f7a50a", marginBottom: "8px" }}>
+                <Title
+                  level={4}
+                  style={{ color: "#f7a50a", marginBottom: "8px" }}
+                >
                   Attendance Requirements
                 </Title>
                 <Text style={{ fontSize: "16px", lineHeight: "1.6" }}>
                   Players must arrive 10 minutes before their scheduled match in
-                  proper playing attire. Failure to present the prescribed number of
-                  players 5 minutes before the match results in automatic default.
+                  proper playing attire. Failure to present the prescribed
+                  number of players 5 minutes before the match results in
+                  automatic default.
                 </Text>
               </motion.div>
             </div>
@@ -446,10 +462,7 @@ export default function GeneralGuide() {
               marginBottom: "30px",
             }}
           >
-            <Title
-              level={2}
-              style={{ color: "#d54839", marginBottom: "24px" }}
-            >
+            <Title level={2} style={{ color: "#d54839", marginBottom: "24px" }}>
               ZONE COLORS
             </Title>
             <div
@@ -468,9 +481,7 @@ export default function GeneralGuide() {
                     borderRadius: "12px",
                     border: `2px solid ${zone.hex}`,
                     background:
-                      zone.color === "White"
-                        ? "#f9fafb"
-                        : `${zone.hex}15`,
+                      zone.color === "White" ? "#f9fafb" : `${zone.hex}15`,
                     textAlign: "center",
                   }}
                 >
@@ -483,12 +494,13 @@ export default function GeneralGuide() {
                       margin: "0 auto 12px",
                       boxShadow: `0 4px 12px ${zone.hex}60`,
                       border:
-                        zone.color === "White"
-                          ? "2px solid #e5e7eb"
-                          : "none",
+                        zone.color === "White" ? "2px solid #e5e7eb" : "none",
                     }}
                   />
-                  <Title level={4} style={{ margin: "0 0 4px", fontSize: "16px" }}>
+                  <Title
+                    level={4}
+                    style={{ margin: "0 0 4px", fontSize: "16px" }}
+                  >
                     {zone.zone}
                   </Title>
                   <Text style={{ fontSize: "14px", color: "#6b7280" }}>
@@ -500,9 +512,7 @@ export default function GeneralGuide() {
                       style={{
                         fontWeight: "600",
                         border:
-                          zone.color === "White"
-                            ? "1px solid #e5e7eb"
-                            : "none",
+                          zone.color === "White" ? "1px solid #e5e7eb" : "none",
                         color:
                           zone.color === "White" || zone.color === "Yellow"
                             ? "#1a1a2e"
@@ -529,8 +539,17 @@ export default function GeneralGuide() {
               marginBottom: "30px",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
-              <CalendarOutlined style={{ fontSize: "32px", color: "#1c3c6d" }} />
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                marginBottom: "20px",
+              }}
+            >
+              <CalendarOutlined
+                style={{ fontSize: "32px", color: "#1c3c6d" }}
+              />
               <Title level={2} style={{ margin: 0, color: "#1c3c6d" }}>
                 SCHEDULE OF EVENTS
               </Title>
@@ -620,7 +639,14 @@ export default function GeneralGuide() {
               marginBottom: "30px",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                marginBottom: "24px",
+              }}
+            >
               <TrophyOutlined style={{ fontSize: "32px", color: "#f7a50a" }} />
               <Title level={2} style={{ margin: 0, color: "#f7a50a" }}>
                 SCORING & AWARDS
@@ -637,7 +663,10 @@ export default function GeneralGuide() {
             >
               {/* Individual Events */}
               <div>
-                <Title level={4} style={{ color: "#1c3c6d", marginBottom: "16px" }}>
+                <Title
+                  level={4}
+                  style={{ color: "#1c3c6d", marginBottom: "16px" }}
+                >
                   Individual Events (Best Time)
                 </Title>
                 <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -677,7 +706,12 @@ export default function GeneralGuide() {
                   </thead>
                   <tbody>
                     {scoringIndividual.map((item, i) => (
-                      <tr key={i} style={{ background: i % 2 === 0 ? "#fff9eb" : "white" }}>
+                      <tr
+                        key={i}
+                        style={{
+                          background: i % 2 === 0 ? "#fff9eb" : "white",
+                        }}
+                      >
                         <td style={{ padding: "10px" }}>{item.rank}</td>
                         <td style={{ padding: "10px", textAlign: "center" }}>
                           {item.points}
@@ -693,7 +727,10 @@ export default function GeneralGuide() {
 
               {/* Team Events */}
               <div>
-                <Title level={4} style={{ color: "#1c3c6d", marginBottom: "16px" }}>
+                <Title
+                  level={4}
+                  style={{ color: "#1c3c6d", marginBottom: "16px" }}
+                >
                   Team Events (Elimination)
                 </Title>
                 <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -733,7 +770,12 @@ export default function GeneralGuide() {
                   </thead>
                   <tbody>
                     {scoringTeam.map((item, i) => (
-                      <tr key={i} style={{ background: i % 2 === 0 ? "#f0f2f7" : "white" }}>
+                      <tr
+                        key={i}
+                        style={{
+                          background: i % 2 === 0 ? "#f0f2f7" : "white",
+                        }}
+                      >
                         <td style={{ padding: "10px" }}>{item.rank}</td>
                         <td style={{ padding: "10px", textAlign: "center" }}>
                           {item.points}
@@ -761,7 +803,14 @@ export default function GeneralGuide() {
               marginBottom: "30px",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                marginBottom: "20px",
+              }}
+            >
               <SafetyOutlined style={{ fontSize: "32px", color: "#d54839" }} />
               <Title level={2} style={{ margin: 0, color: "#d54839" }}>
                 CONDUCT & DISCIPLINE
@@ -833,7 +882,11 @@ export default function GeneralGuide() {
           >
             <Title
               level={2}
-              style={{ color: "#1c3c6d", marginBottom: "24px", textAlign: "center" }}
+              style={{
+                color: "#1c3c6d",
+                marginBottom: "24px",
+                textAlign: "center",
+              }}
             >
               OFFICIAL PALAROTARY 2026 EVENTS
             </Title>
@@ -899,7 +952,8 @@ export default function GeneralGuide() {
           }}
         >
           <Paragraph style={{ fontSize: "15px", color: "#6b7280" }}>
-            For questions and inquiries, please contact the organizing committee.
+            For questions and inquiries, please contact the organizing
+            committee.
           </Paragraph>
           <Paragraph
             style={{ fontSize: "13px", color: "#9ca3af", marginTop: "12px" }}

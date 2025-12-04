@@ -1321,7 +1321,9 @@ const ShirtOrdering = () => {
           >
             <Space direction="vertical" size="large" style={{ width: "100%" }}>
               <Text>
-                You have {orders.length} {orders.length === 1 ? "item" : "items"} in your shopping cart. If you leave now, your cart will be lost.
+                You have {orders.length}{" "}
+                {orders.length === 1 ? "item" : "items"} in your shopping cart.
+                If you leave now, your cart will be lost.
               </Text>
               <div
                 style={{
