@@ -6,6 +6,8 @@ import LoadingFallback from "../components/LoadingFallback";
 const PalarotaryLandingPage = lazy(() =>
   import("../pages/Palarotary/LandingPage")
 );
+const GroundRules = lazy(() => import("../pages/Palarotary/GroundRules"));
+const GeneralGuide = lazy(() => import("../pages/Palarotary/GeneralGuide"));
 const ClubRegistration = lazy(() =>
   import("../pages/Palarotary/ClubRegistration")
 );
@@ -35,6 +37,22 @@ const RootRoutes = () => {
       element: (
         <Suspense fallback={<LoadingFallback />}>
           <PalarotaryLandingPage />
+        </Suspense>
+      ),
+    },
+    {
+      path: "/ground-rules",
+      element: (
+        <Suspense fallback={<LoadingFallback />}>
+          <GroundRules />
+        </Suspense>
+      ),
+    },
+    {
+      path: "/general-guide",
+      element: (
+        <Suspense fallback={<LoadingFallback />}>
+          <GeneralGuide />
         </Suspense>
       ),
     },

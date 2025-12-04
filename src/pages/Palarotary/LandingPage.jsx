@@ -4,8 +4,11 @@ import {
   CheckCircleOutlined,
   ClockCircleOutlined,
   EnvironmentOutlined,
+  ShopOutlined,
   TeamOutlined,
   UploadOutlined,
+  BookOutlined,
+  TrophyOutlined,
 } from "@ant-design/icons";
 import { Button, Card, Col, Modal, Row, Typography } from "antd";
 import { motion, useScroll, useTransform } from "framer-motion";
@@ -337,7 +340,7 @@ export default function PalarotaryLandingPage() {
 
       <div
         style={{
-          maxWidth: "1200px",
+          maxWidth: "1500px",
           margin: "0 auto",
           position: "relative",
           zIndex: 1,
@@ -345,366 +348,836 @@ export default function PalarotaryLandingPage() {
         }}
         className="bg-transparent"
       >
-        {/* Registration Cards */}
-        <div ref={cardsRef}>
-          <Row gutter={[32, 32]} style={{ marginBottom: "60px" }}>
-            {/* Member Registration Card */}
-            <Col xs={24} lg={12}>
-              <motion.div
-                className="registration-card h-full"
-                variants={cardVariants}
-                initial="hidden"
-                whileInView="visible"
-                whileHover="hover"
-                viewport={{ once: true }}
-              >
-                <Card
-                  style={{
+        {/* Information Section - Ground Rules & General Guide */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          style={{ marginBottom: "60px" }}
+        >
+          <Title
+            level={2}
+            style={{
+              textAlign: "center",
+              marginBottom: "40px",
+              color: "#1c3c6d",
+              fontSize: "clamp(28px, 4vw, 36px)",
+            }}
+          >
+            Important Information
+          </Title>
+
+          <div className="grid grid-cols-12 gap-6 mb-6">
+            {/* Ground Rules Card */}
+            <motion.div
+              className="col-span-12 lg:col-span-6"
+              variants={cardVariants}
+              initial="hidden"
+              whileInView="visible"
+              whileHover="hover"
+              viewport={{ once: true }}
+            >
+              <Card
+                style={{
+                  height: "100%",
+                  borderRadius: "24px",
+                  boxShadow: "0 10px 40px rgba(28, 60, 109, 0.15)",
+                  border: "2px solid #e1e5ef",
+                  overflow: "hidden",
+                  background:
+                    "linear-gradient(135deg, #ffffff 0%, #f0f2f7 100%)",
+                }}
+                styles={{
+                  body: {
                     height: "100%",
-                    borderRadius: "24px",
-                    boxShadow: "0 10px 40px rgba(247, 165, 10, 0.15)",
-                    border: "2px solid #fff3d6",
-                    overflow: "hidden",
-                    background:
-                      "linear-gradient(135deg, #ffffff 0%, #fff9eb 100%)",
-                  }}
-                  styles={{
-                    body: {
-                      height: "100%",
-                    },
-                  }}
-                >
-                  <div className="p-0 md:p-4 flex h-full flex-col">
-                    <div className=" flex-1">
-                      <motion.div
-                        style={{ textAlign: "center", marginBottom: "24px" }}
-                        whileHover={{ scale: 1.1, rotate: [0, -10, 10, 0] }}
-                        transition={{ duration: 0.5 }}
+                  },
+                }}
+              >
+                <div className="p-0 md:p-4 flex h-full flex-col">
+                  <div className="flex-1">
+                    <motion.div
+                      style={{ textAlign: "center", marginBottom: "24px" }}
+                      whileHover={{ scale: 1.1, rotate: [0, -10, 10, 0] }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <div
+                        style={{
+                          width: "100px",
+                          height: "100px",
+                          borderRadius: "50%",
+                          background:
+                            "linear-gradient(135deg, #1c3c6d 0%, #2a5085 100%)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          margin: "0 auto 20px",
+                          boxShadow: "0 10px 30px rgba(28, 60, 109, 0.3)",
+                        }}
                       >
-                        <div
+                        <TrophyOutlined
+                          style={{ fontSize: "48px", color: "white" }}
+                        />
+                      </div>
+                    </motion.div>
+
+                    <Title
+                      level={2}
+                      style={{
+                        marginBottom: "12px",
+                        textAlign: "center",
+                        fontSize: "28px",
+                      }}
+                    >
+                      Ground Rules
+                    </Title>
+                    <Paragraph
+                      style={{
+                        fontSize: "16px",
+                        color: "#666",
+                        marginBottom: "24px",
+                        textAlign: "center",
+                      }}
+                    >
+                      Official tournament rules and regulations
+                    </Paragraph>
+
+                    <div style={{ marginBottom: "28px" }}>
+                      {[
+                        "9 official sports events + Muse & Fun Games",
+                        "International Sports Federation standards",
+                        "Complete rules for Athletics, Badminton, Basketball",
+                        "Swimming, Volleyball, Pickleball, Mobile Legends",
+                        "Code of conduct and compliance guidelines",
+                      ].map((text, i) => (
+                        <motion.div
+                          key={i}
+                          className="feature-item"
+                          initial={{ opacity: 0, x: -20 }}
+                          whileInView={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.1 }}
+                          viewport={{ once: true }}
                           style={{
-                            width: "100px",
-                            height: "100px",
-                            borderRadius: "50%",
-                            background:
-                              "linear-gradient(135deg, #f7a50a 0%, #c68408 100%)",
                             display: "flex",
                             alignItems: "center",
-                            justifyContent: "center",
-                            margin: "0 auto 20px",
-                            boxShadow: "0 10px 30px rgba(247, 165, 10, 0.3)",
+                            gap: "12px",
+                            marginBottom: "12px",
                           }}
                         >
-                          <TeamOutlined
-                            style={{ fontSize: "48px", color: "white" }}
+                          <CheckCircleOutlined
+                            style={{ fontSize: "18px", color: "#1c3c6d" }}
                           />
-                        </div>
-                      </motion.div>
-
-                      <Title
-                        level={2}
-                        style={{
-                          marginBottom: "12px",
-                          textAlign: "center",
-                          fontSize: "28px",
-                        }}
-                      >
-                        Member Registration
-                      </Title>
-                      <Paragraph
-                        style={{
-                          fontSize: "16px",
-                          color: "#666",
-                          marginBottom: "24px",
-                          textAlign: "center",
-                        }}
-                      >
-                        Join as an individual member
-                      </Paragraph>
-
-                      <motion.div
-                        whileHover={{ scale: 1.03 }}
-                        animate={{
-                          boxShadow: [
-                            "0 4px 15px rgba(247, 165, 10, 0.2)",
-                            "0 8px 25px rgba(247, 165, 10, 0.3)",
-                            "0 4px 15px rgba(247, 165, 10, 0.2)",
-                          ],
-                        }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                        style={{
-                          background:
-                            "linear-gradient(135deg, #fff3d620 0%, #ffe7ad20 100%)",
-                          padding: "20px",
-                          borderRadius: "16px",
-                          marginBottom: "24px",
-                          border: "2px solid #f7a50a40",
-                        }}
-                      >
-                        <Title
-                          level={3}
-                          style={{
-                            margin: 0,
-                            color: "#f7a50a",
-                            fontSize: "32px",
-                          }}
-                        >
-                          FREE
-                        </Title>
-                        <Paragraph
-                          style={{
-                            margin: "8px 0 0 0",
-                            fontSize: "14px",
-                            color: "#6b7280",
-                          }}
-                        >
-                          No registration fee for members
-                        </Paragraph>
-                      </motion.div>
-
-                      <div style={{ marginBottom: "28px" }}>
-                        {[
-                          "Select your registered club",
-                          "Fill in your information",
-                          "Get digital badge instantly",
-                          "QR code sent via email",
-                        ].map((text, i) => (
-                          <motion.div
-                            key={i}
-                            className="feature-item"
-                            initial={{ opacity: 0, x: -20 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            transition={{ delay: i * 0.1 }}
-                            viewport={{ once: true }}
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "12px",
-                              marginBottom: "12px",
-                            }}
-                          >
-                            <CheckCircleOutlined
-                              style={{ fontSize: "18px", color: "#f7a50a" }}
-                            />
-                            <span
-                              style={{ fontSize: "15px", color: "#1a1a2e" }}
-                            >
-                              {text}
-                            </span>
-                          </motion.div>
-                        ))}
-                      </div>
+                          <span style={{ fontSize: "15px", color: "#1a1a2e" }}>
+                            {text}
+                          </span>
+                        </motion.div>
+                      ))}
                     </div>
+                  </div>
 
-                    <motion.div
-                      variants={buttonVariants}
-                      initial="rest"
-                      whileHover="hover"
-                      whileTap="tap"
+                  <motion.div
+                    variants={buttonVariants}
+                    initial="rest"
+                    whileHover="hover"
+                    whileTap="tap"
+                  >
+                    <Button
+                      type="primary"
+                      size="large"
+                      block
+                      icon={<ArrowRightOutlined />}
+                      onClick={() => navigate("/ground-rules")}
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #1c3c6d 0%, #173052 100%)",
+                        border: "none",
+                        height: "56px",
+                        fontSize: "17px",
+                        fontWeight: "600",
+                        borderRadius: "12px",
+                        boxShadow: "0 6px 20px rgba(28, 60, 109, 0.4)",
+                      }}
                     >
-                      <Button
-                        type="primary"
-                        size="large"
-                        block
-                        icon={<ArrowRightOutlined />}
-                        onClick={() => navigate("/register-member")}
+                      View Ground Rules
+                    </Button>
+                  </motion.div>
+                </div>
+              </Card>
+            </motion.div>
+
+            {/* General Guide Card */}
+            <motion.div
+              className="col-span-12 lg:col-span-6"
+              variants={cardVariants}
+              initial="hidden"
+              whileInView="visible"
+              whileHover="hover"
+              viewport={{ once: true }}
+            >
+              <Card
+                style={{
+                  height: "100%",
+                  borderRadius: "24px",
+                  boxShadow: "0 10px 40px rgba(247, 165, 10, 0.15)",
+                  border: "2px solid #fff3d6",
+                  overflow: "hidden",
+                  background:
+                    "linear-gradient(135deg, #ffffff 0%, #fff9eb 100%)",
+                }}
+                styles={{
+                  body: {
+                    height: "100%",
+                  },
+                }}
+              >
+                <div className="p-0 md:p-4 flex h-full flex-col">
+                  <div className="flex-1">
+                    <motion.div
+                      style={{ textAlign: "center", marginBottom: "24px" }}
+                      whileHover={{ scale: 1.1, rotate: [0, -10, 10, 0] }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <div
                         style={{
+                          width: "100px",
+                          height: "100px",
+                          borderRadius: "50%",
                           background:
                             "linear-gradient(135deg, #f7a50a 0%, #c68408 100%)",
-                          border: "none",
-                          height: "56px",
-                          fontSize: "17px",
-                          fontWeight: "600",
-                          borderRadius: "12px",
-                          boxShadow: "0 6px 20px rgba(247, 165, 10, 0.4)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          margin: "0 auto 20px",
+                          boxShadow: "0 10px 30px rgba(247, 165, 10, 0.3)",
                         }}
                       >
-                        Register as Member
-                      </Button>
-                    </motion.div>
-                  </div>
-                </Card>
-              </motion.div>
-            </Col>
-
-            {/* Club Registration Card */}
-            <Col xs={24} lg={12}>
-              <motion.div
-                className="registration-card"
-                variants={cardVariants}
-                initial="hidden"
-                whileInView="visible"
-                whileHover="hover"
-                viewport={{ once: true }}
-              >
-                <Card
-                  style={{
-                    height: "100%",
-                    borderRadius: "24px",
-                    boxShadow: "0 10px 40px rgba(28, 60, 109, 0.15)",
-                    border: "2px solid #e1e5ef",
-                    overflow: "hidden",
-                    background:
-                      "linear-gradient(135deg, #ffffff 0%, #f0f2f7 100%)",
-                  }}
-                  styles={{
-                    body: {
-                      height: "100%",
-                    },
-                  }}
-                >
-                  <div className="p-0 md:p-4 flex h-full flex-col">
-                    <div className=" flex-1">
-                      <motion.div
-                        style={{ textAlign: "center", marginBottom: "24px" }}
-                        whileHover={{ scale: 1.05, y: -5 }}
-                        transition={{ duration: 0.5 }}
-                      >
-                        <img
-                          src={shirtTemplate}
-                          alt="Shirt Template"
-                          onClick={() => setPreviewVisible(true)}
-                          style={{
-                            width: "100%",
-                            maxWidth: "280px",
-                            height: "auto",
-                            margin: "0 auto 20px",
-                            borderRadius: "12px",
-                            boxShadow: "0 10px 30px rgba(28, 60, 109, 0.2)",
-                            cursor: "pointer",
-                          }}
+                        <BookOutlined
+                          style={{ fontSize: "48px", color: "white" }}
                         />
-                      </motion.div>
+                      </div>
+                    </motion.div>
 
-                      <Title
-                        level={2}
+                    <Title
+                      level={2}
+                      style={{
+                        marginBottom: "12px",
+                        textAlign: "center",
+                        fontSize: "28px",
+                      }}
+                    >
+                      General Guide
+                    </Title>
+                    <Paragraph
+                      style={{
+                        fontSize: "16px",
+                        color: "#666",
+                        marginBottom: "24px",
+                        textAlign: "center",
+                      }}
+                    >
+                      Complete technical guidelines and regulations
+                    </Paragraph>
+
+                    <div style={{ marginBottom: "28px" }}>
+                      {[
+                        "Eligibility requirements and attendance rules",
+                        "Zone colors and uniform guidelines",
+                        "Complete event schedule (6 AM - 5 PM)",
+                        "Scoring system and awards structure",
+                        "Code of conduct and health & safety protocols",
+                      ].map((text, i) => (
+                        <motion.div
+                          key={i}
+                          className="feature-item"
+                          initial={{ opacity: 0, x: -20 }}
+                          whileInView={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.1 }}
+                          viewport={{ once: true }}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "12px",
+                            marginBottom: "12px",
+                          }}
+                        >
+                          <CheckCircleOutlined
+                            style={{ fontSize: "18px", color: "#f7a50a" }}
+                          />
+                          <span style={{ fontSize: "15px", color: "#1a1a2e" }}>
+                            {text}
+                          </span>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <motion.div
+                    variants={buttonVariants}
+                    initial="rest"
+                    whileHover="hover"
+                    whileTap="tap"
+                  >
+                    <Button
+                      type="primary"
+                      size="large"
+                      block
+                      icon={<ArrowRightOutlined />}
+                      onClick={() => navigate("/general-guide")}
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #f7a50a 0%, #c68408 100%)",
+                        border: "none",
+                        height: "56px",
+                        fontSize: "17px",
+                        fontWeight: "600",
+                        borderRadius: "12px",
+                        boxShadow: "0 6px 20px rgba(247, 165, 10, 0.4)",
+                      }}
+                    >
+                      View General Guide
+                    </Button>
+                  </motion.div>
+                </div>
+              </Card>
+            </motion.div>
+          </div>
+        </motion.div>
+
+        {/* Registration Cards */}
+        <div ref={cardsRef}>
+          <Title
+            level={2}
+            style={{
+              textAlign: "center",
+              marginBottom: "40px",
+              color: "#1c3c6d",
+              fontSize: "clamp(28px, 4vw, 36px)",
+            }}
+          >
+            Registration & Orders
+          </Title>
+          <div className=" grid grid-cols-12 gap-6 mb-6">
+            <motion.div
+              className="registration-card h-full col-span-12 lg:col-span-4"
+              variants={cardVariants}
+              initial="hidden"
+              whileInView="visible"
+              whileHover="hover"
+              viewport={{ once: true }}
+            >
+              <Card
+                style={{
+                  height: "100%",
+                  borderRadius: "24px",
+                  boxShadow: "0 10px 40px rgba(213, 72, 57, 0.15)",
+                  border: "2px solid #fde5e3",
+                  overflow: "hidden",
+                  background:
+                    "linear-gradient(135deg, #ffffff 0%, #fef5f4 100%)",
+                }}
+                styles={{
+                  body: {
+                    height: "100%",
+                  },
+                }}
+              >
+                <div className="p-0 md:p-4 flex h-full flex-col">
+                  <div className=" flex-1">
+                    <motion.div
+                      style={{ textAlign: "center", marginBottom: "24px" }}
+                      whileHover={{ scale: 1.1, rotate: [0, -10, 10, 0] }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <div
                         style={{
-                          marginBottom: "12px",
-                          textAlign: "center",
-                          fontSize: "28px",
+                          width: "100px",
+                          height: "100px",
+                          borderRadius: "50%",
+                          background:
+                            "linear-gradient(135deg, #d54839 0%, #a83a2d 100%)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          margin: "0 auto 20px",
+                          boxShadow: "0 10px 30px rgba(213, 72, 57, 0.3)",
                         }}
                       >
-                        Order Customized Shirt
+                        <ShopOutlined
+                          style={{ fontSize: "48px", color: "white" }}
+                        />
+                      </div>
+                    </motion.div>
+
+                    <Title
+                      level={2}
+                      style={{
+                        marginBottom: "12px",
+                        textAlign: "center",
+                        fontSize: "28px",
+                      }}
+                    >
+                      Club Registration
+                    </Title>
+                    <Paragraph
+                      style={{
+                        fontSize: "16px",
+                        color: "#666",
+                        marginBottom: "24px",
+                        textAlign: "center",
+                      }}
+                    >
+                      Register your club for PALAROTARY 2026
+                    </Paragraph>
+
+                    <motion.div
+                      whileHover={{ scale: 1.03 }}
+                      animate={{
+                        boxShadow: [
+                          "0 4px 15px rgba(213, 72, 57, 0.2)",
+                          "0 8px 25px rgba(213, 72, 57, 0.3)",
+                          "0 4px 15px rgba(213, 72, 57, 0.2)",
+                        ],
+                      }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #fde5e320 0%, #fbcbc720 100%)",
+                        padding: "20px",
+                        borderRadius: "16px",
+                        marginBottom: "24px",
+                        border: "2px solid #d5483940",
+                      }}
+                    >
+                      <Title
+                        level={3}
+                        style={{
+                          margin: 0,
+                          color: "#d54839",
+                          fontSize: "32px",
+                        }}
+                      >
+                        ₱4,000
                       </Title>
                       <Paragraph
                         style={{
-                          fontSize: "16px",
+                          margin: "8px 0 0 0",
+                          fontSize: "14px",
                           color: "#6b7280",
-                          marginBottom: "24px",
-                          textAlign: "center",
                         }}
                       >
-                        Get your personalized PALAROTARY 2026 shirt
+                        Per club registration fee
                       </Paragraph>
-
-                      <motion.div
-                        whileHover={{ scale: 1.03 }}
-                        animate={{
-                          boxShadow: [
-                            "0 4px 15px rgba(213, 72, 57, 0.2)",
-                            "0 8px 25px rgba(213, 72, 57, 0.3)",
-                            "0 4px 15px rgba(213, 72, 57, 0.2)",
-                          ],
-                        }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                        style={{
-                          background:
-                            "linear-gradient(135deg, #fde5e320 0%, #fbcbc720 100%)",
-                          padding: "20px",
-                          borderRadius: "16px",
-                          marginBottom: "24px",
-                          border: "2px solid #d5483940",
-                        }}
-                      >
-                        <Title
-                          level={3}
-                          style={{
-                            margin: 0,
-                            color: "#d54839",
-                            fontSize: "32px",
-                          }}
-                        >
-                          ₱300
-                        </Title>
-                        <Paragraph
-                          style={{
-                            margin: "8px 0 0 0",
-                            fontSize: "14px",
-                            color: "#6b7280",
-                          }}
-                        >
-                          All sizes - with custom name and number (00-99)
-                        </Paragraph>
-                      </motion.div>
-
-                      <div style={{ marginBottom: "28px" }}>
-                        {[
-                          "Customize your shirt",
-                          "Choose your size",
-                          "Add your name and 2-digit number (00-99)",
-                          "Secure online payment",
-                        ].map((text, i) => (
-                          <motion.div
-                            key={i}
-                            className="feature-item"
-                            initial={{ opacity: 0, x: -20 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            transition={{ delay: i * 0.1 }}
-                            viewport={{ once: true }}
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "12px",
-                              marginBottom: "12px",
-                            }}
-                          >
-                            <CheckCircleOutlined
-                              style={{ fontSize: "18px", color: "#d54839" }}
-                            />
-                            <span
-                              style={{ fontSize: "15px", color: "#1a1a2e" }}
-                            >
-                              {text}
-                            </span>
-                          </motion.div>
-                        ))}
-                      </div>
-                    </div>
-                    <motion.div
-                      variants={buttonVariants}
-                      initial="rest"
-                      whileHover="hover"
-                      whileTap="tap"
-                    >
-                      <Button
-                        type="primary"
-                        size="large"
-                        block
-                        icon={<ArrowRightOutlined />}
-                        onClick={() => navigate("/order-shirt")}
-                        style={{
-                          background:
-                            "linear-gradient(135deg, #1c3c6d 0%, #173052 100%)",
-                          border: "none",
-                          height: "56px",
-                          fontSize: "17px",
-                          fontWeight: "600",
-                          borderRadius: "12px",
-                          boxShadow: "0 6px 20px rgba(28, 60, 109, 0.4)",
-                        }}
-                      >
-                        Order Now
-                      </Button>
                     </motion.div>
+
+                    <div style={{ marginBottom: "28px" }}>
+                      {[
+                        "Select your zone and club",
+                        "Upload proof of payment",
+                        "GCash or Bank transfer accepted",
+                        "Verification and confirmation",
+                      ].map((text, i) => (
+                        <motion.div
+                          key={i}
+                          className="feature-item"
+                          initial={{ opacity: 0, x: -20 }}
+                          whileInView={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.1 }}
+                          viewport={{ once: true }}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "12px",
+                            marginBottom: "12px",
+                          }}
+                        >
+                          <CheckCircleOutlined
+                            style={{ fontSize: "18px", color: "#d54839" }}
+                          />
+                          <span style={{ fontSize: "15px", color: "#1a1a2e" }}>
+                            {text}
+                          </span>
+                        </motion.div>
+                      ))}
+                    </div>
                   </div>
-                </Card>
-              </motion.div>
-            </Col>
-          </Row>
+
+                  <motion.div
+                    variants={buttonVariants}
+                    initial="rest"
+                    whileHover="hover"
+                    whileTap="tap"
+                  >
+                    <Button
+                      type="primary"
+                      size="large"
+                      block
+                      icon={<ArrowRightOutlined />}
+                      onClick={() => navigate("/club-payment-proof")}
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #d54839 0%, #a83a2d 100%)",
+                        border: "none",
+                        height: "56px",
+                        fontSize: "17px",
+                        fontWeight: "600",
+                        borderRadius: "12px",
+                        boxShadow: "0 6px 20px rgba(213, 72, 57, 0.4)",
+                      }}
+                    >
+                      Register Club
+                    </Button>
+                  </motion.div>
+                </div>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              className="registration-card h-full col-span-12 md:col-span-6 lg:col-span-4"
+              variants={cardVariants}
+              initial="hidden"
+              whileInView="visible"
+              whileHover="hover"
+              viewport={{ once: true }}
+            >
+              <Card
+                style={{
+                  height: "100%",
+                  borderRadius: "24px",
+                  boxShadow: "0 10px 40px rgba(247, 165, 10, 0.15)",
+                  border: "2px solid #fff3d6",
+                  overflow: "hidden",
+                  background:
+                    "linear-gradient(135deg, #ffffff 0%, #fff9eb 100%)",
+                }}
+                styles={{
+                  body: {
+                    height: "100%",
+                  },
+                }}
+              >
+                <div className="p-0 md:p-4 flex h-full flex-col">
+                  <div className=" flex-1">
+                    <motion.div
+                      style={{ textAlign: "center", marginBottom: "24px" }}
+                      whileHover={{ scale: 1.1, rotate: [0, -10, 10, 0] }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <div
+                        style={{
+                          width: "100px",
+                          height: "100px",
+                          borderRadius: "50%",
+                          background:
+                            "linear-gradient(135deg, #f7a50a 0%, #c68408 100%)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          margin: "0 auto 20px",
+                          boxShadow: "0 10px 30px rgba(247, 165, 10, 0.3)",
+                        }}
+                      >
+                        <TeamOutlined
+                          style={{ fontSize: "48px", color: "white" }}
+                        />
+                      </div>
+                    </motion.div>
+
+                    <Title
+                      level={2}
+                      style={{
+                        marginBottom: "12px",
+                        textAlign: "center",
+                        fontSize: "28px",
+                      }}
+                    >
+                      Member Registration
+                    </Title>
+                    <Paragraph
+                      style={{
+                        fontSize: "16px",
+                        color: "#666",
+                        marginBottom: "24px",
+                        textAlign: "center",
+                      }}
+                    >
+                      Join as an individual member
+                    </Paragraph>
+
+                    <motion.div
+                      whileHover={{ scale: 1.03 }}
+                      animate={{
+                        boxShadow: [
+                          "0 4px 15px rgba(247, 165, 10, 0.2)",
+                          "0 8px 25px rgba(247, 165, 10, 0.3)",
+                          "0 4px 15px rgba(247, 165, 10, 0.2)",
+                        ],
+                      }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #fff3d620 0%, #ffe7ad20 100%)",
+                        padding: "20px",
+                        borderRadius: "16px",
+                        marginBottom: "24px",
+                        border: "2px solid #f7a50a40",
+                      }}
+                    >
+                      <Title
+                        level={3}
+                        style={{
+                          margin: 0,
+                          color: "#f7a50a",
+                          fontSize: "32px",
+                        }}
+                      >
+                        FREE
+                      </Title>
+                      <Paragraph
+                        style={{
+                          margin: "8px 0 0 0",
+                          fontSize: "14px",
+                          color: "#6b7280",
+                        }}
+                      >
+                        No registration fee for members
+                      </Paragraph>
+                    </motion.div>
+
+                    <div style={{ marginBottom: "28px" }}>
+                      {[
+                        "Select your registered club",
+                        "Fill in your information",
+                        "Get digital badge instantly",
+                        "QR code sent via email",
+                      ].map((text, i) => (
+                        <motion.div
+                          key={i}
+                          className="feature-item"
+                          initial={{ opacity: 0, x: -20 }}
+                          whileInView={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.1 }}
+                          viewport={{ once: true }}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "12px",
+                            marginBottom: "12px",
+                          }}
+                        >
+                          <CheckCircleOutlined
+                            style={{ fontSize: "18px", color: "#f7a50a" }}
+                          />
+                          <span style={{ fontSize: "15px", color: "#1a1a2e" }}>
+                            {text}
+                          </span>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <motion.div
+                    variants={buttonVariants}
+                    initial="rest"
+                    whileHover="hover"
+                    whileTap="tap"
+                  >
+                    <Button
+                      type="primary"
+                      size="large"
+                      block
+                      icon={<ArrowRightOutlined />}
+                      onClick={() => navigate("/register-member")}
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #f7a50a 0%, #c68408 100%)",
+                        border: "none",
+                        height: "56px",
+                        fontSize: "17px",
+                        fontWeight: "600",
+                        borderRadius: "12px",
+                        boxShadow: "0 6px 20px rgba(247, 165, 10, 0.4)",
+                      }}
+                    >
+                      Register as Member
+                    </Button>
+                  </motion.div>
+                </div>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              className="registration-card col-span-12 md:col-span-6 lg:col-span-4"
+              variants={cardVariants}
+              initial="hidden"
+              whileInView="visible"
+              whileHover="hover"
+              viewport={{ once: true }}
+            >
+              <Card
+                style={{
+                  height: "100%",
+                  borderRadius: "24px",
+                  boxShadow: "0 10px 40px rgba(28, 60, 109, 0.15)",
+                  border: "2px solid #e1e5ef",
+                  overflow: "hidden",
+                  background:
+                    "linear-gradient(135deg, #ffffff 0%, #f0f2f7 100%)",
+                }}
+                styles={{
+                  body: {
+                    height: "100%",
+                  },
+                }}
+              >
+                <div className="p-0 md:p-4 flex h-full flex-col">
+                  <div className=" flex-1">
+                    <motion.div
+                      style={{ textAlign: "center", marginBottom: "24px" }}
+                      whileHover={{ scale: 1.05, y: -5 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <img
+                        src={shirtTemplate}
+                        alt="Shirt Template"
+                        onClick={() => setPreviewVisible(true)}
+                        style={{
+                          width: "100%",
+                          maxWidth: "280px",
+                          height: "auto",
+                          margin: "0 auto 20px",
+                          borderRadius: "12px",
+                          boxShadow: "0 10px 30px rgba(28, 60, 109, 0.2)",
+                          cursor: "pointer",
+                        }}
+                      />
+                    </motion.div>
+
+                    <Title
+                      level={2}
+                      style={{
+                        marginBottom: "12px",
+                        textAlign: "center",
+                        fontSize: "28px",
+                      }}
+                    >
+                      Order Customized Shirt
+                    </Title>
+                    <Paragraph
+                      style={{
+                        fontSize: "16px",
+                        color: "#6b7280",
+                        marginBottom: "24px",
+                        textAlign: "center",
+                      }}
+                    >
+                      Get your personalized PALAROTARY 2026 shirt
+                    </Paragraph>
+
+                    <motion.div
+                      whileHover={{ scale: 1.03 }}
+                      animate={{
+                        boxShadow: [
+                          "0 4px 15px rgba(213, 72, 57, 0.2)",
+                          "0 8px 25px rgba(213, 72, 57, 0.3)",
+                          "0 4px 15px rgba(213, 72, 57, 0.2)",
+                        ],
+                      }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #fde5e320 0%, #fbcbc720 100%)",
+                        padding: "20px",
+                        borderRadius: "16px",
+                        marginBottom: "24px",
+                        border: "2px solid #d5483940",
+                      }}
+                    >
+                      <Title
+                        level={3}
+                        style={{
+                          margin: 0,
+                          color: "#d54839",
+                          fontSize: "32px",
+                        }}
+                      >
+                        ₱300
+                      </Title>
+                      <Paragraph
+                        style={{
+                          margin: "8px 0 0 0",
+                          fontSize: "14px",
+                          color: "#6b7280",
+                        }}
+                      >
+                        All sizes - with custom name and number (00-99)
+                      </Paragraph>
+                    </motion.div>
+
+                    <div style={{ marginBottom: "28px" }}>
+                      {[
+                        "Customize your shirt",
+                        "Choose your size",
+                        "Add your name and 2-digit number (00-99)",
+                        "Secure online payment",
+                      ].map((text, i) => (
+                        <motion.div
+                          key={i}
+                          className="feature-item"
+                          initial={{ opacity: 0, x: -20 }}
+                          whileInView={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.1 }}
+                          viewport={{ once: true }}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "12px",
+                            marginBottom: "12px",
+                          }}
+                        >
+                          <CheckCircleOutlined
+                            style={{ fontSize: "18px", color: "#d54839" }}
+                          />
+                          <span style={{ fontSize: "15px", color: "#1a1a2e" }}>
+                            {text}
+                          </span>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                  <motion.div
+                    variants={buttonVariants}
+                    initial="rest"
+                    whileHover="hover"
+                    whileTap="tap"
+                  >
+                    <Button
+                      type="primary"
+                      size="large"
+                      block
+                      icon={<ArrowRightOutlined />}
+                      onClick={() => navigate("/shirt-order")}
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #1c3c6d 0%, #173052 100%)",
+                        border: "none",
+                        height: "56px",
+                        fontSize: "17px",
+                        fontWeight: "600",
+                        borderRadius: "12px",
+                        boxShadow: "0 6px 20px rgba(28, 60, 109, 0.4)",
+                      }}
+                    >
+                      Order Now
+                    </Button>
+                  </motion.div>
+                </div>
+              </Card>
+            </motion.div>
+          </div>
         </div>
 
         {/* Club Payment Proof Upload Section */}
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -796,7 +1269,7 @@ export default function PalarotaryLandingPage() {
               </motion.div>
             </div>
           </Card>
-        </motion.div>
+        </motion.div> */}
 
         {/* Footer */}
         <motion.div

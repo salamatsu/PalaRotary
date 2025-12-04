@@ -57,7 +57,7 @@ export default function MemberRegistration() {
 
   const registerMember = useRegisterMember();
   const { data: clubsData, isLoading: loadingClubs } = useApprovedClubs();
-
+  console.log(registerMember.data);
   const clubs = clubsData?.data || [];
 
   // Extract unique zones from clubs
@@ -700,7 +700,13 @@ export default function MemberRegistration() {
                           type="primary"
                           size="large"
                           block
-                          onClick={() => navigate("/order-shirt")}
+                          onClick={() =>
+                            navigate("/order-shirt", {
+                              state: {
+                                memberData: registerMember.data?.data,
+                              },
+                            })
+                          }
                           style={{
                             background:
                               "linear-gradient(135deg, #d54839 0%, #c13829 100%)",
@@ -965,7 +971,7 @@ export default function MemberRegistration() {
                   size="large"
                   style={{ borderRadius: "12px" }}
                   options={[
-                    { value: "Rotary", label: "Rotary" },
+                    { value: "Rotarian", label: "Rotarian" },
                     { value: "Spouse / Partner", label: "Spouse / Partner" },
                     { value: "Child", label: "Child" },
                     {

@@ -28,7 +28,7 @@ import {
 } from "antd";
 import { gsap } from "gsap";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router";
+import { data, useLocation, useNavigate } from "react-router";
 import { draw } from "../../hooks/useCanvas";
 import {
   ADULT_SHIRT_SIZES,
@@ -71,6 +71,7 @@ const ShirtOrdering = () => {
   const [invoiceUrl, setInvoiceUrl] = useState(null);
   const [isOpenLink, setIsOpenLink] = useState(false);
   const [selectedZone, setSelectedZone] = useState(null);
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
 
   const { mutate: submitOrder, isPending: submitting } = useSubmitShirtOrder();
   const { data: clubsData, isLoading: loadingClubs } = useApprovedClubs();
@@ -128,8 +129,8 @@ const ShirtOrdering = () => {
     const data = location.state?.memberData;
 
     if (!data) {
-      // message.warning("Please validate your badge first");
-      // navigate("/shirt-order");
+      message.warning("Please validate your badge first");
+      navigate("/shirt-order");
 
       return;
     }
@@ -156,7 +157,7 @@ const ShirtOrdering = () => {
 
     if (data?.zone) {
       setSelectedZone(data.zone);
-      form.setFieldValue("zone", data.zone);
+      // form.setFieldValue("zone", data.zone);
     }
 
     const generateInitialPreview = async () => {
@@ -179,6 +180,23 @@ const ShirtOrdering = () => {
 
     generateInitialPreview();
   }, [location, navigate, form]);
+
+  // Warn user before leaving page if cart has items
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (orders.length > 0) {
+        e.preventDefault();
+        e.returnValue = "";
+        return "";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [orders.length]);
 
   const generatePreview = async (orderData, zoneOverride = null) => {
     const zone = zoneOverride || orderData.zone || selectedZone;
@@ -279,6 +297,16 @@ const ShirtOrdering = () => {
         { scale: 1, duration: 0.3, ease: "back.out(2)" }
       );
 
+      form.resetFields();
+      form.setFieldValue("email", email);
+      form.setFieldValue("mobileNumber", mobileNumber);
+      // form.setFieldValue("zone", selectedZone);
+
+      const defaultPreview = await generatePreview({
+        name: "SHIRT NAME",
+        zone: selectedZone,
+        number: "00",
+      });
       // Reset form
       setCurrentOrder({
         id: Date.now(),
@@ -287,13 +315,8 @@ const ShirtOrdering = () => {
         sizeCategory: "adult",
         shirtNumber: "",
         price: 0,
-        preview: null,
+        preview: defaultPreview,
       });
-
-      form.resetFields();
-      form.setFieldValue("email", email);
-      form.setFieldValue("mobileNumber", mobileNumber);
-      form.setFieldValue("zone", selectedZone);
 
       // Scroll to cart with smooth animation
       if (cartRef.current) {
@@ -399,7 +422,7 @@ const ShirtOrdering = () => {
     const orderData = {
       qrCode: memberData?.qrCode,
       email: email,
-      zone: selectedZone,
+      zone: memberData?.zone,
       mobileNumber: mobileNumber,
       shirtConfig: orders.map((order) => ({
         name: order.name,
@@ -471,6 +494,19 @@ const ShirtOrdering = () => {
     setIsOpenLink(value);
   }, []);
 
+  const handleBackToHome = () => {
+    if (orders.length > 0) {
+      setShowLeaveConfirm(true);
+    } else {
+      navigate("/");
+    }
+  };
+
+  const confirmLeave = () => {
+    setShowLeaveConfirm(false);
+    navigate("/");
+  };
+
   return (
     <>
       <div
@@ -495,7 +531,7 @@ const ShirtOrdering = () => {
               type="default"
               size="large"
               icon={<HomeOutlined />}
-              onClick={() => navigate("/")}
+              onClick={handleBackToHome}
               style={{
                 position: "absolute",
                 left: "0",
@@ -647,7 +683,7 @@ const ShirtOrdering = () => {
                     </div>
 
                     {/* Zone Selection */}
-                    <Form.Item
+                    {/* <Form.Item
                       label={<Text strong>Zone</Text>}
                       name="zone"
                       rules={[
@@ -677,7 +713,7 @@ const ShirtOrdering = () => {
                           label: zone,
                         }))}
                       />
-                    </Form.Item>
+                    </Form.Item> */}
 
                     {/* Name Input */}
                     <Form.Item
@@ -1273,6 +1309,33 @@ const ShirtOrdering = () => {
             </Space>
           </Modal>
 
+          {/* Leave Page Confirmation Modal */}
+          <Modal
+            title="Leave Page?"
+            open={showLeaveConfirm}
+            onOk={confirmLeave}
+            onCancel={() => setShowLeaveConfirm(false)}
+            okText="Yes, Leave"
+            cancelText="Stay"
+            okButtonProps={{ danger: true }}
+          >
+            <Space direction="vertical" size="large" style={{ width: "100%" }}>
+              <Text>
+                You have {orders.length} {orders.length === 1 ? "item" : "items"} in your shopping cart. If you leave now, your cart will be lost.
+              </Text>
+              <div
+                style={{
+                  background: "#fff7e6",
+                  padding: "12px",
+                  borderRadius: "8px",
+                  border: "1px solid #ffd591",
+                }}
+              >
+                <Text strong>Are you sure you want to leave?</Text>
+              </div>
+            </Space>
+          </Modal>
+
           {/* Checkout Confirmation Modal */}
           <Modal
             title={
@@ -1322,7 +1385,7 @@ const ShirtOrdering = () => {
                     </div>
                     <div>
                       <Text type="secondary">Zone: </Text>
-                      <Tag color="blue">{selectedZone}</Tag>
+                      <Tag color="blue">{data.zone}</Tag>
                     </div>
                   </Space>
                 </div>
