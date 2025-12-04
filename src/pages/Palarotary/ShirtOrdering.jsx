@@ -1387,7 +1387,7 @@ const ShirtOrdering = () => {
                     </div>
                     <div>
                       <Text type="secondary">Zone: </Text>
-                      <Tag color="blue">{data.zone}</Tag>
+                      <Tag color="blue">{memberData?.zone}</Tag>
                     </div>
                   </Space>
                 </div>
