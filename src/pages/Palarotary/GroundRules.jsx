@@ -366,7 +366,9 @@ export default function GroundRules() {
                     boxShadow: "0 10px 30px rgba(247, 165, 10, 0.4)",
                   }}
                 >
-                  <TrophyOutlined style={{ fontSize: "50px", color: "white" }} />
+                  <TrophyOutlined
+                    style={{ fontSize: "50px", color: "white" }}
+                  />
                 </div>
               </motion.div>
 
@@ -416,7 +418,9 @@ export default function GroundRules() {
             >
               GENERAL GUIDELINES
             </Title>
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+            >
               {generalRules.map((rule, i) => (
                 <motion.div
                   key={i}
@@ -474,110 +478,112 @@ export default function GroundRules() {
           </Title>
 
           <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-              gap: "24px",
-            }}
+            // style={{
+            //   display: "grid",
+            //   gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+            //   gap: "24px",
+            // }}
+            className=" grid grid-cols-12 gap-6"
           >
             {sports.map((sport, index) => (
-              <motion.div
-                key={index}
-                ref={(el) => (sectionsRef.current[index + 1] = el)}
-                whileHover={{ y: -8, scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
-                <Card
-                  style={{
-                    borderRadius: "20px",
-                    boxShadow: `0 8px 30px ${sport.color}20`,
-                    border: `2px solid ${sport.color}30`,
-                    background: "white",
-                    height: "100%",
-                  }}
+              <div key={index} className=" col-span-4">
+                <motion.div
+                  ref={(el) => (sectionsRef.current[index + 1] = el)}
+                  whileHover={{ y: -8, scale: 1.02 }}
+                  transition={{ type: "spring", stiffness: 300 }}
                 >
-                  <div
+                  <Card
                     style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "12px",
-                      marginBottom: "20px",
+                      borderRadius: "20px",
+                      boxShadow: `0 8px 30px ${sport.color}20`,
+                      border: `2px solid ${sport.color}30`,
+                      background: "white",
+                      height: "100%",
                     }}
                   >
-                    <motion.div
-                      whileHover={{ rotate: 360, scale: 1.2 }}
-                      transition={{ duration: 0.6 }}
+                    <div
                       style={{
-                        width: "60px",
-                        height: "60px",
-                        borderRadius: "50%",
-                        background: `linear-gradient(135deg, ${sport.color} 0%, ${sport.color}dd 100%)`,
                         display: "flex",
                         alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "32px",
-                        boxShadow: `0 6px 20px ${sport.color}40`,
+                        gap: "12px",
+                        marginBottom: "20px",
                       }}
                     >
-                      {sport.emoji}
-                    </motion.div>
-                    <Title
-                      level={3}
-                      style={{
-                        margin: 0,
-                        color: sport.color,
-                        fontSize: "clamp(18px, 3vw, 24px)",
-                      }}
-                    >
-                      {sport.title}
-                    </Title>
-                  </div>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "10px",
-                    }}
-                  >
-                    {sport.events.map((event, i) => (
                       <motion.div
-                        key={i}
-                        className="rule-item"
-                        whileHover={{ x: 5 }}
+                        whileHover={{ rotate: 360, scale: 1.2 }}
+                        transition={{ duration: 0.6 }}
                         style={{
+                          width: "60px",
+                          height: "60px",
+                          borderRadius: "50%",
+                          background: `linear-gradient(135deg, ${sport.color} 0%, ${sport.color}dd 100%)`,
                           display: "flex",
-                          alignItems: "flex-start",
-                          gap: "10px",
-                          padding: "10px",
-                          borderRadius: "10px",
-                          background: `${sport.color}08`,
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: "32px",
+                          boxShadow: `0 6px 20px ${sport.color}40`,
                         }}
                       >
-                        <div
+                        {sport.emoji}
+                      </motion.div>
+                      <Title
+                        level={3}
+                        style={{
+                          margin: 0,
+                          color: sport.color,
+                          fontSize: "clamp(18px, 3vw, 24px)",
+                        }}
+                      >
+                        {sport.title}
+                      </Title>
+                    </div>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "10px",
+                      }}
+                    >
+                      {sport.events.map((event, i) => (
+                        <motion.div
+                          key={i}
+                          className="rule-item"
+                          whileHover={{ x: 5 }}
                           style={{
-                            width: "6px",
-                            height: "6px",
-                            borderRadius: "50%",
-                            background: sport.color,
-                            marginTop: "8px",
-                            flexShrink: 0,
-                          }}
-                        />
-                        <Text
-                          style={{
-                            fontSize: "15px",
-                            color: "#1a1a2e",
-                            lineHeight: "1.6",
+                            display: "flex",
+                            alignItems: "flex-start",
+                            gap: "10px",
+                            padding: "10px",
+                            borderRadius: "10px",
+                            background: `${sport.color}08`,
                           }}
                         >
-                          {event}
-                        </Text>
-                      </motion.div>
-                    ))}
-                  </div>
-                </Card>
-              </motion.div>
+                          <div
+                            style={{
+                              width: "6px",
+                              height: "6px",
+                              borderRadius: "50%",
+                              background: sport.color,
+                              marginTop: "8px",
+                              flexShrink: 0,
+                            }}
+                          />
+                          <Text
+                            style={{
+                              fontSize: "15px",
+                              color: "#1a1a2e",
+                              lineHeight: "1.6",
+                            }}
+                          >
+                            {event}
+                          </Text>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </Card>
+                </motion.div>
+              </div>
             ))}
           </div>
         </div>
@@ -602,7 +608,9 @@ export default function GroundRules() {
             >
               CONDUCT & COMPLIANCE
             </Title>
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+            >
               {[
                 "Strict compliance with default rules; 5-minute grace period",
                 "Players and coaches must avoid misconduct: damage to equipment, foul language, disrespecting officials",
@@ -660,9 +668,12 @@ export default function GroundRules() {
           }}
         >
           <Paragraph style={{ fontSize: "15px", color: "#6b7280" }}>
-            For questions about the rules, please contact the Tournament Committee.
+            For questions about the rules, please contact the Tournament
+            Committee.
           </Paragraph>
-          <Paragraph style={{ fontSize: "13px", color: "#9ca3af", marginTop: "12px" }}>
+          <Paragraph
+            style={{ fontSize: "13px", color: "#9ca3af", marginTop: "12px" }}
+          >
             © 2026 PALAROTARY. All rights reserved.
           </Paragraph>
         </motion.div>
