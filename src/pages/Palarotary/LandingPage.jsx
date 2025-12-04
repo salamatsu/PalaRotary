@@ -16,7 +16,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { cloud, shirtTemplate } from "../../assets/images/Other";
-import { logo2, logoBanner } from "../../assets/images/logos";
+import { logo2, logoBanner, playersImg, yearImg } from "../../assets/images/logos";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -230,6 +230,7 @@ export default function PalarotaryLandingPage() {
 
       <div className=" my-0 mx-auto relative px-0 py-20 ">
         <img src={cloud} className=" absolute z-0 w-full bottom-0 top-0 l-0 " />
+        <img src={playersImg} className=" absolute z-0 w-full bottom-0 top-0 l-0 opacity-50 " />
         {/* Hero Section */}
         <motion.div
           ref={heroRef}
@@ -251,6 +252,7 @@ export default function PalarotaryLandingPage() {
               animate={{ opacity: 1, y: 0 }}
             >
               <center>
+                <img src={logoBanner} className=" w-full max-w-[500px]" />
                 <img src={logo2} className=" w-full max-w-[1000px]" />
               </center>
             </motion.div>
@@ -262,7 +264,7 @@ export default function PalarotaryLandingPage() {
               transition={{ delay: 0.3 }}
             >
               <center>
-                <img src={logoBanner} className=" w-full max-w-[500px]" />
+                <img src={yearImg} className=" w-full max-w-[500px]" />
               </center>
             </motion.div>
 
