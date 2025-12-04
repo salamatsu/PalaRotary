@@ -5,17 +5,31 @@ import {
   QrcodeOutlined,
   UserAddOutlined,
 } from "@ant-design/icons";
-import { App, Button, Card, Form, Input, Select } from "antd";
+import {
+  App,
+  Button,
+  Card,
+  Col,
+  Form,
+  Input,
+  Row,
+  Select,
+  Typography,
+  Alert,
+} from "antd";
 import { motion } from "framer-motion";
 import gsap from "gsap";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { logo2, logoBanner } from "../../assets/images/logos";
+import { shirtTemplate } from "../../assets/images/Other";
 import {
   useApprovedClubs,
   useRegisterMember,
 } from "../../services/requests/usePalarotary";
 import { imageToBase64 } from "../../utils/tobase64";
+
+const { Paragraph } = Typography;
 // {
 //     "attendeeId": "KUZW80G76FL4HGW7",
 //     "qrCode": "P20251MIFRH18N1126",
@@ -49,7 +63,9 @@ export default function MemberRegistration() {
   const clubs = clubsData?.data || [];
 
   // Extract unique zones from clubs
-  const zones = [...new Set(clubs.map((club) => club.zone).filter(Boolean))].sort();
+  const zones = [
+    ...new Set(clubs.map((club) => club.zone).filter(Boolean)),
+  ].sort();
 
   // Filter clubs by selected zone
   const filteredClubs = selectedZone
@@ -513,11 +529,191 @@ export default function MemberRegistration() {
                 </div>
               </motion.div>
 
+              {/* Alert to download badge first */}
               <motion.div
                 className="badge-item"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 1.0 }}
+              >
+                <Alert
+                  message="Important Reminder"
+                  description="Please download your digital badge before leaving this page or ordering a shirt. You'll need it for event registration!"
+                  type="warning"
+                  showIcon
+                  style={{
+                    marginBottom: "20px",
+                    borderRadius: "12px",
+                    border: "2px solid #f7a50a30",
+                  }}
+                />
+              </motion.div>
+
+              {/* Shirt Ordering Advertisement */}
+              <motion.div
+                className="badge-item"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.1 }}
+              >
+                <Card
+                  style={{
+                    borderRadius: "20px",
+                    boxShadow: "0 10px 40px rgba(28, 60, 109, 0.15)",
+                    border: "2px solid #e1e5ef",
+                    overflow: "hidden",
+                    background:
+                      "linear-gradient(135deg, #ffffff 0%, #f0f2f7 100%)",
+                    marginBottom: "20px",
+                  }}
+                  styles={{
+                    body: {
+                      padding: "20px",
+                    },
+                  }}
+                >
+                  <motion.div
+                    style={{ textAlign: "center", marginBottom: "20px" }}
+                    whileHover={{ scale: 1.05, y: -5 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <img
+                      src={shirtTemplate}
+                      alt="Shirt Template"
+                      style={{
+                        width: "100%",
+                        maxWidth: "200px",
+                        height: "auto",
+                        margin: "0 auto",
+                        borderRadius: "12px",
+                        boxShadow: "0 10px 30px rgba(28, 60, 109, 0.2)",
+                      }}
+                    />
+                  </motion.div>
+
+                  <h3
+                    style={{
+                      marginBottom: "8px",
+                      textAlign: "center",
+                      fontSize: "22px",
+                      color: "#1c3c6d",
+                      fontWeight: "700",
+                    }}
+                  >
+                    Order Customized Shirt
+                  </h3>
+                  <Paragraph
+                    style={{
+                      fontSize: "14px",
+                      color: "#6b7280",
+                      marginBottom: "16px",
+                      textAlign: "center",
+                    }}
+                  >
+                    Get your personalized PALAROTARY 2026 shirt
+                  </Paragraph>
+
+                  <motion.div
+                    whileHover={{ scale: 1.03 }}
+                    animate={{
+                      boxShadow: [
+                        "0 4px 15px rgba(213, 72, 57, 0.2)",
+                        "0 8px 25px rgba(213, 72, 57, 0.3)",
+                        "0 4px 15px rgba(213, 72, 57, 0.2)",
+                      ],
+                    }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    style={{
+                      background:
+                        "linear-gradient(135deg, #fde5e320 0%, #fbcbc720 100%)",
+                      padding: "16px",
+                      borderRadius: "12px",
+                      marginBottom: "16px",
+                      border: "2px solid #d5483940",
+                      textAlign: "center",
+                    }}
+                  >
+                    <h3
+                      style={{
+                        margin: 0,
+                        color: "#d54839",
+                        fontSize: "28px",
+                        fontWeight: "700",
+                      }}
+                    >
+                      ₱300
+                    </h3>
+                    <Paragraph
+                      style={{
+                        margin: "4px 0 0 0",
+                        fontSize: "13px",
+                        color: "#6b7280",
+                      }}
+                    >
+                      All sizes - with custom name and number (00-99)
+                    </Paragraph>
+                  </motion.div>
+
+                  <div style={{ marginBottom: "20px" }}>
+                    {[
+                      "Customize your shirt",
+                      "Choose your size",
+                      "Add your name and 2-digit number (00-99)",
+                      "Secure online payment",
+                    ].map((text, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 1.2 + i * 0.1 }}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "10px",
+                          marginBottom: "10px",
+                        }}
+                      >
+                        <CheckCircleOutlined
+                          style={{ fontSize: "16px", color: "#d54839" }}
+                        />
+                        <span style={{ fontSize: "14px", color: "#1a1a2e" }}>
+                          {text}
+                        </span>
+                      </motion.div>
+                    ))}
+                  </div>
+
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Button
+                      type="primary"
+                      size="large"
+                      block
+                      onClick={() => navigate("/order-shirt")}
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #d54839 0%, #c13829 100%)",
+                        border: "none",
+                        height: "48px",
+                        fontSize: "16px",
+                        fontWeight: "600",
+                        borderRadius: "12px",
+                        boxShadow: "0 6px 20px rgba(213, 72, 57, 0.4)",
+                      }}
+                    >
+                      Order Now
+                    </Button>
+                  </motion.div>
+                </Card>
+              </motion.div>
+
+              <motion.div
+                className="badge-item"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.6 }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -782,6 +978,7 @@ export default function MemberRegistration() {
                   }
                   name="firstName"
                   rules={[{ required: true, message: "Required" }]}
+                  normalize={(value) => value?.toUpperCase()}
                 >
                   <Input
                     placeholder="First name"
@@ -797,6 +994,7 @@ export default function MemberRegistration() {
                     </span>
                   }
                   name="middleName"
+                  normalize={(value) => value?.toUpperCase()}
                 >
                   <Input
                     placeholder="Middle name (optional)"
@@ -813,6 +1011,7 @@ export default function MemberRegistration() {
                   }
                   name="lastName"
                   rules={[{ required: true, message: "Required" }]}
+                  normalize={(value) => value?.toUpperCase()}
                 >
                   <Input
                     placeholder="Last name"
@@ -828,6 +1027,7 @@ export default function MemberRegistration() {
                     </span>
                   }
                   name="suffix"
+                  normalize={(value) => value?.toUpperCase()}
                 >
                   <Input
                     placeholder="Jr., Sr., III (optional)"
