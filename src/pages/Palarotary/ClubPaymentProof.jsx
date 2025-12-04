@@ -211,9 +211,9 @@ export default function ClubPaymentProof() {
             content:
               error?.message ||
               "Failed to upload payment proof. Please try again.",
-            onOk: () => {
-              form.resetFields();
-            },
+            // onOk: () => {
+            //   form.resetFields();
+            // },
           });
         },
       }
@@ -500,6 +500,7 @@ export default function ClubPaymentProof() {
               layout="vertical"
               onFinish={handleSubmit}
               requiredMark={false}
+              scrollToFirstError
             >
               {/* Zone Selection */}
               <Form.Item
