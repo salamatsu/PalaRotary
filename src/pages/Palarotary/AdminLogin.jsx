@@ -30,7 +30,7 @@ export default function AdminLogin() {
         form.resetFields();
       },
       onError: (error) => {
-        message.error(error.response?.data?.message);
+        message.error(error?.message);
       },
     });
   };

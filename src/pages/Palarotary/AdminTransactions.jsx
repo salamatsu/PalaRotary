@@ -75,9 +75,7 @@ const AdminTransactions = () => {
               }
             },
             onError: (error) => {
-              message.error(
-                error.response?.data?.message || "Failed to approve transaction"
-              );
+              message.error(error?.message || "Failed to approve transaction");
             },
           }
         );
@@ -102,9 +100,7 @@ const AdminTransactions = () => {
           }
         },
         onError: (error) => {
-          message.error(
-            error.response?.data?.message || "Failed to approve transaction"
-          );
+          message.error(error?.message || "Failed to approve transaction");
         },
       }
     );

@@ -162,6 +162,7 @@ export const createAxiosInstanceWithInterceptor = (type = "data") => {
 
       // Handle authentication errors
       if (
+        errMessage?.message === "Invalid or expired token." ||
         errMessage?.message === "Invalid token." ||
         errMessage?.message === "No token provided" ||
         errMessage?.message === "Token expired" ||

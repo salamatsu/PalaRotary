@@ -1,36 +1,31 @@
-import { useState } from "react";
-import { useNavigate } from "react-router";
-import {
-  Card,
-  Form,
-  Select,
-  Input,
-  Upload,
-  Button,
-  Typography,
-  App,
-  Spin,
-  Modal,
-  Image,
-} from "antd";
 import {
   ArrowLeftOutlined,
-  UploadOutlined,
   CheckCircleOutlined,
-  InboxOutlined,
-  EditOutlined,
-  LockOutlined,
   ExclamationCircleOutlined,
   EyeOutlined,
-  DeleteOutlined,
+  InboxOutlined,
+  UploadOutlined,
 } from "@ant-design/icons";
-import { motion } from "framer-motion";
+import {
+  App,
+  Button,
+  Card,
+  Form,
+  Image,
+  Modal,
+  Select,
+  Typography,
+  Upload,
+} from "antd";
 import imageCompression from "browser-image-compression";
+import { motion } from "framer-motion";
+import { useState } from "react";
+import { useNavigate } from "react-router";
+import { logo2, logoBanner } from "../../assets/images/logos";
 import {
   useGetRegisteredClub,
   useUploadPaymentProof,
 } from "../../services/requests/usePalarotary";
-import { logo2, logoBanner } from "../../assets/images/logos";
 
 const { Title, Text } = Typography;
 const { Dragger } = Upload;
@@ -149,7 +144,9 @@ export default function ClubPaymentProof() {
 
         const compressedSizeMB = compressedFile.size / 1024 / 1024;
         message.success({
-          content: `Image compressed from ${fileSizeMB.toFixed(2)}MB to ${compressedSizeMB.toFixed(2)}MB`,
+          content: `Image compressed from ${fileSizeMB.toFixed(
+            2
+          )}MB to ${compressedSizeMB.toFixed(2)}MB`,
           key: "compress",
         });
       }
@@ -208,11 +205,11 @@ export default function ClubPaymentProof() {
           handleRemoveImage();
         },
         onError: (error) => {
-          console.log(error);
+          console.log({ error });
           modal.warning({
             title: "Upload Failed",
             content:
-              error?.response?.data?.message ||
+              error?.message ||
               "Failed to upload payment proof. Please try again.",
             onOk: () => {
               form.resetFields();

@@ -170,8 +170,7 @@ const AdminMerchandise = () => {
         onError: (error) => {
           modal.warning({
             title: "Failed to approve order",
-            content:
-              error.response?.data?.data?.message || "Failed to approve order",
+            content: error?.message || "Failed to approve order",
           });
         },
       }
@@ -234,7 +233,7 @@ const AdminMerchandise = () => {
           modal.warning({
             title: "Failed to approve order",
             content:
-              error.response?.data?.data?.message ||
+              error?.message ||
               error.response?.data?.message ||
               "Failed to approve order",
           });
