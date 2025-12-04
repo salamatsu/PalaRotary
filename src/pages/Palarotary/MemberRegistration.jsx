@@ -16,6 +16,10 @@ import {
   Select,
   Typography,
   Alert,
+  Progress,
+  Modal,
+  Spin,
+  Space,
 } from "antd";
 import { motion } from "framer-motion";
 import gsap from "gsap";
@@ -29,6 +33,7 @@ import {
 } from "../../services/requests/usePalarotary";
 import { imageToBase64 } from "../../utils/tobase64";
 import { useRegistrationStore } from "../../store/useRegistrationStore";
+import { ComponentLoader } from "../../components/LoadingFallback";
 
 const { Paragraph } = Typography;
 // {
@@ -51,6 +56,8 @@ export default function MemberRegistration() {
   const [formLoadTime] = useState(Date.now());
   const [familyMembers, setFamilyMembers] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submissionProgress, setSubmissionProgress] = useState(0);
+  const [currentProcessing, setCurrentProcessing] = useState("");
 
   const containerRef = useRef(null);
   const formRef = useRef(null);
@@ -66,7 +73,7 @@ export default function MemberRegistration() {
     registrations,
     addSuccessRegistration,
     addFailedRegistration,
-    resetRegistrations
+    resetRegistrations,
   } = useRegistrationStore();
 
   console.log(registerMember.data);
@@ -114,7 +121,11 @@ export default function MemberRegistration() {
 
   // Animate badge on success with GSAP
   useEffect(() => {
-    if (badgeRef.current && registrationComplete && registrations.success.length > 0) {
+    if (
+      badgeRef.current &&
+      registrationComplete &&
+      registrations.success.length > 0
+    ) {
       const successIcon = badgeRef.current.querySelector(".success-icon");
       const badgeItems = badgeRef.current.querySelectorAll(".badge-item");
       const qrCode = badgeRef.current.querySelector(".qr-code");
@@ -198,7 +209,10 @@ export default function MemberRegistration() {
       // Helper function to remove empty values from object
       const removeEmptyValues = (obj) => {
         return Object.fromEntries(
-          Object.entries(obj).filter(([_, value]) => value !== "" && value !== null && value !== undefined)
+          Object.entries(obj).filter(
+            ([_, value]) =>
+              value !== "" && value !== null && value !== undefined
+          )
         );
       };
 
@@ -242,7 +256,8 @@ export default function MemberRegistration() {
           clubId: cleanValues.clubId,
           category: member.category,
           designation:
-            member.category === "Spouse / Partner" || member.category === "Child"
+            member.category === "Spouse / Partner" ||
+            member.category === "Child"
               ? primaryMemberFullName
               : "",
           firstName: member.firstName,
@@ -257,7 +272,12 @@ export default function MemberRegistration() {
       });
 
       // Register all members asynchronously
-      for (const member of membersToRegister) {
+      const totalMembers = membersToRegister.length;
+      for (let i = 0; i < membersToRegister.length; i++) {
+        const member = membersToRegister[i];
+        const memberName = `${member.firstName} ${member.lastName}`;
+        setCurrentProcessing(memberName);
+
         try {
           const response = await registerMember.mutateAsync(member);
           addSuccessRegistration({
@@ -270,6 +290,9 @@ export default function MemberRegistration() {
             error: error.response?.data?.message || "Registration failed",
           });
         }
+
+        // Update progress
+        setSubmissionProgress(Math.round(((i + 1) / totalMembers) * 100));
       }
 
       // Animate form exit with GSAP
@@ -354,6 +377,77 @@ export default function MemberRegistration() {
     );
   };
 
+  // Loading Modal Component
+  const LoadingModal = () => (
+    <Modal
+      open={isSubmitting}
+      footer={null}
+      closable={false}
+      centered
+      maskClosable={false}
+      width={500}
+      styles={{
+        mask: {
+          backdropFilter: "blur(8px)",
+        },
+      }}
+    >
+      <div style={{ textAlign: "center", padding: "20px" }}>
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+          style={{
+            width: "80px",
+            height: "80px",
+            margin: "0 auto 24px",
+            borderRadius: "50%",
+            border: "6px solid #e0f2fe",
+            borderTopColor: "#1e3a8a",
+          }}
+        />
+
+        <h2
+          style={{
+            fontSize: "24px",
+            fontWeight: "700",
+            color: "#1e3a8a",
+            marginBottom: "16px",
+          }}
+        >
+          Registering Members...
+        </h2>
+
+        <p
+          style={{
+            fontSize: "14px",
+            color: "#6b7280",
+            marginBottom: "24px",
+          }}
+        >
+          Processing: <strong>{currentProcessing}</strong>
+        </p>
+
+        <Progress
+          percent={submissionProgress}
+          strokeColor={{
+            "0%": "#1e3a8a",
+            "100%": "#3b82f6",
+          }}
+          style={{ marginBottom: "16px" }}
+        />
+
+        <p
+          style={{
+            fontSize: "12px",
+            color: "#9ca3af",
+          }}
+        >
+          Please wait while we register your members. Do not close this window.
+        </p>
+      </div>
+    </Modal>
+  );
+
   if (registrationComplete && registrations.success.length > 0) {
     return (
       <motion.div
@@ -362,26 +456,61 @@ export default function MemberRegistration() {
         animate={{ opacity: 1 }}
         style={{
           minHeight: "100vh",
-          background: "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)",
+          background:
+            "linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #10b981 100%)",
           padding: "20px",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          position: "relative",
+          overflow: "hidden",
         }}
       >
+        {/* Success background effects */}
+        <div
+          style={{
+            position: "absolute",
+            top: "-5%",
+            right: "-5%",
+            width: "500px",
+            height: "500px",
+            borderRadius: "50%",
+            background: "rgba(16, 185, 129, 0.15)",
+            filter: "blur(100px)",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            bottom: "-5%",
+            left: "-5%",
+            width: "500px",
+            height: "500px",
+            borderRadius: "50%",
+            background: "rgba(59, 130, 246, 0.15)",
+            filter: "blur(100px)",
+          }}
+        />
+
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          style={{ width: "100%", maxWidth: "1200px" }}
+          style={{
+            width: "100%",
+            maxWidth: "1400px",
+            position: "relative",
+            zIndex: 1,
+          }}
         >
           <Card
             style={{
-              borderRadius: "24px",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
-              overflow: "hidden",
+              borderRadius: "32px",
+              boxShadow: "0 30px 100px rgba(0,0,0,0.4)",
+              overflow: "visible",
               background: "rgba(255, 255, 255, 0.98)",
-              backdropFilter: "blur(10px)",
+              backdropFilter: "blur(20px)",
+              border: "1px solid rgba(255, 255, 255, 0.3)",
             }}
           >
             <div ref={badgeRef} style={{ padding: "20px" }}>
@@ -433,7 +562,8 @@ export default function MemberRegistration() {
                     marginBottom: "8px",
                   }}
                 >
-                  {registrations.success.length} member(s) registered successfully
+                  {registrations.success.length} member(s) registered
+                  successfully
                 </motion.p>
               </div>
 
@@ -471,8 +601,19 @@ export default function MemberRegistration() {
               )}
 
               {/* Digital Badges Grid */}
-              <div style={{ marginBottom: "24px" }}>
-                <Row gutter={[16, 16]}>
+              <div style={{ marginBottom: "32px" }}>
+                <h3
+                  style={{
+                    fontSize: "20px",
+                    fontWeight: "700",
+                    color: "#1e3a8a",
+                    marginBottom: "20px",
+                    textAlign: "center",
+                  }}
+                >
+                  Your Digital Badges
+                </h3>
+                <div className=" flex flex-wrap justify-center gap-6">
                   {registrations.success.map((registration, index) => (
                     <Col xs={24} sm={12} lg={8} key={index}>
                       <motion.div
@@ -480,14 +621,18 @@ export default function MemberRegistration() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.6 + index * 0.1 }}
-                        whileHover={{ scale: 1.02 }}
+                        whileHover={{
+                          scale: 1.05,
+                          boxShadow: "0 20px 40px rgba(30, 58, 138, 0.3)",
+                        }}
                         style={{
-                          background:
-                            "linear-gradient(135deg, #1e3a8a08 0%, #3b82f608 100%)",
-                          padding: "16px",
-                          borderRadius: "16px",
-                          border: "2px solid #3b82f620",
+                          background: "white",
+                          padding: "20px",
+                          borderRadius: "20px",
+                          border: "2px solid #e5e7eb",
                           height: "100%",
+                          boxShadow: "0 10px 25px rgba(30, 58, 138, 0.15)",
+                          transition: "all 0.3s ease",
                         }}
                       >
                         <div
@@ -540,7 +685,7 @@ export default function MemberRegistration() {
                               style={{
                                 width: "100%",
                                 maxWidth: "200px",
-                                borderRadius: "8px",
+                                // borderRadius: "8px",
                               }}
                             />
                           )}
@@ -582,309 +727,329 @@ export default function MemberRegistration() {
                       </motion.div>
                     </Col>
                   ))}
-                </Row>
+                </div>
               </div>
 
-              {/* Important Info and Actions */}
-              <Row gutter={[24, 24]}>
-                <Col xs={24} lg={12}>
-                  <motion.div
-                    className="badge-item"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 1.0 }}
+              <div className=" flex flex-col lg:flex-row flex-wrap gap-6 justify-center items-center">
+                <motion.div
+                  className="badge-item flex-1 order-2"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 1.1 }}
+                >
+                  <Card
                     style={{
+                      borderRadius: "20px",
+                      boxShadow: "0 10px 40px rgba(28, 60, 109, 0.15)",
+                      border: "2px solid #e1e5ef",
+                      overflow: "hidden",
                       background:
-                        "linear-gradient(135deg, #3b82f615 0%, #1e3a8a15 100%)",
-                      padding: "16px",
-                      borderRadius: "12px",
-                      fontSize: "13px",
-                      color: "#1e3a8a",
-                      lineHeight: "1.6",
-                      marginBottom: "16px",
-                    }}
-                  >
-                    <strong>Important:</strong> Digital badges have been sent to
-                    your email. Present these QR codes at the registration desk on
-                    event day.
-                  </motion.div>
-                </Col>
-
-                {/* Right Column - Event Details, Alert, and Shirt Advertisement */}
-                <Col xs={24} lg={12}>
-                  <motion.div
-                    className="badge-item"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.9 }}
-                    style={{
-                      background:
-                        "linear-gradient(135deg, #fff9eb 0%, #fff3d6 100%)",
-                      padding: "16px",
-                      borderRadius: "16px",
+                        "linear-gradient(135deg, #ffffff 0%, #f0f2f7 100%)",
                       marginBottom: "20px",
-                      textAlign: "left",
-                      border: "2px solid #f7a50a30",
+                    }}
+                    styles={{
+                      body: {
+                        padding: "20px",
+                      },
                     }}
                   >
-                    <h3
+                    {/* Important Info and Actions */}
+                    <motion.div
+                      className="badge-item"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 1.0 }}
                       style={{
-                        fontSize: "14px",
-                        fontWeight: "700",
-                        marginBottom: "8px",
-                        color: "#f7a50a",
-                      }}
-                    >
-                      Event Details
-                    </h3>
-                    <div
-                      style={{
-                        fontSize: "13px",
-                        color: "#1a1a2e",
-                        lineHeight: "1.6",
-                      }}
-                    >
-                      <p style={{ margin: "4px 0" }}>
-                        <strong>Event:</strong>{" "}
-                        {registrations.success[0]?.eventDetails?.eventName}
-                      </p>
-                      <p style={{ margin: "4px 0" }}>
-                        <strong>Date:</strong>{" "}
-                        {registrations.success[0]?.eventDetails?.eventDate}
-                      </p>
-                      {registrations.success[0]?.eventDetails?.location && (
-                        <p style={{ margin: "4px 0" }}>
-                          <strong>Time:</strong>{" "}
-                          {registrations.success[0]?.eventDetails?.location}
-                        </p>
-                      )}
-                      {registrations.success[0]?.eventDetails?.description && (
-                        <p style={{ margin: "4px 0" }}>
-                          <strong>Venue:</strong>{" "}
-                          {registrations.success[0]?.eventDetails?.description}
-                        </p>
-                      )}
-                    </div>
-                  </motion.div>
-
-                  {/* Alert to download badge first */}
-                  <motion.div
-                    className="badge-item"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 1.0 }}
-                  >
-                    <Alert
-                      message="Important Reminder"
-                      description="Please download your digital badge before leaving this page or ordering a shirt. You'll need it for event registration!"
-                      type="warning"
-                      showIcon
-                      style={{
-                        marginBottom: "20px",
+                        background:
+                          "linear-gradient(135deg, #3b82f615 0%, #1e3a8a15 100%)",
+                        padding: "16px",
                         borderRadius: "12px",
+                        fontSize: "13px",
+                        color: "#1e3a8a",
+                        lineHeight: "1.6",
+                        marginBottom: "16px",
+                      }}
+                    >
+                      <strong>Important:</strong> Digital badges have been sent
+                      to your email. Present these QR codes at the registration
+                      desk on event day.
+                    </motion.div>
+                    {/*  Event Details, Alert, and Shirt Advertisement */}
+                    <motion.div
+                      className="badge-item"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.9 }}
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #fff9eb 0%, #fff3d6 100%)",
+                        padding: "16px",
+                        borderRadius: "16px",
+                        marginBottom: "20px",
+                        textAlign: "left",
                         border: "2px solid #f7a50a30",
                       }}
-                    />
-                  </motion.div>
-
-                  {/* Shirt Ordering Advertisement */}
-                  <motion.div
-                    className="badge-item"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 1.1 }}
-                  >
-                    <Card
-                      style={{
-                        borderRadius: "20px",
-                        boxShadow: "0 10px 40px rgba(28, 60, 109, 0.15)",
-                        border: "2px solid #e1e5ef",
-                        overflow: "hidden",
-                        background:
-                          "linear-gradient(135deg, #ffffff 0%, #f0f2f7 100%)",
-                        marginBottom: "20px",
-                      }}
-                      styles={{
-                        body: {
-                          padding: "20px",
-                        },
-                      }}
                     >
-                      <motion.div
-                        style={{ textAlign: "center", marginBottom: "20px" }}
-                        whileHover={{ scale: 1.05, y: -5 }}
-                        transition={{ duration: 0.5 }}
-                      >
-                        <img
-                          src={shirtTemplate}
-                          alt="Shirt Template"
-                          style={{
-                            width: "100%",
-                            maxWidth: "200px",
-                            height: "auto",
-                            margin: "0 auto",
-                            borderRadius: "12px",
-                            boxShadow: "0 10px 30px rgba(28, 60, 109, 0.2)",
-                          }}
-                        />
-                      </motion.div>
-
                       <h3
                         style={{
+                          fontSize: "14px",
+                          fontWeight: "700",
                           marginBottom: "8px",
-                          textAlign: "center",
-                          fontSize: "22px",
-                          color: "#1c3c6d",
+                          color: "#f7a50a",
+                        }}
+                      >
+                        Event Details
+                      </h3>
+                      <div
+                        style={{
+                          fontSize: "13px",
+                          color: "#1a1a2e",
+                          lineHeight: "1.6",
+                        }}
+                      >
+                        <p style={{ margin: "4px 0" }}>
+                          <strong>Event:</strong>{" "}
+                          {registrations.success[0]?.eventDetails?.eventName}
+                        </p>
+                        <p style={{ margin: "4px 0" }}>
+                          <strong>Date:</strong>{" "}
+                          {registrations.success[0]?.eventDetails?.eventDate}
+                        </p>
+                        {registrations.success[0]?.eventDetails?.location && (
+                          <p style={{ margin: "4px 0" }}>
+                            <strong>Time:</strong>{" "}
+                            {registrations.success[0]?.eventDetails?.location}
+                          </p>
+                        )}
+                        {registrations.success[0]?.eventDetails
+                          ?.description && (
+                          <p style={{ margin: "4px 0" }}>
+                            <strong>Venue:</strong>{" "}
+                            {
+                              registrations.success[0]?.eventDetails
+                                ?.description
+                            }
+                          </p>
+                        )}
+                      </div>
+                    </motion.div>
+
+                    {/* Alert to download badge first */}
+                    <motion.div
+                      className="badge-item"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 1.0 }}
+                    >
+                      <Alert
+                        message="Important Reminder"
+                        description="Please download your digital badge before leaving this page or ordering a shirt. You'll need it for event registration!"
+                        type="warning"
+                        showIcon
+                        style={{
+                          marginBottom: "20px",
+                          borderRadius: "12px",
+                          border: "2px solid #f7a50a30",
+                        }}
+                      />
+                    </motion.div>
+
+                    {/* Register Another Member Button - Full Width */}
+                    <motion.div
+                      className="badge-item"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 1.6 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      style={{ marginTop: "24px" }}
+                    >
+                      <Button
+                        type="default"
+                        size="large"
+                        onClick={() => window.location.reload()}
+                        style={{
+                          height: "48px",
+                          borderRadius: "12px",
+                          fontWeight: "600",
+                          fontSize: "16px",
+                          border: "2px solid #1e3a8a",
+                          color: "#1e3a8a",
+                          background: "white",
+                        }}
+                        block
+                      >
+                        Register Another Member
+                      </Button>
+                    </motion.div>
+                  </Card>
+                </motion.div>
+                {/* Shirt Ordering Advertisement */}
+                <motion.div
+                  className="badge-item flex-1 order-1"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 1.1 }}
+                >
+                  <Card
+                    style={{
+                      borderRadius: "20px",
+                      boxShadow: "0 10px 40px rgba(28, 60, 109, 0.15)",
+                      border: "2px solid #e1e5ef",
+                      overflow: "hidden",
+                      background:
+                        "linear-gradient(135deg, #ffffff 0%, #f0f2f7 100%)",
+                      marginBottom: "20px",
+                    }}
+                    styles={{
+                      body: {
+                        padding: "20px",
+                      },
+                    }}
+                  >
+                    <motion.div
+                      style={{ textAlign: "center", marginBottom: "20px" }}
+                      whileHover={{ scale: 1.05, y: -5 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <img
+                        src={shirtTemplate}
+                        alt="Shirt Template"
+                        style={{
+                          width: "100%",
+                          maxWidth: "200px",
+                          height: "auto",
+                          margin: "0 auto",
+                          borderRadius: "12px",
+                          boxShadow: "0 10px 30px rgba(28, 60, 109, 0.2)",
+                        }}
+                      />
+                    </motion.div>
+
+                    <h3
+                      style={{
+                        marginBottom: "8px",
+                        textAlign: "center",
+                        fontSize: "22px",
+                        color: "#1c3c6d",
+                        fontWeight: "700",
+                      }}
+                    >
+                      Order Customized Shirt
+                    </h3>
+                    <Paragraph
+                      style={{
+                        fontSize: "14px",
+                        color: "#6b7280",
+                        marginBottom: "16px",
+                        textAlign: "center",
+                      }}
+                    >
+                      Get your personalized PALAROTARY 2026 shirt
+                    </Paragraph>
+
+                    <motion.div
+                      whileHover={{ scale: 1.03 }}
+                      animate={{
+                        boxShadow: [
+                          "0 4px 15px rgba(213, 72, 57, 0.2)",
+                          "0 8px 25px rgba(213, 72, 57, 0.3)",
+                          "0 4px 15px rgba(213, 72, 57, 0.2)",
+                        ],
+                      }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #fde5e320 0%, #fbcbc720 100%)",
+                        padding: "16px",
+                        borderRadius: "12px",
+                        marginBottom: "16px",
+                        border: "2px solid #d5483940",
+                        textAlign: "center",
+                      }}
+                    >
+                      <h3
+                        style={{
+                          margin: 0,
+                          color: "#d54839",
+                          fontSize: "28px",
                           fontWeight: "700",
                         }}
                       >
-                        Order Customized Shirt
+                        ₱300
                       </h3>
                       <Paragraph
                         style={{
-                          fontSize: "14px",
+                          margin: "4px 0 0 0",
+                          fontSize: "13px",
                           color: "#6b7280",
-                          marginBottom: "16px",
-                          textAlign: "center",
                         }}
                       >
-                        Get your personalized PALAROTARY 2026 shirt
+                        All sizes - with custom name and number (00-99)
                       </Paragraph>
+                    </motion.div>
 
-                      <motion.div
-                        whileHover={{ scale: 1.03 }}
-                        animate={{
-                          boxShadow: [
-                            "0 4px 15px rgba(213, 72, 57, 0.2)",
-                            "0 8px 25px rgba(213, 72, 57, 0.3)",
-                            "0 4px 15px rgba(213, 72, 57, 0.2)",
-                          ],
-                        }}
-                        transition={{ duration: 2, repeat: Infinity }}
+                    <div style={{ marginBottom: "20px" }}>
+                      {[
+                        "Customize your shirt",
+                        "Choose your size",
+                        "Add your name and 2-digit number (00-99)",
+                        "Secure online payment",
+                      ].map((text, i) => (
+                        <motion.div
+                          key={i}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 1.2 + i * 0.1 }}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "10px",
+                            marginBottom: "10px",
+                          }}
+                        >
+                          <CheckCircleOutlined
+                            style={{ fontSize: "16px", color: "#d54839" }}
+                          />
+                          <span style={{ fontSize: "14px", color: "#1a1a2e" }}>
+                            {text}
+                          </span>
+                        </motion.div>
+                      ))}
+                    </div>
+
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <Button
+                        type="primary"
+                        size="large"
+                        block
+                        onClick={() =>
+                          navigate("/order-shirt", {
+                            state: {
+                              memberData: registrations.success[0],
+                            },
+                          })
+                        }
                         style={{
                           background:
-                            "linear-gradient(135deg, #fde5e320 0%, #fbcbc720 100%)",
-                          padding: "16px",
+                            "linear-gradient(135deg, #d54839 0%, #c13829 100%)",
+                          border: "none",
+                          height: "48px",
+                          fontSize: "16px",
+                          fontWeight: "600",
                           borderRadius: "12px",
-                          marginBottom: "16px",
-                          border: "2px solid #d5483940",
-                          textAlign: "center",
+                          boxShadow: "0 6px 20px rgba(213, 72, 57, 0.4)",
                         }}
                       >
-                        <h3
-                          style={{
-                            margin: 0,
-                            color: "#d54839",
-                            fontSize: "28px",
-                            fontWeight: "700",
-                          }}
-                        >
-                          ₱300
-                        </h3>
-                        <Paragraph
-                          style={{
-                            margin: "4px 0 0 0",
-                            fontSize: "13px",
-                            color: "#6b7280",
-                          }}
-                        >
-                          All sizes - with custom name and number (00-99)
-                        </Paragraph>
-                      </motion.div>
-
-                      <div style={{ marginBottom: "20px" }}>
-                        {[
-                          "Customize your shirt",
-                          "Choose your size",
-                          "Add your name and 2-digit number (00-99)",
-                          "Secure online payment",
-                        ].map((text, i) => (
-                          <motion.div
-                            key={i}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 1.2 + i * 0.1 }}
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "10px",
-                              marginBottom: "10px",
-                            }}
-                          >
-                            <CheckCircleOutlined
-                              style={{ fontSize: "16px", color: "#d54839" }}
-                            />
-                            <span
-                              style={{ fontSize: "14px", color: "#1a1a2e" }}
-                            >
-                              {text}
-                            </span>
-                          </motion.div>
-                        ))}
-                      </div>
-
-                      <motion.div
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        <Button
-                          type="primary"
-                          size="large"
-                          block
-                          onClick={() =>
-                            navigate("/order-shirt", {
-                              state: {
-                                memberData: registrations.success[0],
-                              },
-                            })
-                          }
-                          style={{
-                            background:
-                              "linear-gradient(135deg, #d54839 0%, #c13829 100%)",
-                            border: "none",
-                            height: "48px",
-                            fontSize: "16px",
-                            fontWeight: "600",
-                            borderRadius: "12px",
-                            boxShadow: "0 6px 20px rgba(213, 72, 57, 0.4)",
-                          }}
-                        >
-                          Order Now
-                        </Button>
-                      </motion.div>
-                    </Card>
-                  </motion.div>
-                </Col>
-              </Row>
-
-              {/* Register Another Member Button - Full Width */}
-              <motion.div
-                className="badge-item"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.6 }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                style={{ marginTop: "24px" }}
-              >
-                <Button
-                  type="default"
-                  size="large"
-                  onClick={() => window.location.reload()}
-                  style={{
-                    height: "48px",
-                    borderRadius: "12px",
-                    fontWeight: "600",
-                    fontSize: "16px",
-                    border: "2px solid #1e3a8a",
-                    color: "#1e3a8a",
-                    background: "white",
-                  }}
-                  block
-                >
-                  Register Another Member
-                </Button>
-              </motion.div>
+                        Order Now
+                      </Button>
+                    </motion.div>
+                  </Card>
+                </motion.div>
+              </div>
             </div>
           </Card>
         </motion.div>
@@ -899,26 +1064,61 @@ export default function MemberRegistration() {
       animate={{ opacity: 1 }}
       style={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #ffffff 0%, #3b82f6 100%)",
+        background:
+          "linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #3b82f6 100%)",
         padding: "20px",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        position: "relative",
+        overflow: "hidden",
       }}
     >
+      {/* Background decorative elements */}
+      <div
+        style={{
+          position: "absolute",
+          top: "-10%",
+          right: "-5%",
+          width: "400px",
+          height: "400px",
+          borderRadius: "50%",
+          background: "rgba(59, 130, 246, 0.1)",
+          filter: "blur(80px)",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          bottom: "-10%",
+          left: "-5%",
+          width: "400px",
+          height: "400px",
+          borderRadius: "50%",
+          background: "rgba(30, 58, 138, 0.1)",
+          filter: "blur(80px)",
+        }}
+      />
+
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        style={{ width: "100%", maxWidth: "600px" }}
+        style={{
+          width: "100%",
+          maxWidth: "900px",
+          position: "relative",
+          zIndex: 1,
+        }}
       >
         <Card
           style={{
-            borderRadius: "24px",
-            boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+            borderRadius: "32px",
+            boxShadow: "0 25px 80px rgba(0,0,0,0.4)",
             overflow: "hidden",
             background: "rgba(255, 255, 255, 0.98)",
-            backdropFilter: "blur(10px)",
+            backdropFilter: "blur(20px)",
+            border: "1px solid rgba(255, 255, 255, 0.2)",
           }}
         >
           {/* Header */}
@@ -1025,9 +1225,10 @@ export default function MemberRegistration() {
           <div ref={formRef}>
             <Form
               form={form}
-              layout="vertical" 
+              layout="vertical"
               onFinish={onFinish}
               // requiredMark={false}
+              scrollToFirstError
             >
               <Form.Item
                 label={
@@ -1326,11 +1527,17 @@ export default function MemberRegistration() {
                           fontSize: "14px",
                         }}
                       >
-                        No family members added yet. Click "Add Family Member" to
-                        register your family.
+                        No family members added yet. Click "Add Family Member"
+                        to register your family.
                       </div>
                     ) : (
-                      <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "16px",
+                        }}
+                      >
                         {familyMembers.map((member, index) => (
                           <motion.div
                             key={member.id}
@@ -1388,7 +1595,8 @@ export default function MemberRegistration() {
                                     fontSize: "13px",
                                   }}
                                 >
-                                  First Name <span style={{ color: "red" }}>*</span>
+                                  First Name{" "}
+                                  <span style={{ color: "red" }}>*</span>
                                 </label>
                                 <Input
                                   placeholder="First name"
@@ -1440,7 +1648,8 @@ export default function MemberRegistration() {
                                     fontSize: "13px",
                                   }}
                                 >
-                                  Last Name <span style={{ color: "red" }}>*</span>
+                                  Last Name{" "}
+                                  <span style={{ color: "red" }}>*</span>
                                 </label>
                                 <Input
                                   placeholder="Last name"
@@ -1492,13 +1701,18 @@ export default function MemberRegistration() {
                                     fontSize: "13px",
                                   }}
                                 >
-                                  Category <span style={{ color: "red" }}>*</span>
+                                  Category{" "}
+                                  <span style={{ color: "red" }}>*</span>
                                 </label>
                                 <Select
                                   placeholder="Select category"
                                   value={member.category}
                                   onChange={(value) =>
-                                    updateFamilyMember(member.id, "category", value)
+                                    updateFamilyMember(
+                                      member.id,
+                                      "category",
+                                      value
+                                    )
                                   }
                                   style={{ width: "100%", borderRadius: "8px" }}
                                   options={[
@@ -1527,8 +1741,8 @@ export default function MemberRegistration() {
                                 color: "#1e3a8a",
                               }}
                             >
-                              <strong>Note:</strong> Email and mobile number will be
-                              copied from the primary member.
+                              <strong>Note:</strong> Email and mobile number
+                              will be copied from the primary member.
                             </div>
                           </motion.div>
                         ))}
@@ -1588,7 +1802,9 @@ export default function MemberRegistration() {
                     }}
                   >
                     {familyMembers.length > 0
-                      ? `Register ${familyMembers.length + 1} Member(s) & Get Digital Badges`
+                      ? `Register ${
+                          familyMembers.length + 1
+                        } Member(s) & Get Digital Badges`
                       : "Register & Get Digital Badge"}
                   </Button>
                 </motion.div>
@@ -1616,6 +1832,24 @@ export default function MemberRegistration() {
           </div>
         </Card>
       </motion.div>
+
+      {/* Loading Modal */}
+      <LoadingModal />
+
+      <Modal
+        open={loadingClubs}
+        footer={[]}
+        closable={false}
+        centered
+        destroyOnHidden
+      >
+        <center>
+          <Space direction="vertical" size="small">
+            <Spin />
+            <Typography.Text>Loading zones and clubs . . .</Typography.Text>
+          </Space>
+        </center>
+      </Modal>
     </motion.div>
   );
 }
