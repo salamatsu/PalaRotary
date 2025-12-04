@@ -55,6 +55,9 @@ export default function MemberRegistration() {
   const badgeRef = useRef(null);
   const [selectedZone, setSelectedZone] = useState(null);
 
+  // Watch category field to show/hide designation field
+  const category = Form.useWatch("category", form);
+
   const registerMember = useRegisterMember();
   const { data: clubsData, isLoading: loadingClubs } = useApprovedClubs();
   console.log(registerMember.data);
@@ -970,6 +973,12 @@ export default function MemberRegistration() {
                   placeholder="Select category"
                   size="large"
                   style={{ borderRadius: "12px" }}
+                  onChange={(value) => {
+                    // Clear designation when category changes
+                    if (value !== "Spouse / Partner" && value !== "Child") {
+                      form.setFieldValue("designation", undefined);
+                    }
+                  }}
                   options={[
                     { value: "Rotarian", label: "Rotarian" },
                     { value: "Spouse / Partner", label: "Spouse / Partner" },
@@ -981,6 +990,38 @@ export default function MemberRegistration() {
                   ]}
                 />
               </Form.Item>
+
+              {/* Conditional Field - Show only for Spouse/Partner or Child */}
+              {(category === "Spouse / Partner" || category === "Child") && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Form.Item
+                    label={
+                      <span style={{ fontWeight: "600", color: "#333" }}>
+                        Rotarian Member Name
+                      </span>
+                    }
+                    name="designation"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please enter the Rotarian member's name",
+                      },
+                    ]}
+                    normalize={(value) => value?.toUpperCase()}
+                  >
+                    <Input
+                      placeholder="Full name of Rotarian member"
+                      size="large"
+                      style={{ borderRadius: "12px" }}
+                    />
+                  </Form.Item>
+                </motion.div>
+              )}
 
               <div
                 style={{
