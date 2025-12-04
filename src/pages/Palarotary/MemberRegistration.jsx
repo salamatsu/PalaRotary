@@ -52,7 +52,6 @@ export default function MemberRegistration() {
   const { message } = App.useApp();
   const navigate = useNavigate();
   const [form] = Form.useForm();
-  const [registrationComplete, setRegistrationComplete] = useState(false);
   const [formLoadTime] = useState(Date.now());
   const [familyMembers, setFamilyMembers] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -75,6 +74,11 @@ export default function MemberRegistration() {
     addFailedRegistration,
     resetRegistrations,
   } = useRegistrationStore();
+
+  // Check if there's persisted registration data and show success page
+  const [registrationComplete, setRegistrationComplete] = useState(
+    registrations.success.length > 0
+  );
 
   console.log(registerMember.data);
   const clubs = clubsData?.data || [];
@@ -343,11 +347,31 @@ export default function MemberRegistration() {
           document.body.removeChild(a);
         }, 100);
 
-        message.success("QR Code downloaded!");
+        message.success("Badge downloaded!");
       } catch (error) {
-        console.error("Failed to download QR code:", error);
-        message.error("Failed to download QR code. Please try again.");
+        console.error("Failed to download badge:", error);
+        message.error("Failed to download badge. Please try again.");
       }
+    }
+  };
+
+  const downloadAllBadges = async () => {
+    message.loading({ content: "Downloading all badges...", key: "download-all" });
+    try {
+      for (const registration of registrations.success) {
+        await downloadQRCode(registration.badgeUrl, registration.qrCode);
+        // Add delay between downloads to prevent browser blocking
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+      message.success({
+        content: `All ${registrations.success.length} badge(s) downloaded!`,
+        key: "download-all",
+      });
+    } catch (error) {
+      message.error({
+        content: "Some badges failed to download. Please try again.",
+        key: "download-all",
+      });
     }
   };
 
@@ -602,17 +626,46 @@ export default function MemberRegistration() {
 
               {/* Digital Badges Grid */}
               <div style={{ marginBottom: "32px" }}>
-                <h3
+                <div
                   style={{
-                    fontSize: "20px",
-                    fontWeight: "700",
-                    color: "#1e3a8a",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
                     marginBottom: "20px",
-                    textAlign: "center",
+                    flexWrap: "wrap",
+                    gap: "12px",
                   }}
                 >
-                  Your Digital Badges
-                </h3>
+                  <h3
+                    style={{
+                      fontSize: "20px",
+                      fontWeight: "700",
+                      color: "#1e3a8a",
+                      margin: 0,
+                    }}
+                  >
+                    Your Digital Badges
+                  </h3>
+                  {registrations.success.length > 1 && (
+                    <Button
+                      type="primary"
+                      icon={<DownloadOutlined />}
+                      onClick={downloadAllBadges}
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                        border: "none",
+                        height: "40px",
+                        borderRadius: "10px",
+                        fontWeight: "600",
+                        fontSize: "14px",
+                        boxShadow: "0 4px 15px rgba(16, 185, 129, 0.3)",
+                      }}
+                    >
+                      Download All Badges
+                    </Button>
+                  )}
+                </div>
                 <div className=" flex flex-wrap justify-center gap-6">
                   {registrations.success.map((registration, index) => (
                     <Col xs={24} sm={12} lg={8} key={index}>
@@ -867,7 +920,12 @@ export default function MemberRegistration() {
                       <Button
                         type="default"
                         size="large"
-                        onClick={() => window.location.reload()}
+                        onClick={() => {
+                          resetRegistrations();
+                          setRegistrationComplete(false);
+                          setFamilyMembers([]);
+                          form.resetFields();
+                        }}
                         style={{
                           height: "48px",
                           borderRadius: "12px",
