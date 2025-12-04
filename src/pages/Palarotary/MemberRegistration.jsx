@@ -2,8 +2,8 @@ import {
   ArrowLeftOutlined,
   CheckCircleOutlined,
   DownloadOutlined,
-  QrcodeOutlined,
   UserAddOutlined,
+  CloseOutlined,
 } from "@ant-design/icons";
 import {
   App,
@@ -28,6 +28,7 @@ import {
   useRegisterMember,
 } from "../../services/requests/usePalarotary";
 import { imageToBase64 } from "../../utils/tobase64";
+import { useRegistrationStore } from "../../store/useRegistrationStore";
 
 const { Paragraph } = Typography;
 // {
@@ -47,8 +48,9 @@ export default function MemberRegistration() {
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const [registrationComplete, setRegistrationComplete] = useState(false);
-  const [badgeData, setBadgeData] = useState(null);
   const [formLoadTime] = useState(Date.now());
+  const [familyMembers, setFamilyMembers] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const containerRef = useRef(null);
   const formRef = useRef(null);
@@ -60,6 +62,13 @@ export default function MemberRegistration() {
 
   const registerMember = useRegisterMember();
   const { data: clubsData, isLoading: loadingClubs } = useApprovedClubs();
+  const {
+    registrations,
+    addSuccessRegistration,
+    addFailedRegistration,
+    resetRegistrations
+  } = useRegistrationStore();
+
   console.log(registerMember.data);
   const clubs = clubsData?.data || [];
 
@@ -105,7 +114,7 @@ export default function MemberRegistration() {
 
   // Animate badge on success with GSAP
   useEffect(() => {
-    if (badgeRef.current && registrationComplete) {
+    if (badgeRef.current && registrationComplete && registrations.success.length > 0) {
       const successIcon = badgeRef.current.querySelector(".success-icon");
       const badgeItems = badgeRef.current.querySelectorAll(".badge-item");
       const qrCode = badgeRef.current.querySelector(".qr-code");
@@ -146,7 +155,7 @@ export default function MemberRegistration() {
         );
       }
     }
-  }, [registrationComplete, badgeData]);
+  }, [registrationComplete, registrations.success]);
 
   const onFinish = async (values) => {
     try {
@@ -167,16 +176,101 @@ export default function MemberRegistration() {
         return;
       }
 
+      // Validate family members
+      const invalidMembers = familyMembers.filter(
+        (member) => !member.firstName || !member.lastName || !member.category
+      );
+
+      if (invalidMembers.length > 0) {
+        message.error(
+          "Please fill in all required fields for family members (First Name, Last Name, Category)"
+        );
+        return;
+      }
+
       // Remove honeypot fields from payload
       const { captcha, website, ...cleanValues } = values;
 
-      // Add static origin value "P" for pre-registered
-      const payload = {
-        ...cleanValues,
-        origin: "P",
+      // Reset previous registrations
+      resetRegistrations();
+      setIsSubmitting(true);
+
+      // Helper function to remove empty values from object
+      const removeEmptyValues = (obj) => {
+        return Object.fromEntries(
+          Object.entries(obj).filter(([_, value]) => value !== "" && value !== null && value !== undefined)
+        );
       };
 
-      const response = await registerMember.mutateAsync(payload);
+      // Build array of members to register
+      const membersToRegister = [];
+
+      // Get primary member full name (used as designation for family members)
+      const primaryMemberFullName = [
+        cleanValues.firstName,
+        cleanValues.middleName,
+        cleanValues.lastName,
+        cleanValues.suffix,
+      ]
+        .filter(Boolean)
+        .join(" ");
+
+      // Add primary member (with designation only if Spouse/Partner or Child)
+      const primaryMember = removeEmptyValues({
+        zone: cleanValues.zone,
+        clubId: cleanValues.clubId,
+        category: cleanValues.category,
+        designation:
+          cleanValues.category === "Spouse / Partner" ||
+          cleanValues.category === "Child"
+            ? cleanValues.designation
+            : "",
+        firstName: cleanValues.firstName,
+        middleName: cleanValues.middleName || "",
+        lastName: cleanValues.lastName,
+        suffix: cleanValues.suffix || "",
+        email: cleanValues.email,
+        mobileNumber: cleanValues.mobileNumber,
+        origin: "P",
+      });
+      membersToRegister.push(primaryMember);
+
+      // Add family members with parent designation
+      familyMembers.forEach((member) => {
+        const familyMember = removeEmptyValues({
+          zone: cleanValues.zone,
+          clubId: cleanValues.clubId,
+          category: member.category,
+          designation:
+            member.category === "Spouse / Partner" || member.category === "Child"
+              ? primaryMemberFullName
+              : "",
+          firstName: member.firstName,
+          middleName: member.middleName || "",
+          lastName: member.lastName,
+          suffix: member.suffix || "",
+          email: cleanValues.email,
+          mobileNumber: cleanValues.mobileNumber,
+          origin: "P",
+        });
+        membersToRegister.push(familyMember);
+      });
+
+      // Register all members asynchronously
+      for (const member of membersToRegister) {
+        try {
+          const response = await registerMember.mutateAsync(member);
+          addSuccessRegistration({
+            ...response.data,
+            memberInfo: member,
+          });
+        } catch (error) {
+          addFailedRegistration({
+            memberInfo: member,
+            error: error.response?.data?.message || "Registration failed",
+          });
+        }
+      }
 
       // Animate form exit with GSAP
       gsap.to(formRef.current, {
@@ -185,29 +279,38 @@ export default function MemberRegistration() {
         duration: 0.4,
         ease: "power2.in",
         onComplete: () => {
-          setBadgeData(response.data);
           setRegistrationComplete(true);
-          message.success(
-            "Registration successful! Check your email for your digital badge."
-          );
+          setIsSubmitting(false);
+
+          if (registrations.success.length > 0) {
+            message.success(
+              `Successfully registered ${registrations.success.length} member(s)!`
+            );
+          }
+          if (registrations.failed.length > 0) {
+            message.warning(
+              `${registrations.failed.length} registration(s) failed. Please check the details.`
+            );
+          }
         },
       });
     } catch (error) {
+      setIsSubmitting(false);
       message.error(
         error.response?.data?.message || "Failed to register member"
       );
     }
   };
 
-  const downloadQRCode = async () => {
-    if (badgeData?.badgeUrl) {
+  const downloadQRCode = async (badgeUrl, qrCode) => {
+    if (badgeUrl) {
       try {
         // Convert image URL to base64
-        const base64Image = await imageToBase64(badgeData.badgeUrl);
+        const base64Image = await imageToBase64(badgeUrl);
 
         // Create download link
         const a = document.createElement("a");
-        a.download = `PALAROTARY-${badgeData.qrCode}.png`;
+        a.download = `PALAROTARY-${qrCode}.png`;
         a.href = base64Image;
         document.body.appendChild(a);
         a.click();
@@ -225,7 +328,33 @@ export default function MemberRegistration() {
     }
   };
 
-  if (registrationComplete && badgeData) {
+  const addFamilyMember = () => {
+    setFamilyMembers([
+      ...familyMembers,
+      {
+        id: Date.now(),
+        firstName: "",
+        middleName: "",
+        lastName: "",
+        suffix: "",
+        category: "Child",
+      },
+    ]);
+  };
+
+  const removeFamilyMember = (id) => {
+    setFamilyMembers(familyMembers.filter((member) => member.id !== id));
+  };
+
+  const updateFamilyMember = (id, field, value) => {
+    setFamilyMembers(
+      familyMembers.map((member) =>
+        member.id === id ? { ...member, [field]: value } : member
+      )
+    );
+  };
+
+  if (registrationComplete && registrations.success.length > 0) {
     return (
       <motion.div
         ref={containerRef}
@@ -294,191 +423,190 @@ export default function MemberRegistration() {
                 >
                   Registration Successful!
                 </motion.h1>
+                <motion.p
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                  style={{
+                    fontSize: "16px",
+                    color: "#6b7280",
+                    marginBottom: "8px",
+                  }}
+                >
+                  {registrations.success.length} member(s) registered successfully
+                </motion.p>
               </div>
 
-              {/* Two Column Layout */}
+              {/* Failed Registrations Alert */}
+              {registrations.failed.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  style={{ marginBottom: "24px" }}
+                >
+                  <Alert
+                    message="Some Registrations Failed"
+                    description={
+                      <div>
+                        {registrations.failed.map((failed, index) => (
+                          <div key={index} style={{ marginBottom: "8px" }}>
+                            <strong>
+                              {failed.memberInfo.firstName}{" "}
+                              {failed.memberInfo.lastName}
+                            </strong>
+                            : {failed.error}
+                          </div>
+                        ))}
+                      </div>
+                    }
+                    type="warning"
+                    showIcon
+                    style={{
+                      borderRadius: "12px",
+                      border: "2px solid #f7a50a30",
+                    }}
+                  />
+                </motion.div>
+              )}
+
+              {/* Digital Badges Grid */}
+              <div style={{ marginBottom: "24px" }}>
+                <Row gutter={[16, 16]}>
+                  {registrations.success.map((registration, index) => (
+                    <Col xs={24} sm={12} lg={8} key={index}>
+                      <motion.div
+                        className="badge-item"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.6 + index * 0.1 }}
+                        whileHover={{ scale: 1.02 }}
+                        style={{
+                          background:
+                            "linear-gradient(135deg, #1e3a8a08 0%, #3b82f608 100%)",
+                          padding: "16px",
+                          borderRadius: "16px",
+                          border: "2px solid #3b82f620",
+                          height: "100%",
+                        }}
+                      >
+                        <div
+                          style={{
+                            textAlign: "center",
+                            marginBottom: "12px",
+                          }}
+                        >
+                          <h4
+                            style={{
+                              margin: 0,
+                              fontSize: "14px",
+                              fontWeight: "700",
+                              color: "#1e3a8a",
+                              textTransform: "uppercase",
+                            }}
+                          >
+                            {registration.firstName} {registration.lastName}
+                          </h4>
+                          <p
+                            style={{
+                              margin: "4px 0 0 0",
+                              fontSize: "12px",
+                              color: "#6b7280",
+                            }}
+                          >
+                            {registration.memberInfo?.category}
+                          </p>
+                        </div>
+
+                        <div
+                          className="qr-code"
+                          style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            marginBottom: "12px",
+                          }}
+                        >
+                          {registration.badgeUrl && (
+                            <motion.img
+                              initial={{ rotate: -10, scale: 0.8 }}
+                              animate={{ rotate: 0, scale: 1 }}
+                              transition={{
+                                type: "spring",
+                                stiffness: 200,
+                                delay: 0.7 + index * 0.1,
+                              }}
+                              src={registration.badgeUrl}
+                              alt={`Badge for ${registration.firstName}`}
+                              style={{
+                                width: "100%",
+                                maxWidth: "200px",
+                                borderRadius: "8px",
+                              }}
+                            />
+                          )}
+                        </div>
+
+                        <motion.div
+                          className="badge-item"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.8 + index * 0.1 }}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <Button
+                            type="primary"
+                            icon={<DownloadOutlined />}
+                            onClick={() =>
+                              downloadQRCode(
+                                registration.badgeUrl,
+                                registration.qrCode
+                              )
+                            }
+                            block
+                            size="small"
+                            style={{
+                              background:
+                                "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)",
+                              border: "none",
+                              height: "36px",
+                              borderRadius: "8px",
+                              fontWeight: "600",
+                              fontSize: "13px",
+                              boxShadow: "0 4px 15px rgba(30, 58, 138, 0.4)",
+                            }}
+                          >
+                            Download
+                          </Button>
+                        </motion.div>
+                      </motion.div>
+                    </Col>
+                  ))}
+                </Row>
+              </div>
+
+              {/* Important Info and Actions */}
               <Row gutter={[24, 24]}>
-                {/* Left Column - Digital Badge */}
                 <Col xs={24} lg={12}>
                   <motion.div
                     className="badge-item"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                    whileHover={{ scale: 1.02 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 1.0 }}
                     style={{
                       background:
-                        "linear-gradient(135deg, #1e3a8a08 0%, #3b82f608 100%)",
-                      padding: "20px",
-                      borderRadius: "20px",
-                      border: "2px solid #3b82f620",
-                      height: "100%",
+                        "linear-gradient(135deg, #3b82f615 0%, #1e3a8a15 100%)",
+                      padding: "16px",
+                      borderRadius: "12px",
+                      fontSize: "13px",
+                      color: "#1e3a8a",
+                      lineHeight: "1.6",
+                      marginBottom: "16px",
                     }}
                   >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "8px",
-                        marginBottom: "16px",
-                      }}
-                    >
-                      <QrcodeOutlined
-                        style={{ fontSize: "24px", color: "#1e3a8a" }}
-                      />
-                      <h3
-                        style={{
-                          margin: 0,
-                          fontSize: "18px",
-                          fontWeight: "700",
-                          color: "#1e3a8a",
-                        }}
-                      >
-                        Your Digital Badge
-                      </h3>
-                    </div>
-
-                    <div
-                      className="qr-code"
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        marginBottom: "20px",
-                      }}
-                    >
-                      {badgeData?.qrCode && (
-                        <motion.img
-                          initial={{ rotate: -10, scale: 0.8 }}
-                          animate={{ rotate: 0, scale: 1 }}
-                          transition={{
-                            type: "spring",
-                            stiffness: 200,
-                            delay: 0.5,
-                          }}
-                          src={badgeData?.badgeUrl}
-                          alt="QR Code Badge"
-                          style={{
-                            maxWidth: "400px",
-                            // width: "220px",
-                            // height: "220px",
-                            // border: "3px solid #1e3a8a",
-                            // borderRadius: "16px",
-                            // padding: "12px",
-                            // background: "white",
-                            // boxShadow: "0 8px 20px rgba(30, 58, 138, 0.2)",
-                          }}
-                        />
-                      )}
-                    </div>
-
-                    {/* <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.6 }}
-                  style={{
-                    background: "#f8fafc",
-                    padding: "16px",
-                    borderRadius: "12px",
-                    textAlign: "left",
-                    marginBottom: "16px",
-                  }}
-                >
-                  <div
-                    className="badge-item"
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "auto 1fr",
-                      gap: "8px 16px",
-                      fontSize: "14px",
-                    }}
-                  >
-                    <strong style={{ color: "#475569" }}>Name:</strong>
-                    <span
-                      style={{ color: "#1e293b", fontWeight: "600" }}
-                      className="uppercase"
-                    >
-                      {[badgeData?.firstName, badgeData?.lastName]
-                        .join(" ")
-                        ?.trim()}
-                    </span>
-
-                    <strong style={{ color: "#475569" }}>Club:</strong>
-                    <span
-                      style={{ color: "#1e293b", fontWeight: "600" }}
-                      className="uppercase"
-                    >
-                      {badgeData?.clubName}
-                    </span>
-
-                    {badgeData?.companyName && (
-                      <>
-                        <strong style={{ color: "#475569" }}>Company:</strong>
-                        <span style={{ color: "#1e293b", fontWeight: "600" }}>
-                          {badgeData?.companyName}
-                        </span>
-                      </>
-                    )}
-
-                    {badgeData?.position && (
-                      <>
-                        <strong style={{ color: "#475569" }}>Position:</strong>
-                        <span style={{ color: "#1e293b", fontWeight: "600" }}>
-                          {badgeData?.position}
-                        </span>
-                      </>
-                    )}
-                  </div>
-                </motion.div> */}
-
-                    <motion.div
-                      className="badge-item"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.7 }}
-                      style={{
-                        background:
-                          "linear-gradient(135deg, #3b82f615 0%, #1e3a8a15 100%)",
-                        padding: "12px 16px",
-                        borderRadius: "12px",
-                        marginBottom: "16px",
-                        fontSize: "13px",
-                        color: "#1e3a8a",
-                        lineHeight: "1.6",
-                      }}
-                    >
-                      Your digital badge has been sent to your email. Present
-                      this QR code at the registration desk on event day.
-                    </motion.div>
-
-                    <motion.div
-                      className="badge-item"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.8 }}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <Button
-                        type="primary"
-                        icon={<DownloadOutlined />}
-                        onClick={downloadQRCode}
-                        block
-                        size="large"
-                        style={{
-                          background:
-                            "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)",
-                          border: "none",
-                          height: "48px",
-                          borderRadius: "12px",
-                          fontWeight: "600",
-                          fontSize: "16px",
-                          boxShadow: "0 4px 15px rgba(30, 58, 138, 0.4)",
-                        }}
-                      >
-                        Download QR Code
-                      </Button>
-                    </motion.div>
+                    <strong>Important:</strong> Digital badges have been sent to
+                    your email. Present these QR codes at the registration desk on
+                    event day.
                   </motion.div>
                 </Col>
 
@@ -518,22 +646,22 @@ export default function MemberRegistration() {
                     >
                       <p style={{ margin: "4px 0" }}>
                         <strong>Event:</strong>{" "}
-                        {badgeData?.eventDetails?.eventName}
+                        {registrations.success[0]?.eventDetails?.eventName}
                       </p>
                       <p style={{ margin: "4px 0" }}>
                         <strong>Date:</strong>{" "}
-                        {badgeData?.eventDetails?.eventDate}
+                        {registrations.success[0]?.eventDetails?.eventDate}
                       </p>
-                      {badgeData?.eventDetails?.location && (
+                      {registrations.success[0]?.eventDetails?.location && (
                         <p style={{ margin: "4px 0" }}>
                           <strong>Time:</strong>{" "}
-                          {badgeData?.eventDetails?.location}
+                          {registrations.success[0]?.eventDetails?.location}
                         </p>
                       )}
-                      {badgeData?.eventDetails?.description && (
+                      {registrations.success[0]?.eventDetails?.description && (
                         <p style={{ margin: "4px 0" }}>
                           <strong>Venue:</strong>{" "}
-                          {badgeData?.eventDetails?.description}
+                          {registrations.success[0]?.eventDetails?.description}
                         </p>
                       )}
                     </div>
@@ -706,7 +834,7 @@ export default function MemberRegistration() {
                           onClick={() =>
                             navigate("/order-shirt", {
                               state: {
-                                memberData: registerMember.data?.data,
+                                memberData: registrations.success[0],
                               },
                             })
                           }
@@ -897,7 +1025,7 @@ export default function MemberRegistration() {
           <div ref={formRef}>
             <Form
               form={form}
-              layout="vertical"
+              layout="vertical" 
               onFinish={onFinish}
               // requiredMark={false}
             >
@@ -1137,6 +1265,279 @@ export default function MemberRegistration() {
                 </Form.Item>
               </div>
 
+              {/* Add Family Member Section - Only for Rotarian or Rotaract/Interact */}
+              {(category === "Rotarian" ||
+                category === "Rotaract / Interact") && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                  style={{ marginTop: "24px" }}
+                >
+                  <div
+                    style={{
+                      background:
+                        "linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)",
+                      padding: "20px",
+                      borderRadius: "16px",
+                      border: "2px solid #3b82f620",
+                      marginBottom: "16px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        marginBottom: "16px",
+                      }}
+                    >
+                      <h3
+                        style={{
+                          margin: 0,
+                          fontSize: "16px",
+                          fontWeight: "700",
+                          color: "#1e3a8a",
+                        }}
+                      >
+                        Family Members
+                      </h3>
+                      <Button
+                        type="dashed"
+                        icon={<UserAddOutlined />}
+                        onClick={addFamilyMember}
+                        style={{
+                          borderColor: "#3b82f6",
+                          color: "#3b82f6",
+                          fontWeight: "600",
+                        }}
+                      >
+                        Add Family Member
+                      </Button>
+                    </div>
+
+                    {familyMembers.length === 0 ? (
+                      <div
+                        style={{
+                          textAlign: "center",
+                          padding: "20px",
+                          color: "#6b7280",
+                          fontSize: "14px",
+                        }}
+                      >
+                        No family members added yet. Click "Add Family Member" to
+                        register your family.
+                      </div>
+                    ) : (
+                      <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                        {familyMembers.map((member, index) => (
+                          <motion.div
+                            key={member.id}
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            style={{
+                              background: "white",
+                              padding: "16px",
+                              borderRadius: "12px",
+                              border: "1px solid #e5e7eb",
+                              position: "relative",
+                            }}
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                marginBottom: "12px",
+                              }}
+                            >
+                              <span
+                                style={{
+                                  fontWeight: "600",
+                                  color: "#1e3a8a",
+                                  fontSize: "14px",
+                                }}
+                              >
+                                Family Member {index + 1}
+                              </span>
+                              <Button
+                                type="text"
+                                danger
+                                icon={<CloseOutlined />}
+                                size="small"
+                                onClick={() => removeFamilyMember(member.id)}
+                              />
+                            </div>
+
+                            <div
+                              style={{
+                                display: "grid",
+                                gridTemplateColumns: "1fr 1fr",
+                                gap: "12px",
+                              }}
+                            >
+                              <div>
+                                <label
+                                  style={{
+                                    display: "block",
+                                    marginBottom: "4px",
+                                    fontWeight: "600",
+                                    color: "#333",
+                                    fontSize: "13px",
+                                  }}
+                                >
+                                  First Name <span style={{ color: "red" }}>*</span>
+                                </label>
+                                <Input
+                                  placeholder="First name"
+                                  value={member.firstName}
+                                  onChange={(e) =>
+                                    updateFamilyMember(
+                                      member.id,
+                                      "firstName",
+                                      e.target.value.toUpperCase()
+                                    )
+                                  }
+                                  style={{ borderRadius: "8px" }}
+                                />
+                              </div>
+
+                              <div>
+                                <label
+                                  style={{
+                                    display: "block",
+                                    marginBottom: "4px",
+                                    fontWeight: "600",
+                                    color: "#333",
+                                    fontSize: "13px",
+                                  }}
+                                >
+                                  Middle Name
+                                </label>
+                                <Input
+                                  placeholder="Middle name (optional)"
+                                  value={member.middleName}
+                                  onChange={(e) =>
+                                    updateFamilyMember(
+                                      member.id,
+                                      "middleName",
+                                      e.target.value.toUpperCase()
+                                    )
+                                  }
+                                  style={{ borderRadius: "8px" }}
+                                />
+                              </div>
+
+                              <div>
+                                <label
+                                  style={{
+                                    display: "block",
+                                    marginBottom: "4px",
+                                    fontWeight: "600",
+                                    color: "#333",
+                                    fontSize: "13px",
+                                  }}
+                                >
+                                  Last Name <span style={{ color: "red" }}>*</span>
+                                </label>
+                                <Input
+                                  placeholder="Last name"
+                                  value={member.lastName}
+                                  onChange={(e) =>
+                                    updateFamilyMember(
+                                      member.id,
+                                      "lastName",
+                                      e.target.value.toUpperCase()
+                                    )
+                                  }
+                                  style={{ borderRadius: "8px" }}
+                                />
+                              </div>
+
+                              <div>
+                                <label
+                                  style={{
+                                    display: "block",
+                                    marginBottom: "4px",
+                                    fontWeight: "600",
+                                    color: "#333",
+                                    fontSize: "13px",
+                                  }}
+                                >
+                                  Suffix
+                                </label>
+                                <Input
+                                  placeholder="Jr., Sr., III (optional)"
+                                  value={member.suffix}
+                                  onChange={(e) =>
+                                    updateFamilyMember(
+                                      member.id,
+                                      "suffix",
+                                      e.target.value.toUpperCase()
+                                    )
+                                  }
+                                  style={{ borderRadius: "8px" }}
+                                />
+                              </div>
+
+                              <div style={{ gridColumn: "1 / -1" }}>
+                                <label
+                                  style={{
+                                    display: "block",
+                                    marginBottom: "4px",
+                                    fontWeight: "600",
+                                    color: "#333",
+                                    fontSize: "13px",
+                                  }}
+                                >
+                                  Category <span style={{ color: "red" }}>*</span>
+                                </label>
+                                <Select
+                                  placeholder="Select category"
+                                  value={member.category}
+                                  onChange={(value) =>
+                                    updateFamilyMember(member.id, "category", value)
+                                  }
+                                  style={{ width: "100%", borderRadius: "8px" }}
+                                  options={[
+                                    { value: "Rotarian", label: "Rotarian" },
+                                    {
+                                      value: "Rotaract / Interact",
+                                      label: "Rotaract / Interact",
+                                    },
+                                    { value: "Child", label: "Child" },
+                                    {
+                                      value: "Spouse / Partner",
+                                      label: "Spouse / Partner",
+                                    },
+                                  ]}
+                                />
+                              </div>
+                            </div>
+
+                            <div
+                              style={{
+                                marginTop: "12px",
+                                padding: "8px 12px",
+                                background: "#f0f9ff",
+                                borderRadius: "8px",
+                                fontSize: "12px",
+                                color: "#1e3a8a",
+                              }}
+                            >
+                              <strong>Note:</strong> Email and mobile number will be
+                              copied from the primary member.
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+
               {/* Honeypot fields - hidden from users, visible to bots */}
               <div
                 style={{
@@ -1174,7 +1575,7 @@ export default function MemberRegistration() {
                     htmlType="submit"
                     size="large"
                     block
-                    loading={registerMember.isPending}
+                    loading={isSubmitting}
                     style={{
                       background:
                         "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)",
@@ -1186,7 +1587,9 @@ export default function MemberRegistration() {
                       boxShadow: "0 4px 15px rgba(30, 58, 138, 0.4)",
                     }}
                   >
-                    Register & Get Digital Badge
+                    {familyMembers.length > 0
+                      ? `Register ${familyMembers.length + 1} Member(s) & Get Digital Badges`
+                      : "Register & Get Digital Badge"}
                   </Button>
                 </motion.div>
               </Form.Item>
