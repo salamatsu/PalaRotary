@@ -50,8 +50,6 @@ export default function MemberRegistration() {
   const [badgeData, setBadgeData] = useState(null);
   const [formLoadTime] = useState(Date.now());
 
-  console.log(badgeData);
-
   const containerRef = useRef(null);
   const formRef = useRef(null);
   const badgeRef = useRef(null);
@@ -243,7 +241,7 @@ export default function MemberRegistration() {
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          style={{ width: "100%", maxWidth: "550px" }}
+          style={{ width: "100%", maxWidth: "1200px" }}
         >
           <Card
             style={{
@@ -254,121 +252,124 @@ export default function MemberRegistration() {
               backdropFilter: "blur(10px)",
             }}
           >
-            <div
-              ref={badgeRef}
-              style={{ textAlign: "center", padding: "20px 0" }}
-            >
-              <motion.div
-                className="success-icon"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
-                style={{
-                  width: "80px",
-                  height: "80px",
-                  borderRadius: "50%",
-                  background:
-                    "linear-gradient(135deg, #10b981 0%, #059669 100%)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  margin: "0 auto 20px",
-                  boxShadow: "0 8px 25px rgba(16, 185, 129, 0.3)",
-                }}
-              >
-                <CheckCircleOutlined
-                  style={{ fontSize: "40px", color: "white" }}
-                />
-              </motion.div>
-
-              <motion.h1
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                style={{
-                  fontSize: "24px",
-                  fontWeight: "800",
-                  color: "#10b981",
-                  marginBottom: "8px",
-                }}
-              >
-                Registration Successful!
-              </motion.h1>
-
-              <motion.div
-                className="badge-item"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                whileHover={{ scale: 1.02 }}
-                style={{
-                  background:
-                    "linear-gradient(135deg, #1e3a8a08 0%, #3b82f608 100%)",
-                  padding: "20px",
-                  borderRadius: "20px",
-                  marginTop: "24px",
-                  marginBottom: "20px",
-                  border: "2px solid #3b82f620",
-                }}
-              >
-                <div
+            <div ref={badgeRef} style={{ padding: "20px" }}>
+              {/* Success Header - Full Width */}
+              <div style={{ textAlign: "center", marginBottom: "24px" }}>
+                <motion.div
+                  className="success-icon"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
                   style={{
+                    width: "80px",
+                    height: "80px",
+                    borderRadius: "50%",
+                    background:
+                      "linear-gradient(135deg, #10b981 0%, #059669 100%)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    gap: "8px",
-                    marginBottom: "16px",
+                    margin: "0 auto 20px",
+                    boxShadow: "0 8px 25px rgba(16, 185, 129, 0.3)",
                   }}
                 >
-                  <QrcodeOutlined
-                    style={{ fontSize: "24px", color: "#1e3a8a" }}
+                  <CheckCircleOutlined
+                    style={{ fontSize: "40px", color: "white" }}
                   />
-                  <h3
+                </motion.div>
+
+                <motion.h1
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                  style={{
+                    fontSize: "24px",
+                    fontWeight: "800",
+                    color: "#10b981",
+                    marginBottom: "8px",
+                  }}
+                >
+                  Registration Successful!
+                </motion.h1>
+              </div>
+
+              {/* Two Column Layout */}
+              <Row gutter={[24, 24]}>
+                {/* Left Column - Digital Badge */}
+                <Col xs={24} lg={12}>
+                  <motion.div
+                    className="badge-item"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                    whileHover={{ scale: 1.02 }}
                     style={{
-                      margin: 0,
-                      fontSize: "18px",
-                      fontWeight: "700",
-                      color: "#1e3a8a",
+                      background:
+                        "linear-gradient(135deg, #1e3a8a08 0%, #3b82f608 100%)",
+                      padding: "20px",
+                      borderRadius: "20px",
+                      border: "2px solid #3b82f620",
+                      height: "100%",
                     }}
                   >
-                    Your Digital Badge
-                  </h3>
-                </div>
-
-                <div
-                  className="qr-code"
-                  style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    marginBottom: "20px",
-                  }}
-                >
-                  {badgeData?.qrCode && (
-                    <motion.img
-                      initial={{ rotate: -10, scale: 0.8 }}
-                      animate={{ rotate: 0, scale: 1 }}
-                      transition={{
-                        type: "spring",
-                        stiffness: 200,
-                        delay: 0.5,
-                      }}
-                      src={badgeData?.badgeUrl}
-                      alt="QR Code Badge"
+                    <div
                       style={{
-                        maxWidth: "400px",
-                        // width: "220px",
-                        // height: "220px",
-                        // border: "3px solid #1e3a8a",
-                        // borderRadius: "16px",
-                        // padding: "12px",
-                        // background: "white",
-                        // boxShadow: "0 8px 20px rgba(30, 58, 138, 0.2)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "8px",
+                        marginBottom: "16px",
                       }}
-                    />
-                  )}
-                </div>
+                    >
+                      <QrcodeOutlined
+                        style={{ fontSize: "24px", color: "#1e3a8a" }}
+                      />
+                      <h3
+                        style={{
+                          margin: 0,
+                          fontSize: "18px",
+                          fontWeight: "700",
+                          color: "#1e3a8a",
+                        }}
+                      >
+                        Your Digital Badge
+                      </h3>
+                    </div>
 
-                <motion.div
+                    <div
+                      className="qr-code"
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        marginBottom: "20px",
+                      }}
+                    >
+                      {badgeData?.qrCode && (
+                        <motion.img
+                          initial={{ rotate: -10, scale: 0.8 }}
+                          animate={{ rotate: 0, scale: 1 }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 200,
+                            delay: 0.5,
+                          }}
+                          src={badgeData?.badgeUrl}
+                          alt="QR Code Badge"
+                          style={{
+                            maxWidth: "400px",
+                            // width: "220px",
+                            // height: "220px",
+                            // border: "3px solid #1e3a8a",
+                            // borderRadius: "16px",
+                            // padding: "12px",
+                            // background: "white",
+                            // boxShadow: "0 8px 20px rgba(30, 58, 138, 0.2)",
+                          }}
+                        />
+                      )}
+                    </div>
+
+                    {/* <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.6 }}
@@ -425,290 +426,301 @@ export default function MemberRegistration() {
                       </>
                     )}
                   </div>
-                </motion.div>
+                </motion.div> */}
 
-                <motion.div
-                  className="badge-item"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.7 }}
-                  style={{
-                    background:
-                      "linear-gradient(135deg, #3b82f615 0%, #1e3a8a15 100%)",
-                    padding: "12px 16px",
-                    borderRadius: "12px",
-                    marginBottom: "16px",
-                    fontSize: "13px",
-                    color: "#1e3a8a",
-                    lineHeight: "1.6",
-                  }}
-                >
-                  Your digital badge has been sent to your email. Present this
-                  QR code at the registration desk on event day.
-                </motion.div>
-
-                <motion.div
-                  className="badge-item"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.8 }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <Button
-                    type="primary"
-                    icon={<DownloadOutlined />}
-                    onClick={downloadQRCode}
-                    block
-                    size="large"
-                    style={{
-                      background:
-                        "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)",
-                      border: "none",
-                      height: "48px",
-                      borderRadius: "12px",
-                      fontWeight: "600",
-                      fontSize: "16px",
-                      boxShadow: "0 4px 15px rgba(30, 58, 138, 0.4)",
-                    }}
-                  >
-                    Download QR Code
-                  </Button>
-                </motion.div>
-              </motion.div>
-
-              <motion.div
-                className="badge-item"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.9 }}
-                style={{
-                  background:
-                    "linear-gradient(135deg, #fff9eb 0%, #fff3d6 100%)",
-                  padding: "16px",
-                  borderRadius: "16px",
-                  marginBottom: "20px",
-                  textAlign: "left",
-                  border: "2px solid #f7a50a30",
-                }}
-              >
-                <h3
-                  style={{
-                    fontSize: "14px",
-                    fontWeight: "700",
-                    marginBottom: "8px",
-                    color: "#f7a50a",
-                  }}
-                >
-                  Event Details
-                </h3>
-                <div
-                  style={{
-                    fontSize: "13px",
-                    color: "#1a1a2e",
-                    lineHeight: "1.6",
-                  }}
-                >
-                  <p style={{ margin: "4px 0" }}>
-                    <strong>Event:</strong> {badgeData?.eventDetails?.eventName}
-                  </p>
-                  <p style={{ margin: "4px 0" }}>
-                    <strong>Date:</strong> {badgeData?.eventDetails?.eventDate}
-                  </p>
-                  {badgeData?.eventDetails?.location && (
-                    <p style={{ margin: "4px 0" }}>
-                      <strong>Time:</strong> {badgeData?.eventDetails?.location}
-                    </p>
-                  )}
-                  {badgeData?.eventDetails?.description && (
-                    <p style={{ margin: "4px 0" }}>
-                      <strong>Venue:</strong>{" "}
-                      {badgeData?.eventDetails?.description}
-                    </p>
-                  )}
-                </div>
-              </motion.div>
-
-              {/* Alert to download badge first */}
-              <motion.div
-                className="badge-item"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.0 }}
-              >
-                <Alert
-                  message="Important Reminder"
-                  description="Please download your digital badge before leaving this page or ordering a shirt. You'll need it for event registration!"
-                  type="warning"
-                  showIcon
-                  style={{
-                    marginBottom: "20px",
-                    borderRadius: "12px",
-                    border: "2px solid #f7a50a30",
-                  }}
-                />
-              </motion.div>
-
-              {/* Shirt Ordering Advertisement */}
-              <motion.div
-                className="badge-item"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.1 }}
-              >
-                <Card
-                  style={{
-                    borderRadius: "20px",
-                    boxShadow: "0 10px 40px rgba(28, 60, 109, 0.15)",
-                    border: "2px solid #e1e5ef",
-                    overflow: "hidden",
-                    background:
-                      "linear-gradient(135deg, #ffffff 0%, #f0f2f7 100%)",
-                    marginBottom: "20px",
-                  }}
-                  styles={{
-                    body: {
-                      padding: "20px",
-                    },
-                  }}
-                >
-                  <motion.div
-                    style={{ textAlign: "center", marginBottom: "20px" }}
-                    whileHover={{ scale: 1.05, y: -5 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <img
-                      src={shirtTemplate}
-                      alt="Shirt Template"
+                    <motion.div
+                      className="badge-item"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.7 }}
                       style={{
-                        width: "100%",
-                        maxWidth: "200px",
-                        height: "auto",
-                        margin: "0 auto",
+                        background:
+                          "linear-gradient(135deg, #3b82f615 0%, #1e3a8a15 100%)",
+                        padding: "12px 16px",
                         borderRadius: "12px",
-                        boxShadow: "0 10px 30px rgba(28, 60, 109, 0.2)",
+                        marginBottom: "16px",
+                        fontSize: "13px",
+                        color: "#1e3a8a",
+                        lineHeight: "1.6",
                       }}
-                    />
+                    >
+                      Your digital badge has been sent to your email. Present
+                      this QR code at the registration desk on event day.
+                    </motion.div>
+
+                    <motion.div
+                      className="badge-item"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.8 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <Button
+                        type="primary"
+                        icon={<DownloadOutlined />}
+                        onClick={downloadQRCode}
+                        block
+                        size="large"
+                        style={{
+                          background:
+                            "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)",
+                          border: "none",
+                          height: "48px",
+                          borderRadius: "12px",
+                          fontWeight: "600",
+                          fontSize: "16px",
+                          boxShadow: "0 4px 15px rgba(30, 58, 138, 0.4)",
+                        }}
+                      >
+                        Download QR Code
+                      </Button>
+                    </motion.div>
                   </motion.div>
+                </Col>
 
-                  <h3
-                    style={{
-                      marginBottom: "8px",
-                      textAlign: "center",
-                      fontSize: "22px",
-                      color: "#1c3c6d",
-                      fontWeight: "700",
-                    }}
-                  >
-                    Order Customized Shirt
-                  </h3>
-                  <Paragraph
-                    style={{
-                      fontSize: "14px",
-                      color: "#6b7280",
-                      marginBottom: "16px",
-                      textAlign: "center",
-                    }}
-                  >
-                    Get your personalized PALAROTARY 2026 shirt
-                  </Paragraph>
-
+                {/* Right Column - Event Details, Alert, and Shirt Advertisement */}
+                <Col xs={24} lg={12}>
                   <motion.div
-                    whileHover={{ scale: 1.03 }}
-                    animate={{
-                      boxShadow: [
-                        "0 4px 15px rgba(213, 72, 57, 0.2)",
-                        "0 8px 25px rgba(213, 72, 57, 0.3)",
-                        "0 4px 15px rgba(213, 72, 57, 0.2)",
-                      ],
-                    }}
-                    transition={{ duration: 2, repeat: Infinity }}
+                    className="badge-item"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.9 }}
                     style={{
                       background:
-                        "linear-gradient(135deg, #fde5e320 0%, #fbcbc720 100%)",
+                        "linear-gradient(135deg, #fff9eb 0%, #fff3d6 100%)",
                       padding: "16px",
-                      borderRadius: "12px",
-                      marginBottom: "16px",
-                      border: "2px solid #d5483940",
-                      textAlign: "center",
+                      borderRadius: "16px",
+                      marginBottom: "20px",
+                      textAlign: "left",
+                      border: "2px solid #f7a50a30",
                     }}
                   >
                     <h3
                       style={{
-                        margin: 0,
-                        color: "#d54839",
-                        fontSize: "28px",
+                        fontSize: "14px",
                         fontWeight: "700",
+                        marginBottom: "8px",
+                        color: "#f7a50a",
                       }}
                     >
-                      ₱300
+                      Event Details
                     </h3>
-                    <Paragraph
+                    <div
                       style={{
-                        margin: "4px 0 0 0",
                         fontSize: "13px",
-                        color: "#6b7280",
+                        color: "#1a1a2e",
+                        lineHeight: "1.6",
                       }}
                     >
-                      All sizes - with custom name and number (00-99)
-                    </Paragraph>
+                      <p style={{ margin: "4px 0" }}>
+                        <strong>Event:</strong>{" "}
+                        {badgeData?.eventDetails?.eventName}
+                      </p>
+                      <p style={{ margin: "4px 0" }}>
+                        <strong>Date:</strong>{" "}
+                        {badgeData?.eventDetails?.eventDate}
+                      </p>
+                      {badgeData?.eventDetails?.location && (
+                        <p style={{ margin: "4px 0" }}>
+                          <strong>Time:</strong>{" "}
+                          {badgeData?.eventDetails?.location}
+                        </p>
+                      )}
+                      {badgeData?.eventDetails?.description && (
+                        <p style={{ margin: "4px 0" }}>
+                          <strong>Venue:</strong>{" "}
+                          {badgeData?.eventDetails?.description}
+                        </p>
+                      )}
+                    </div>
                   </motion.div>
 
-                  <div style={{ marginBottom: "20px" }}>
-                    {[
-                      "Customize your shirt",
-                      "Choose your size",
-                      "Add your name and 2-digit number (00-99)",
-                      "Secure online payment",
-                    ].map((text, i) => (
+                  {/* Alert to download badge first */}
+                  <motion.div
+                    className="badge-item"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 1.0 }}
+                  >
+                    <Alert
+                      message="Important Reminder"
+                      description="Please download your digital badge before leaving this page or ordering a shirt. You'll need it for event registration!"
+                      type="warning"
+                      showIcon
+                      style={{
+                        marginBottom: "20px",
+                        borderRadius: "12px",
+                        border: "2px solid #f7a50a30",
+                      }}
+                    />
+                  </motion.div>
+
+                  {/* Shirt Ordering Advertisement */}
+                  <motion.div
+                    className="badge-item"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 1.1 }}
+                  >
+                    <Card
+                      style={{
+                        borderRadius: "20px",
+                        boxShadow: "0 10px 40px rgba(28, 60, 109, 0.15)",
+                        border: "2px solid #e1e5ef",
+                        overflow: "hidden",
+                        background:
+                          "linear-gradient(135deg, #ffffff 0%, #f0f2f7 100%)",
+                        marginBottom: "20px",
+                      }}
+                      styles={{
+                        body: {
+                          padding: "20px",
+                        },
+                      }}
+                    >
                       <motion.div
-                        key={i}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 1.2 + i * 0.1 }}
+                        style={{ textAlign: "center", marginBottom: "20px" }}
+                        whileHover={{ scale: 1.05, y: -5 }}
+                        transition={{ duration: 0.5 }}
+                      >
+                        <img
+                          src={shirtTemplate}
+                          alt="Shirt Template"
+                          style={{
+                            width: "100%",
+                            maxWidth: "200px",
+                            height: "auto",
+                            margin: "0 auto",
+                            borderRadius: "12px",
+                            boxShadow: "0 10px 30px rgba(28, 60, 109, 0.2)",
+                          }}
+                        />
+                      </motion.div>
+
+                      <h3
                         style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "10px",
-                          marginBottom: "10px",
+                          marginBottom: "8px",
+                          textAlign: "center",
+                          fontSize: "22px",
+                          color: "#1c3c6d",
+                          fontWeight: "700",
                         }}
                       >
-                        <CheckCircleOutlined
-                          style={{ fontSize: "16px", color: "#d54839" }}
-                        />
-                        <span style={{ fontSize: "14px", color: "#1a1a2e" }}>
-                          {text}
-                        </span>
+                        Order Customized Shirt
+                      </h3>
+                      <Paragraph
+                        style={{
+                          fontSize: "14px",
+                          color: "#6b7280",
+                          marginBottom: "16px",
+                          textAlign: "center",
+                        }}
+                      >
+                        Get your personalized PALAROTARY 2026 shirt
+                      </Paragraph>
+
+                      <motion.div
+                        whileHover={{ scale: 1.03 }}
+                        animate={{
+                          boxShadow: [
+                            "0 4px 15px rgba(213, 72, 57, 0.2)",
+                            "0 8px 25px rgba(213, 72, 57, 0.3)",
+                            "0 4px 15px rgba(213, 72, 57, 0.2)",
+                          ],
+                        }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        style={{
+                          background:
+                            "linear-gradient(135deg, #fde5e320 0%, #fbcbc720 100%)",
+                          padding: "16px",
+                          borderRadius: "12px",
+                          marginBottom: "16px",
+                          border: "2px solid #d5483940",
+                          textAlign: "center",
+                        }}
+                      >
+                        <h3
+                          style={{
+                            margin: 0,
+                            color: "#d54839",
+                            fontSize: "28px",
+                            fontWeight: "700",
+                          }}
+                        >
+                          ₱300
+                        </h3>
+                        <Paragraph
+                          style={{
+                            margin: "4px 0 0 0",
+                            fontSize: "13px",
+                            color: "#6b7280",
+                          }}
+                        >
+                          All sizes - with custom name and number (00-99)
+                        </Paragraph>
                       </motion.div>
-                    ))}
-                  </div>
 
-                  <motion.div
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <Button
-                      type="primary"
-                      size="large"
-                      block
-                      onClick={() => navigate("/order-shirt")}
-                      style={{
-                        background:
-                          "linear-gradient(135deg, #d54839 0%, #c13829 100%)",
-                        border: "none",
-                        height: "48px",
-                        fontSize: "16px",
-                        fontWeight: "600",
-                        borderRadius: "12px",
-                        boxShadow: "0 6px 20px rgba(213, 72, 57, 0.4)",
-                      }}
-                    >
-                      Order Now
-                    </Button>
+                      <div style={{ marginBottom: "20px" }}>
+                        {[
+                          "Customize your shirt",
+                          "Choose your size",
+                          "Add your name and 2-digit number (00-99)",
+                          "Secure online payment",
+                        ].map((text, i) => (
+                          <motion.div
+                            key={i}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 1.2 + i * 0.1 }}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "10px",
+                              marginBottom: "10px",
+                            }}
+                          >
+                            <CheckCircleOutlined
+                              style={{ fontSize: "16px", color: "#d54839" }}
+                            />
+                            <span
+                              style={{ fontSize: "14px", color: "#1a1a2e" }}
+                            >
+                              {text}
+                            </span>
+                          </motion.div>
+                        ))}
+                      </div>
+
+                      <motion.div
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <Button
+                          type="primary"
+                          size="large"
+                          block
+                          onClick={() => navigate("/order-shirt")}
+                          style={{
+                            background:
+                              "linear-gradient(135deg, #d54839 0%, #c13829 100%)",
+                            border: "none",
+                            height: "48px",
+                            fontSize: "16px",
+                            fontWeight: "600",
+                            borderRadius: "12px",
+                            boxShadow: "0 6px 20px rgba(213, 72, 57, 0.4)",
+                          }}
+                        >
+                          Order Now
+                        </Button>
+                      </motion.div>
+                    </Card>
                   </motion.div>
-                </Card>
-              </motion.div>
+                </Col>
+              </Row>
 
+              {/* Register Another Member Button - Full Width */}
               <motion.div
                 className="badge-item"
                 initial={{ opacity: 0, y: 20 }}
@@ -716,6 +728,7 @@ export default function MemberRegistration() {
                 transition={{ delay: 1.6 }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
+                style={{ marginTop: "24px" }}
               >
                 <Button
                   type="default"
