@@ -16,7 +16,12 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { cloud, shirtTemplate } from "../../assets/images/Other";
-import { logo2, logoBanner, playersImg, yearImg } from "../../assets/images/logos";
+import {
+  logo2,
+  logoBanner,
+  playersImg,
+  yearImg,
+} from "../../assets/images/logos";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -230,7 +235,10 @@ export default function PalarotaryLandingPage() {
 
       <div className=" my-0 mx-auto relative px-0 py-20 ">
         <img src={cloud} className=" absolute z-0 w-full bottom-0 top-0 l-0 " />
-        <img src={playersImg} className=" absolute z-0 w-full bottom-0 top-0 l-0 opacity-50 " />
+        <img
+          src={playersImg}
+          className=" absolute z-0 w-full bottom-0 top-0 l-0 opacity-50 "
+        />
         {/* Hero Section */}
         <motion.div
           ref={heroRef}
@@ -349,303 +357,6 @@ export default function PalarotaryLandingPage() {
         }}
         className="bg-transparent"
       >
-        {/* Information Section - Ground Rules & General Guide */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          style={{ marginBottom: "60px" }}
-        >
-          <Title
-            level={2}
-            style={{
-              textAlign: "center",
-              marginBottom: "40px",
-              color: "#1c3c6d",
-              fontSize: "clamp(28px, 4vw, 36px)",
-            }}
-          >
-            Important Information
-          </Title>
-
-          <div className="grid grid-cols-12 gap-6 mb-6">
-            {/* Ground Rules Card */}
-            <motion.div
-              className="col-span-12 lg:col-span-6"
-              variants={cardVariants}
-              initial="hidden"
-              whileInView="visible"
-              whileHover="hover"
-              viewport={{ once: true }}
-            >
-              <Card
-                style={{
-                  height: "100%",
-                  borderRadius: "24px",
-                  boxShadow: "0 10px 40px rgba(28, 60, 109, 0.15)",
-                  border: "2px solid #e1e5ef",
-                  overflow: "hidden",
-                  background:
-                    "linear-gradient(135deg, #ffffff 0%, #f0f2f7 100%)",
-                }}
-                styles={{
-                  body: {
-                    height: "100%",
-                  },
-                }}
-              >
-                <div className="p-0 md:p-4 flex h-full flex-col">
-                  <div className="flex-1">
-                    <motion.div
-                      style={{ textAlign: "center", marginBottom: "24px" }}
-                      whileHover={{ scale: 1.1, rotate: [0, -10, 10, 0] }}
-                      transition={{ duration: 0.5 }}
-                    >
-                      <div
-                        style={{
-                          width: "100px",
-                          height: "100px",
-                          borderRadius: "50%",
-                          background:
-                            "linear-gradient(135deg, #1c3c6d 0%, #2a5085 100%)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          margin: "0 auto 20px",
-                          boxShadow: "0 10px 30px rgba(28, 60, 109, 0.3)",
-                        }}
-                      >
-                        <TrophyOutlined
-                          style={{ fontSize: "48px", color: "white" }}
-                        />
-                      </div>
-                    </motion.div>
-
-                    <Title
-                      level={2}
-                      style={{
-                        marginBottom: "12px",
-                        textAlign: "center",
-                        fontSize: "28px",
-                      }}
-                    >
-                      Ground Rules
-                    </Title>
-                    <Paragraph
-                      style={{
-                        fontSize: "16px",
-                        color: "#666",
-                        marginBottom: "24px",
-                        textAlign: "center",
-                      }}
-                    >
-                      Official tournament rules and regulations
-                    </Paragraph>
-
-                    <div style={{ marginBottom: "28px" }}>
-                      {[
-                        "9 official sports events + Muse & Fun Games",
-                        "International Sports Federation standards",
-                        "Complete rules for Athletics, Badminton, Basketball",
-                        "Swimming, Volleyball, Pickleball, Mobile Legends",
-                        "Code of conduct and compliance guidelines",
-                      ].map((text, i) => (
-                        <motion.div
-                          key={i}
-                          className="feature-item"
-                          initial={{ opacity: 0, x: -20 }}
-                          whileInView={{ opacity: 1, x: 0 }}
-                          transition={{ delay: i * 0.1 }}
-                          viewport={{ once: true }}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "12px",
-                            marginBottom: "12px",
-                          }}
-                        >
-                          <CheckCircleOutlined
-                            style={{ fontSize: "18px", color: "#1c3c6d" }}
-                          />
-                          <span style={{ fontSize: "15px", color: "#1a1a2e" }}>
-                            {text}
-                          </span>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <motion.div
-                    variants={buttonVariants}
-                    initial="rest"
-                    whileHover="hover"
-                    whileTap="tap"
-                  >
-                    <Button
-                      type="primary"
-                      size="large"
-                      block
-                      icon={<ArrowRightOutlined />}
-                      onClick={() =>
-                        navigate("/ground-rules")
-                      }
-                      style={{
-                        background:
-                          "linear-gradient(135deg, #1c3c6d 0%, #173052 100%)",
-                        border: "none",
-                        height: "56px",
-                        fontSize: "17px",
-                        fontWeight: "600",
-                        borderRadius: "12px",
-                        boxShadow: "0 6px 20px rgba(28, 60, 109, 0.4)",
-                      }}
-                    >
-                      View Ground Rules
-                    </Button>
-                  </motion.div>
-                </div>
-              </Card>
-            </motion.div>
-
-            {/* General Guide Card */}
-            <motion.div
-              className="col-span-12 lg:col-span-6"
-              variants={cardVariants}
-              initial="hidden"
-              whileInView="visible"
-              whileHover="hover"
-              viewport={{ once: true }}
-            >
-              <Card
-                style={{
-                  height: "100%",
-                  borderRadius: "24px",
-                  boxShadow: "0 10px 40px rgba(247, 165, 10, 0.15)",
-                  border: "2px solid #fff3d6",
-                  overflow: "hidden",
-                  background:
-                    "linear-gradient(135deg, #ffffff 0%, #fff9eb 100%)",
-                }}
-                styles={{
-                  body: {
-                    height: "100%",
-                  },
-                }}
-              >
-                <div className="p-0 md:p-4 flex h-full flex-col">
-                  <div className="flex-1">
-                    <motion.div
-                      style={{ textAlign: "center", marginBottom: "24px" }}
-                      whileHover={{ scale: 1.1, rotate: [0, -10, 10, 0] }}
-                      transition={{ duration: 0.5 }}
-                    >
-                      <div
-                        style={{
-                          width: "100px",
-                          height: "100px",
-                          borderRadius: "50%",
-                          background:
-                            "linear-gradient(135deg, #f7a50a 0%, #c68408 100%)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          margin: "0 auto 20px",
-                          boxShadow: "0 10px 30px rgba(247, 165, 10, 0.3)",
-                        }}
-                      >
-                        <BookOutlined
-                          style={{ fontSize: "48px", color: "white" }}
-                        />
-                      </div>
-                    </motion.div>
-
-                    <Title
-                      level={2}
-                      style={{
-                        marginBottom: "12px",
-                        textAlign: "center",
-                        fontSize: "28px",
-                      }}
-                    >
-                      General Guide
-                    </Title>
-                    <Paragraph
-                      style={{
-                        fontSize: "16px",
-                        color: "#666",
-                        marginBottom: "24px",
-                        textAlign: "center",
-                      }}
-                    >
-                      Complete technical guidelines and regulations
-                    </Paragraph>
-
-                    <div style={{ marginBottom: "28px" }}>
-                      {[
-                        "Eligibility requirements and attendance rules",
-                        "Zone colors and uniform guidelines",
-                        "Complete event schedule (6 AM - 5 PM)",
-                        "Scoring system and awards structure",
-                        "Code of conduct and health & safety protocols",
-                      ].map((text, i) => (
-                        <motion.div
-                          key={i}
-                          className="feature-item"
-                          initial={{ opacity: 0, x: -20 }}
-                          whileInView={{ opacity: 1, x: 0 }}
-                          transition={{ delay: i * 0.1 }}
-                          viewport={{ once: true }}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "12px",
-                            marginBottom: "12px",
-                          }}
-                        >
-                          <CheckCircleOutlined
-                            style={{ fontSize: "18px", color: "#f7a50a" }}
-                          />
-                          <span style={{ fontSize: "15px", color: "#1a1a2e" }}>
-                            {text}
-                          </span>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <motion.div
-                    variants={buttonVariants}
-                    initial="rest"
-                    whileHover="hover"
-                    whileTap="tap"
-                  >
-                    <Button
-                      type="primary"
-                      size="large"
-                      block
-                      icon={<ArrowRightOutlined />}
-                      onClick={() => navigate("/general-guide")}
-                      style={{
-                        background:
-                          "linear-gradient(135deg, #f7a50a 0%, #c68408 100%)",
-                        border: "none",
-                        height: "56px",
-                        fontSize: "17px",
-                        fontWeight: "600",
-                        borderRadius: "12px",
-                        boxShadow: "0 6px 20px rgba(247, 165, 10, 0.4)",
-                      }}
-                    >
-                      View General Guide
-                    </Button>
-                  </motion.div>
-                </div>
-              </Card>
-            </motion.div>
-          </div>
-        </motion.div>
-
         {/* Registration Cards */}
         <div ref={cardsRef}>
           <Title
@@ -657,7 +368,7 @@ export default function PalarotaryLandingPage() {
               fontSize: "clamp(28px, 4vw, 36px)",
             }}
           >
-            Registration & Orders
+            Register & Customize Shirt
           </Title>
           <div className=" grid grid-cols-12 gap-6 mb-6">
             <motion.div
@@ -773,11 +484,14 @@ export default function PalarotaryLandingPage() {
                     </motion.div>
 
                     <div style={{ marginBottom: "28px" }}>
+                      <p className="text-red-600 font-semibold italic text-center mb-3">
+                        "NOTE: Only authorized club representattives are
+                        permitted to register their respective clubs"
+                      </p>
                       {[
                         "Select your zone and club",
                         "Upload proof of payment",
                         "GCash or Bank transfer accepted",
-                        "Verification and confirmation",
                       ].map((text, i) => (
                         <motion.div
                           key={i}
@@ -1178,6 +892,300 @@ export default function PalarotaryLandingPage() {
             </motion.div>
           </div>
         </div>
+        {/* Information Section - Ground Rules & General Guide */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          style={{ marginBottom: "60px" }}
+        >
+          <Title
+            level={2}
+            style={{
+              textAlign: "center",
+              marginBottom: "40px",
+              color: "#1c3c6d",
+              fontSize: "clamp(28px, 4vw, 36px)",
+            }}
+          >
+            Important Information
+          </Title>
+
+          <div className="grid grid-cols-12 gap-6 mb-6">
+            {/* Ground Rules Card */}
+            <motion.div
+              className="col-span-12 lg:col-span-6"
+              variants={cardVariants}
+              initial="hidden"
+              whileInView="visible"
+              whileHover="hover"
+              viewport={{ once: true }}
+            >
+              <Card
+                style={{
+                  height: "100%",
+                  borderRadius: "24px",
+                  boxShadow: "0 10px 40px rgba(28, 60, 109, 0.15)",
+                  border: "2px solid #e1e5ef",
+                  overflow: "hidden",
+                  background:
+                    "linear-gradient(135deg, #ffffff 0%, #f0f2f7 100%)",
+                }}
+                styles={{
+                  body: {
+                    height: "100%",
+                  },
+                }}
+              >
+                <div className="p-0 md:p-4 flex h-full flex-col">
+                  <div className="flex-1">
+                    <motion.div
+                      style={{ textAlign: "center", marginBottom: "24px" }}
+                      whileHover={{ scale: 1.1, rotate: [0, -10, 10, 0] }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <div
+                        style={{
+                          width: "100px",
+                          height: "100px",
+                          borderRadius: "50%",
+                          background:
+                            "linear-gradient(135deg, #1c3c6d 0%, #2a5085 100%)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          margin: "0 auto 20px",
+                          boxShadow: "0 10px 30px rgba(28, 60, 109, 0.3)",
+                        }}
+                      >
+                        <TrophyOutlined
+                          style={{ fontSize: "48px", color: "white" }}
+                        />
+                      </div>
+                    </motion.div>
+
+                    <Title
+                      level={2}
+                      style={{
+                        marginBottom: "12px",
+                        textAlign: "center",
+                        fontSize: "28px",
+                      }}
+                    >
+                      Ground Rules
+                    </Title>
+                    <Paragraph
+                      style={{
+                        fontSize: "16px",
+                        color: "#666",
+                        marginBottom: "24px",
+                        textAlign: "center",
+                      }}
+                    >
+                      Official tournament rules and regulations
+                    </Paragraph>
+
+                    <div style={{ marginBottom: "28px" }}>
+                      {[
+                        "9 official sports events + Muse & Fun Games",
+                        "International Sports Federation standards",
+                        "Complete rules for Athletics, Badminton, Basketball",
+                        "Swimming, Volleyball, Pickleball, Mobile Legends",
+                        "Code of conduct and compliance guidelines",
+                      ].map((text, i) => (
+                        <motion.div
+                          key={i}
+                          className="feature-item"
+                          initial={{ opacity: 0, x: -20 }}
+                          whileInView={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.1 }}
+                          viewport={{ once: true }}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "12px",
+                            marginBottom: "12px",
+                          }}
+                        >
+                          <CheckCircleOutlined
+                            style={{ fontSize: "18px", color: "#1c3c6d" }}
+                          />
+                          <span style={{ fontSize: "15px", color: "#1a1a2e" }}>
+                            {text}
+                          </span>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <motion.div
+                    variants={buttonVariants}
+                    initial="rest"
+                    whileHover="hover"
+                    whileTap="tap"
+                  >
+                    <Button
+                      type="primary"
+                      size="large"
+                      block
+                      icon={<ArrowRightOutlined />}
+                      onClick={() => navigate("/ground-rules")}
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #1c3c6d 0%, #173052 100%)",
+                        border: "none",
+                        height: "56px",
+                        fontSize: "17px",
+                        fontWeight: "600",
+                        borderRadius: "12px",
+                        boxShadow: "0 6px 20px rgba(28, 60, 109, 0.4)",
+                      }}
+                    >
+                      View Ground Rules
+                    </Button>
+                  </motion.div>
+                </div>
+              </Card>
+            </motion.div>
+
+            {/* General Guide Card */}
+            <motion.div
+              className="col-span-12 lg:col-span-6"
+              variants={cardVariants}
+              initial="hidden"
+              whileInView="visible"
+              whileHover="hover"
+              viewport={{ once: true }}
+            >
+              <Card
+                style={{
+                  height: "100%",
+                  borderRadius: "24px",
+                  boxShadow: "0 10px 40px rgba(247, 165, 10, 0.15)",
+                  border: "2px solid #fff3d6",
+                  overflow: "hidden",
+                  background:
+                    "linear-gradient(135deg, #ffffff 0%, #fff9eb 100%)",
+                }}
+                styles={{
+                  body: {
+                    height: "100%",
+                  },
+                }}
+              >
+                <div className="p-0 md:p-4 flex h-full flex-col">
+                  <div className="flex-1">
+                    <motion.div
+                      style={{ textAlign: "center", marginBottom: "24px" }}
+                      whileHover={{ scale: 1.1, rotate: [0, -10, 10, 0] }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <div
+                        style={{
+                          width: "100px",
+                          height: "100px",
+                          borderRadius: "50%",
+                          background:
+                            "linear-gradient(135deg, #f7a50a 0%, #c68408 100%)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          margin: "0 auto 20px",
+                          boxShadow: "0 10px 30px rgba(247, 165, 10, 0.3)",
+                        }}
+                      >
+                        <BookOutlined
+                          style={{ fontSize: "48px", color: "white" }}
+                        />
+                      </div>
+                    </motion.div>
+
+                    <Title
+                      level={2}
+                      style={{
+                        marginBottom: "12px",
+                        textAlign: "center",
+                        fontSize: "28px",
+                      }}
+                    >
+                      General Guide
+                    </Title>
+                    <Paragraph
+                      style={{
+                        fontSize: "16px",
+                        color: "#666",
+                        marginBottom: "24px",
+                        textAlign: "center",
+                      }}
+                    >
+                      Complete technical guidelines and regulations
+                    </Paragraph>
+
+                    <div style={{ marginBottom: "28px" }}>
+                      {[
+                        "Eligibility requirements and attendance rules",
+                        "Zone colors and uniform guidelines",
+                        "Complete event schedule (6 AM - 5 PM)",
+                        "Scoring system and awards structure",
+                        "Code of conduct and health & safety protocols",
+                      ].map((text, i) => (
+                        <motion.div
+                          key={i}
+                          className="feature-item"
+                          initial={{ opacity: 0, x: -20 }}
+                          whileInView={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.1 }}
+                          viewport={{ once: true }}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "12px",
+                            marginBottom: "12px",
+                          }}
+                        >
+                          <CheckCircleOutlined
+                            style={{ fontSize: "18px", color: "#f7a50a" }}
+                          />
+                          <span style={{ fontSize: "15px", color: "#1a1a2e" }}>
+                            {text}
+                          </span>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <motion.div
+                    variants={buttonVariants}
+                    initial="rest"
+                    whileHover="hover"
+                    whileTap="tap"
+                  >
+                    <Button
+                      type="primary"
+                      size="large"
+                      block
+                      icon={<ArrowRightOutlined />}
+                      onClick={() => navigate("/general-guide")}
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #f7a50a 0%, #c68408 100%)",
+                        border: "none",
+                        height: "56px",
+                        fontSize: "17px",
+                        fontWeight: "600",
+                        borderRadius: "12px",
+                        boxShadow: "0 6px 20px rgba(247, 165, 10, 0.4)",
+                      }}
+                    >
+                      View General Guide
+                    </Button>
+                  </motion.div>
+                </div>
+              </Card>
+            </motion.div>
+          </div>
+        </motion.div>
 
         {/* Club Payment Proof Upload Section */}
         {/* <motion.div

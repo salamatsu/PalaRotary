@@ -553,7 +553,7 @@ export default function ClubPaymentProof() {
                     value: club.token,
                     label:
                       club.clubName +
-                      (club.status === "APPROVED" ? " (Approved)" : ""),
+                      (club.status === "APPROVED" ? " (Registered)" : ""),
                     disabled: club.status === "APPROVED",
                   }))}
                 />

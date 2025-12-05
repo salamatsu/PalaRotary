@@ -458,7 +458,6 @@ export default function GeneralGuide() {
               borderRadius: "24px",
               boxShadow: "0 10px 40px rgba(213, 72, 57, 0.12)",
               border: "2px solid #fde5e3",
-              background: "white",
               marginBottom: "30px",
             }}
           >
@@ -479,7 +478,9 @@ export default function GeneralGuide() {
                   style={{
                     padding: "16px",
                     borderRadius: "12px",
-                    border: `2px solid ${zone.hex}`,
+                    border: `2px solid ${
+                      zone.color === "White" ? "#e5e7eb" : zone.hex
+                    }`,
                     background:
                       zone.color === "White" ? "#f9fafb" : `${zone.hex}15`,
                     textAlign: "center",
