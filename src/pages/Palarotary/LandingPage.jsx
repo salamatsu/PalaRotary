@@ -896,7 +896,7 @@ export default function PalarotaryLandingPage() {
                       style={{
                         fontSize: "16px",
                         color: "#6b7280",
-                        marginBottom: "24px",
+                        marginBottom: "12px",
                         textAlign: "center",
                       }}
                     >
@@ -907,9 +907,9 @@ export default function PalarotaryLandingPage() {
                       whileHover={{ scale: 1.03 }}
                       animate={{
                         boxShadow: [
-                          "0 4px 15px rgba(213, 72, 57, 0.2)",
-                          "0 8px 25px rgba(213, 72, 57, 0.3)",
-                          "0 4px 15px rgba(213, 72, 57, 0.2)",
+                          "0 4px 15px rgba(28, 60, 109, 0.2)",
+                          "0 8px 25px rgba(28, 60, 109, 0.3)",
+                          "0 4px 15px rgba(28, 60, 109, 0.2)",
                         ],
                       }}
                       transition={{ duration: 2, repeat: Infinity }}
@@ -919,36 +919,91 @@ export default function PalarotaryLandingPage() {
                         padding: "20px",
                         borderRadius: "16px",
                         marginBottom: "24px",
-                        border: "2px solid #d5483940",
+                        border: "2px solid #9ca3af",
                       }}
                     >
-                      <Title
-                        level={3}
+                      <div
                         style={{
-                          margin: 0,
-                          color: "#d54839",
-                          fontSize: "32px",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "12px",
+                          marginBottom: "8px",
                         }}
                       >
-                        ₱300
-                      </Title>
+                        <Title
+                          level={3}
+                          style={{
+                            margin: 0,
+                            color: "#173052",
+                            fontSize: "32px",
+                          }}
+                        >
+                          ₱320
+                        </Title>
+                        <Paragraph
+                          style={{
+                            margin: 0,
+                            fontSize: "20px",
+                            color: "#9ca3af",
+                            textDecoration: "line-through",
+                          }}
+                        >
+                          ₱350
+                        </Paragraph>
+                      </div>
                       <Paragraph
                         style={{
-                          margin: "8px 0 0 0",
+                          margin: "0 0 8px 0",
                           fontSize: "14px",
                           color: "#6b7280",
                         }}
                       >
                         All sizes - with custom name and number (00-99)
                       </Paragraph>
+                      <Paragraph
+                        style={{
+                          margin: 0,
+                          fontSize: "13px",
+                          fontWeight: "600",
+                          color: "#d54839",
+                        }}
+                      >
+                        Promo price until December 25, 2025
+                      </Paragraph>
                     </motion.div>
 
+                    {/* Deadline Notice */}
+                    <motion.div
+                      animate={{
+                        scale: [1, 1.05, 1],
+                      }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #17305210 0%, #17305210 100%)",
+                        padding: "10px 16px",
+                        borderRadius: "12px",
+                        marginBottom: "16px",
+                        border: "2px solid #9ca3af",
+                        textAlign: "center",
+                      }}
+                    >
+                      <Paragraph
+                        style={{
+                          margin: 0,
+                          fontSize: "13px",
+                          fontWeight: "600",
+                          color: "#173052",
+                        }}
+                      >
+                        Orders available until January 5, 2026
+                      </Paragraph>
+                    </motion.div>
                     <div style={{ marginBottom: "28px" }}>
                       {[
                         "Customize your shirt",
                         "Choose your size",
                         "Add your name and 2-digit number (00-99)",
-                        "Secure online payment",
                       ].map((text, i) => (
                         <motion.div
                           key={i}
@@ -1003,6 +1058,7 @@ export default function PalarotaryLandingPage() {
                 </div>
               </Card>
             </motion.div>
+            
           </div>
         </div>
         {/* Information Section - Ground Rules & General Guide */}
