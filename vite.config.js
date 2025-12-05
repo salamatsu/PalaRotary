@@ -30,10 +30,26 @@ export default defineConfig(({ mode }) => {
             "chart-vendor": ["highcharts", "highcharts-react-official", "recharts"],
             "utils-vendor": ["axios", "dayjs", "zustand"],
           },
+          // Separate assets by type for better caching
+          assetFileNames: (assetInfo) => {
+            const fileName = assetInfo.names?.[0] || "";
+            if (/\.(mp4|webm|ogg|mp3|wav|flac|aac)$/i.test(fileName)) {
+              return `assets/media/[name]-[hash][extname]`;
+            }
+            if (/\.(png|jpe?g|gif|svg|webp|avif)$/i.test(fileName)) {
+              return `assets/images/[name]-[hash][extname]`;
+            }
+            if (/\.(woff2?|eot|ttf|otf)$/i.test(fileName)) {
+              return `assets/fonts/[name]-[hash][extname]`;
+            }
+            return `assets/[name]-[hash][extname]`;
+          },
         },
       },
-      // Chunk size warnings
-      chunkSizeWarningLimit: 1000,
+      // Chunk size warnings - increased for video files
+      chunkSizeWarningLimit: 2000,
+      // Control asset inlining - don't inline large files
+      assetsInlineLimit: 4096, // 4KB - files larger than this won't be inlined
       // Source maps for production debugging
       sourcemap: mode === "development",
     },

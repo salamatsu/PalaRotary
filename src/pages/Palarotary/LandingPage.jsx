@@ -181,14 +181,20 @@ export default function PalarotaryLandingPage() {
                   })
                   .catch((err) => {
                     // If autoplay with sound fails, try muted autoplay
-                    console.log("Autoplay with sound blocked, trying muted:", err);
+                    console.log(
+                      "Autoplay with sound blocked, trying muted:",
+                      err
+                    );
                     videoElement.muted = true;
                     setIsMuted(true);
-                    videoElement.play().then(() => {
-                      setIsPlaying(true);
-                    }).catch(() => {
-                      setIsPlaying(false);
-                    });
+                    videoElement
+                      .play()
+                      .then(() => {
+                        setIsPlaying(true);
+                      })
+                      .catch(() => {
+                        setIsPlaying(false);
+                      });
                   });
               },
               { once: true }
@@ -771,10 +777,6 @@ export default function PalarotaryLandingPage() {
           >
             Watch the highlights and get ready for the biggest Rotary sports
             event of 2026!
-            <br />
-            <span style={{ fontSize: "14px", color: "#9ca3af" }}>
-              Auto-plays with sound • Click to pause • Fullscreen available
-            </span>
           </Paragraph>
         </motion.div>
       </div>

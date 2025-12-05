@@ -1,3 +1,5 @@
-import videoTeaser from "./videoTeaser.mp4";
+// Serve video from public folder for better performance
+// Public files are not processed by Vite, reducing build time
+const videoTeaser = "/videos/videoTeaser.mp4";
 
 export { videoTeaser };
