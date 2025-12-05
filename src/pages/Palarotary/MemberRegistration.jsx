@@ -1,5 +1,6 @@
 import {
   ArrowLeftOutlined,
+  ArrowRightOutlined,
   CheckCircleOutlined,
   CloseOutlined,
   DownloadOutlined,
@@ -33,7 +34,7 @@ import {
 import { useRegistrationStore } from "../../store/useRegistrationStore";
 import { imageToBase64 } from "../../utils/tobase64";
 
-const { Paragraph } = Typography;
+const { Paragraph, Title } = Typography;
 
 export default function MemberRegistration() {
   const { message, modal } = App.useApp();
@@ -462,6 +463,43 @@ export default function MemberRegistration() {
     );
   };
 
+  const cardVariants = {
+    hidden: { opacity: 0, y: 50, rotateX: -15 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      rotateX: 0,
+      transition: {
+        type: "spring",
+        stiffness: 100,
+        damping: 15,
+      },
+    },
+    hover: {
+      y: -10,
+      scale: 1.02,
+      rotateY: 2,
+      boxShadow: "0 20px 50px rgba(0,0,0,0.2)",
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 20,
+      },
+    },
+  };
+
+  const buttonVariants = {
+    rest: { scale: 1 },
+    hover: {
+      scale: 1.05,
+      transition: {
+        type: "spring",
+        stiffness: 400,
+        damping: 10,
+      },
+    },
+    tap: { scale: 0.95 },
+  };
 
   if (registrationComplete && registrations.success.length > 0) {
     return (
@@ -633,6 +671,8 @@ export default function MemberRegistration() {
                       fontWeight: "700",
                       color: "#1e3a8a",
                       margin: 0,
+                      textAlign: "center",
+                      margin: "auto",
                     }}
                   >
                     Your Digital Badges
@@ -783,21 +823,22 @@ export default function MemberRegistration() {
                 >
                   <Card
                     style={{
-                      borderRadius: "20px",
-                      boxShadow: "0 10px 40px rgba(28, 60, 109, 0.15)",
-                      border: "2px solid #e1e5ef",
+                      borderRadius: "24px",
+                      boxShadow: "0 8px 30px rgba(28, 60, 109, 0.12)",
+                      border: "1px solid #e5e7eb",
                       overflow: "hidden",
-                      background:
-                        "linear-gradient(135deg, #ffffff 0%, #f0f2f7 100%)",
+                      background: "white",
                       marginBottom: "20px",
+                      height: "100%",
                     }}
                     styles={{
                       body: {
-                        padding: "20px",
+                        padding: "0",
+                        height: "100%",
                       },
                     }}
                   >
-                    {/* Important Info and Actions */}
+                    {/* Header Section with Gradient */}
                     <motion.div
                       className="badge-item"
                       initial={{ opacity: 0 }}
@@ -805,136 +846,309 @@ export default function MemberRegistration() {
                       transition={{ delay: 1.0 }}
                       style={{
                         background:
-                          "linear-gradient(135deg, #3b82f615 0%, #1e3a8a15 100%)",
-                        padding: "16px",
-                        borderRadius: "12px",
-                        fontSize: "13px",
-                        color: "#1e3a8a",
-                        lineHeight: "1.6",
-                        marginBottom: "16px",
+                          "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)",
+                        padding: "24px",
+                        color: "white",
+                        position: "relative",
+                        overflow: "hidden",
                       }}
                     >
-                      <strong>Important:</strong> Digital badges have been sent
-                      to your email. Present these QR codes at the registration
-                      desk on event day.
-                    </motion.div>
-                    {/*  Event Details, Alert, and Shirt Advertisement */}
-                    <motion.div
-                      className="badge-item"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.9 }}
-                      style={{
-                        background:
-                          "linear-gradient(135deg, #fff9eb 0%, #fff3d6 100%)",
-                        padding: "16px",
-                        borderRadius: "16px",
-                        marginBottom: "20px",
-                        textAlign: "left",
-                        border: "2px solid #f7a50a30",
-                      }}
-                    >
-                      <h3
-                        style={{
-                          fontSize: "14px",
-                          fontWeight: "700",
-                          marginBottom: "8px",
-                          color: "#f7a50a",
-                        }}
-                      >
-                        Event Details
-                      </h3>
+                      {/* Decorative elements */}
                       <div
                         style={{
-                          fontSize: "13px",
-                          color: "#1a1a2e",
-                          lineHeight: "1.6",
+                          position: "absolute",
+                          top: "-20px",
+                          right: "-20px",
+                          width: "100px",
+                          height: "100px",
+                          borderRadius: "50%",
+                          background: "rgba(255, 255, 255, 0.1)",
                         }}
-                      >
-                        <p style={{ margin: "4px 0" }}>
-                          <strong>Event:</strong>{" "}
-                          {registrations.success[0]?.eventDetails?.eventName}
+                      />
+                      <div
+                        style={{
+                          position: "absolute",
+                          bottom: "-30px",
+                          left: "-30px",
+                          width: "120px",
+                          height: "120px",
+                          borderRadius: "50%",
+                          background: "rgba(255, 255, 255, 0.05)",
+                        }}
+                      />
+
+                      <div style={{ position: "relative", zIndex: 1 }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "12px",
+                            marginBottom: "8px",
+                          }}
+                        >
+                          <CheckCircleOutlined
+                            style={{ fontSize: "28px", color: "#10b981" }}
+                          />
+                          <h3
+                            style={{
+                              margin: 0,
+                              fontSize: "20px",
+                              fontWeight: "700",
+                              color: "white",
+                            }}
+                          >
+                            Registration Confirmed
+                          </h3>
+                        </div>
+                        <p
+                          style={{
+                            margin: 0,
+                            fontSize: "14px",
+                            opacity: 0.95,
+                            lineHeight: "1.5",
+                          }}
+                        >
+                          Your digital badges have been sent to your email.
+                          Please download them before leaving the page.
                         </p>
-                        <p style={{ margin: "4px 0" }}>
-                          <strong>Date:</strong>{" "}
-                          {registrations.success[0]?.eventDetails?.eventDate}
-                        </p>
-                        {registrations.success[0]?.eventDetails?.location && (
-                          <p style={{ margin: "4px 0" }}>
-                            <strong>Time:</strong>{" "}
-                            {registrations.success[0]?.eventDetails?.location}
-                          </p>
-                        )}
-                        {registrations.success[0]?.eventDetails
-                          ?.description && (
-                          <p style={{ margin: "4px 0" }}>
-                            <strong>Venue:</strong>{" "}
-                            {
-                              registrations.success[0]?.eventDetails
-                                ?.description
-                            }
-                          </p>
-                        )}
                       </div>
                     </motion.div>
 
-                    {/* Alert to download badge first */}
-                    <motion.div
-                      className="badge-item"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 1.0 }}
-                    >
-                      <Alert
-                        message="Important Reminder"
-                        description="Please download your digital badge before leaving this page or ordering a shirt. You'll need it for event registration!"
-                        type="warning"
-                        showIcon
+                    {/* Content Section */}
+                    <div style={{ padding: "24px" }}>
+                      {/* Event Details Card */}
+                      <motion.div
+                        className="badge-item"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.9 }}
                         style={{
+                          background:
+                            "linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)",
+                          padding: "20px",
+                          borderRadius: "16px",
                           marginBottom: "20px",
-                          borderRadius: "12px",
-                          border: "2px solid #f7a50a30",
+                          border: "1px solid #fbbf24",
                         }}
-                      />
-                    </motion.div>
-
-                    {/* Register Another Member Button - Full Width */}
-                    <motion.div
-                      className="badge-item"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 1.6 }}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      style={{ marginTop: "24px" }}
-                    >
-                      <Button
-                        type="default"
-                        size="large"
-                        onClick={() => {
-                          resetRegistrations();
-                          setRegistrationComplete(false);
-                          setFamilyMembers([]);
-                          form.resetFields();
-                        }}
-                        style={{
-                          height: "48px",
-                          borderRadius: "12px",
-                          fontWeight: "600",
-                          fontSize: "16px",
-                          border: "2px solid #1e3a8a",
-                          color: "#1e3a8a",
-                          background: "white",
-                        }}
-                        block
                       >
-                        Register Another Member
-                      </Button>
-                    </motion.div>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "flex-start",
+                            gap: "12px",
+                          }}
+                        >
+                          <div
+                            style={{
+                              minWidth: "40px",
+                              height: "40px",
+                              borderRadius: "12px",
+                              background: "rgba(245, 158, 11, 0.2)",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <span style={{ fontSize: "20px" }}>📅</span>
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <h4
+                              style={{
+                                fontSize: "15px",
+                                fontWeight: "700",
+                                marginBottom: "12px",
+                                color: "#92400e",
+                              }}
+                            >
+                              Event Information
+                            </h4>
+                            <div
+                              style={{
+                                fontSize: "13px",
+                                color: "#78350f",
+                                lineHeight: "1.8",
+                              }}
+                            >
+                              <div
+                                style={{
+                                  display: "flex",
+                                  marginBottom: "6px",
+                                }}
+                              >
+                                <strong
+                                  style={{ minWidth: "70px", opacity: 0.8 }}
+                                >
+                                  Event:
+                                </strong>
+                                <span>
+                                  {
+                                    registrations.success[0]?.eventDetails
+                                      ?.eventName
+                                  }
+                                </span>
+                              </div>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  marginBottom: "6px",
+                                }}
+                              >
+                                <strong
+                                  style={{ minWidth: "70px", opacity: 0.8 }}
+                                >
+                                  Date:
+                                </strong>
+                                <span>
+                                  {
+                                    registrations.success[0]?.eventDetails
+                                      ?.eventDate
+                                  }
+                                </span>
+                              </div>
+                              {registrations.success[0]?.eventDetails
+                                ?.location && (
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    marginBottom: "6px",
+                                  }}
+                                >
+                                  <strong
+                                    style={{ minWidth: "70px", opacity: 0.8 }}
+                                  >
+                                    Time:
+                                  </strong>
+                                  <span>
+                                    {
+                                      registrations.success[0]?.eventDetails
+                                        ?.location
+                                    }
+                                  </span>
+                                </div>
+                              )}
+                              {registrations.success[0]?.eventDetails
+                                ?.description && (
+                                <div style={{ display: "flex" }}>
+                                  <strong
+                                    style={{ minWidth: "70px", opacity: 0.8 }}
+                                  >
+                                    Venue:
+                                  </strong>
+                                  <span>
+                                    {
+                                      registrations.success[0]?.eventDetails
+                                        ?.description
+                                    }
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+
+                      {/* Important Reminder */}
+                      <motion.div
+                        className="badge-item"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 1.0 }}
+                        style={{
+                          background:
+                            "linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)",
+                          padding: "16px",
+                          borderRadius: "12px",
+                          marginBottom: "20px",
+                          border: "1px solid #fca5a5",
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "flex-start",
+                            gap: "12px",
+                          }}
+                        >
+                          <div
+                            style={{
+                              minWidth: "32px",
+                              height: "32px",
+                              borderRadius: "8px",
+                              background: "rgba(239, 68, 68, 0.2)",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              marginTop: "2px",
+                            }}
+                          >
+                            <span style={{ fontSize: "16px" }}>⚠️</span>
+                          </div>
+                          <div>
+                            <h4
+                              style={{
+                                fontSize: "14px",
+                                fontWeight: "700",
+                                marginBottom: "4px",
+                                color: "#991b1b",
+                              }}
+                            >
+                              Important Reminder
+                            </h4>
+                            <p
+                              style={{
+                                margin: 0,
+                                fontSize: "13px",
+                                color: "#7f1d1d",
+                                lineHeight: "1.6",
+                              }}
+                            >
+                              Download your badges before leaving this page.
+                              You'll need them for event check-in!
+                            </p>
+                          </div>
+                        </div>
+                      </motion.div>
+
+                      {/* Register Another Member Button */}
+                      <motion.div
+                        className="badge-item"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 1.2 }}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <Button
+                          type="default"
+                          size="large"
+                          icon={<UserAddOutlined />}
+                          onClick={() => {
+                            resetRegistrations();
+                            setRegistrationComplete(false);
+                            setFamilyMembers([]);
+                            form.resetFields();
+                          }}
+                          style={{
+                            height: "52px",
+                            borderRadius: "12px",
+                            fontWeight: "600",
+                            fontSize: "15px",
+                            border: "2px solid #e5e7eb",
+                            color: "#1e3a8a",
+                            background: "white",
+                            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
+                            transition: "all 0.3s ease",
+                          }}
+                          block
+                        >
+                          Register Another Member
+                        </Button>
+                      </motion.div>
+                    </div>
                   </Card>
                 </motion.div>
                 {/* Shirt Ordering Advertisement */}
-                <motion.div
+                {/* <motion.div
                   className="badge-item flex-1 order-1"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -1096,6 +1310,238 @@ export default function MemberRegistration() {
                         Order Now
                       </Button>
                     </motion.div>
+                  </Card>
+                </motion.div> */}
+
+                <motion.div
+                  className="registration-card col-span-12 md:col-span-6 lg:col-span-4"
+                  variants={cardVariants}
+                  initial="hidden"
+                  whileInView="visible"
+                  whileHover="hover"
+                  viewport={{ once: true }}
+                >
+                  <Card
+                    style={{
+                      height: "100%",
+                      borderRadius: "24px",
+                      boxShadow: "0 10px 40px rgba(28, 60, 109, 0.15)",
+                      border: "2px solid #e1e5ef",
+                      overflow: "hidden",
+                      background:
+                        "linear-gradient(135deg, #ffffff 0%, #f0f2f7 100%)",
+                    }}
+                    styles={{
+                      body: {
+                        height: "100%",
+                      },
+                    }}
+                  >
+                    <div className="p-0 md:p-4 flex h-full flex-col">
+                      <div className=" flex-1">
+                        <motion.div
+                          style={{ textAlign: "center", marginBottom: "24px" }}
+                          whileHover={{ scale: 1.05, y: -5 }}
+                          transition={{ duration: 0.5 }}
+                        >
+                          <img
+                            src={shirtTemplate}
+                            alt="Shirt Template"
+                            onClick={() => setPreviewVisible(true)}
+                            style={{
+                              width: "100%",
+                              maxWidth: "280px",
+                              height: "auto",
+                              margin: "0 auto 20px",
+                              borderRadius: "12px",
+                              boxShadow: "0 10px 30px rgba(28, 60, 109, 0.2)",
+                              cursor: "pointer",
+                            }}
+                          />
+                        </motion.div>
+
+                        <Title
+                          level={2}
+                          style={{
+                            marginBottom: "12px",
+                            textAlign: "center",
+                            fontSize: "28px",
+                          }}
+                        >
+                          Order Customized Shirt
+                        </Title>
+                        <Paragraph
+                          style={{
+                            fontSize: "16px",
+                            color: "#6b7280",
+                            marginBottom: "12px",
+                            textAlign: "center",
+                          }}
+                        >
+                          Get your personalized PALAROTARY 2026 shirt
+                        </Paragraph>
+
+                        <motion.div
+                          whileHover={{ scale: 1.03 }}
+                          animate={{
+                            boxShadow: [
+                              "0 4px 15px rgba(28, 60, 109, 0.2)",
+                              "0 8px 25px rgba(28, 60, 109, 0.3)",
+                              "0 4px 15px rgba(28, 60, 109, 0.2)",
+                            ],
+                          }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                          style={{
+                            background:
+                              "linear-gradient(135deg, #fde5e320 0%, #fbcbc720 100%)",
+                            padding: "20px",
+                            borderRadius: "16px",
+                            marginBottom: "24px",
+                            border: "2px solid #9ca3af",
+                          }}
+                        >
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "12px",
+                              marginBottom: "8px",
+                            }}
+                          >
+                            <Title
+                              level={3}
+                              style={{
+                                margin: 0,
+                                color: "#173052",
+                                fontSize: "32px",
+                              }}
+                            >
+                              ₱320
+                            </Title>
+                            <Paragraph
+                              style={{
+                                margin: 0,
+                                fontSize: "20px",
+                                color: "#9ca3af",
+                                textDecoration: "line-through",
+                              }}
+                            >
+                              ₱350
+                            </Paragraph>
+                          </div>
+                          <Paragraph
+                            style={{
+                              margin: "0 0 8px 0",
+                              fontSize: "14px",
+                              color: "#6b7280",
+                            }}
+                          >
+                            All sizes - with custom name and number (00-99)
+                          </Paragraph>
+                          <Paragraph
+                            style={{
+                              margin: 0,
+                              fontSize: "13px",
+                              fontWeight: "600",
+                              color: "#d54839",
+                            }}
+                          >
+                            Promo price until December 25, 2025
+                          </Paragraph>
+                        </motion.div>
+
+                        {/* Deadline Notice */}
+                        <motion.div
+                          animate={{
+                            scale: [1, 1.05, 1],
+                          }}
+                          transition={{ duration: 1.5, repeat: Infinity }}
+                          style={{
+                            background:
+                              "linear-gradient(135deg, #17305210 0%, #17305210 100%)",
+                            padding: "10px 16px",
+                            borderRadius: "12px",
+                            marginBottom: "16px",
+                            border: "2px solid #9ca3af",
+                            textAlign: "center",
+                          }}
+                        >
+                          <Paragraph
+                            style={{
+                              margin: 0,
+                              fontSize: "13px",
+                              fontWeight: "600",
+                              color: "#173052",
+                            }}
+                          >
+                            Orders available until January 5, 2026
+                          </Paragraph>
+                        </motion.div>
+                        <div style={{ marginBottom: "28px" }}>
+                          {[
+                            "Customize your shirt",
+                            "Choose your size",
+                            "Add your name and 2-digit number (00-99)",
+                          ].map((text, i) => (
+                            <motion.div
+                              key={i}
+                              className="feature-item"
+                              initial={{ opacity: 0, x: -20 }}
+                              whileInView={{ opacity: 1, x: 0 }}
+                              transition={{ delay: i * 0.1 }}
+                              viewport={{ once: true }}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "12px",
+                                marginBottom: "12px",
+                              }}
+                            >
+                              <CheckCircleOutlined
+                                style={{ fontSize: "18px", color: "#d54839" }}
+                              />
+                              <span
+                                style={{ fontSize: "15px", color: "#1a1a2e" }}
+                              >
+                                {text}
+                              </span>
+                            </motion.div>
+                          ))}
+                        </div>
+                      </div>
+                      <motion.div
+                        variants={buttonVariants}
+                        initial="rest"
+                        whileHover="hover"
+                        whileTap="tap"
+                      >
+                        <Button
+                          type="primary"
+                          size="large"
+                          block
+                          icon={<ArrowRightOutlined />}
+                          onClick={() =>
+                            navigate("/order-shirt", {
+                              state: {
+                                memberData: registrations.success[0],
+                              },
+                            })
+                          }
+                          style={{
+                            background:
+                              "linear-gradient(135deg, #1c3c6d 0%, #173052 100%)",
+                            border: "none",
+                            height: "56px",
+                            fontSize: "17px",
+                            fontWeight: "600",
+                            borderRadius: "12px",
+                            boxShadow: "0 6px 20px rgba(28, 60, 109, 0.4)",
+                          }}
+                        >
+                          Order Now
+                        </Button>
+                      </motion.div>
+                    </div>
                   </Card>
                 </motion.div>
               </div>
