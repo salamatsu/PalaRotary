@@ -33,7 +33,7 @@ import { draw } from "../../hooks/useCanvas";
 import {
   ADULT_SHIRT_SIZES,
   KID_SHIRT_SIZES,
-  SHIRT_PRICING,
+  getCurrentShirtPrice,
 } from "../../lib/constants";
 import {
   useApprovedClubs,
@@ -222,7 +222,7 @@ const ShirtOrdering = () => {
     const updatedOrder = { ...currentOrder, [field]: value };
 
     if (field === "size") {
-      const price = SHIRT_PRICING.sizes[value] || SHIRT_PRICING.base;
+      const price = getCurrentShirtPrice();
       updatedOrder.price = price;
 
       // Animate price change
@@ -375,7 +375,7 @@ const ShirtOrdering = () => {
 
   const handleEditFieldChange = (field, value) => {
     if (field === "size") {
-      const price = SHIRT_PRICING.sizes[value] || SHIRT_PRICING.base;
+      const price = getCurrentShirtPrice();
       setEditingOrderData((prev) => ({
         ...prev,
         [field]: value,
@@ -820,9 +820,7 @@ const ShirtOrdering = () => {
                         }}
                       >
                         {getSizeOptions().map((sizeOption) => {
-                          const price =
-                            SHIRT_PRICING.sizes[sizeOption.size] ||
-                            SHIRT_PRICING.base;
+                          const price = getCurrentShirtPrice();
                           const isSelected =
                             currentOrder.size === sizeOption.size;
 
@@ -1269,8 +1267,7 @@ const ShirtOrdering = () => {
                     {
                       title: "Price",
                       key: "price",
-                      render: (_, record) =>
-                        `₱${SHIRT_PRICING.sizes[record.size]}`,
+                      render: () => `₱${getCurrentShirtPrice()}`,
                     },
                   ]}
                   pagination={false}
@@ -1297,8 +1294,7 @@ const ShirtOrdering = () => {
                     {
                       title: "Price",
                       key: "price",
-                      render: (_, record) =>
-                        `₱${SHIRT_PRICING.sizes[record.size]}`,
+                      render: () => `₱${getCurrentShirtPrice()}`,
                     },
                   ]}
                   pagination={false}

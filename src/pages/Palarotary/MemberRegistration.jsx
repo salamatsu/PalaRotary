@@ -33,6 +33,11 @@ import {
 } from "../../services/requests/usePalarotary";
 import { useRegistrationStore } from "../../store/useRegistrationStore";
 import { imageToBase64 } from "../../utils/tobase64";
+import {
+  getCurrentShirtPrice,
+  isPromoActive,
+  SHIRT_PRICING_CONFIG,
+} from "../../lib/constants";
 
 const { Paragraph, Title } = Typography;
 
@@ -1416,18 +1421,20 @@ export default function MemberRegistration() {
                                 fontSize: "32px",
                               }}
                             >
-                              ₱320
+                              ₱{getCurrentShirtPrice()}
                             </Title>
-                            <Paragraph
-                              style={{
-                                margin: 0,
-                                fontSize: "20px",
-                                color: "#9ca3af",
-                                textDecoration: "line-through",
-                              }}
-                            >
-                              ₱350
-                            </Paragraph>
+                            {isPromoActive() && (
+                              <Paragraph
+                                style={{
+                                  margin: 0,
+                                  fontSize: "20px",
+                                  color: "#9ca3af",
+                                  textDecoration: "line-through",
+                                }}
+                              >
+                                ₱{SHIRT_PRICING_CONFIG.regularPrice}
+                              </Paragraph>
+                            )}
                           </div>
                           <Paragraph
                             style={{
@@ -1438,16 +1445,25 @@ export default function MemberRegistration() {
                           >
                             All sizes - with custom name and number (00-99)
                           </Paragraph>
-                          <Paragraph
-                            style={{
-                              margin: 0,
-                              fontSize: "13px",
-                              fontWeight: "600",
-                              color: "#d54839",
-                            }}
-                          >
-                            Promo price until December 25, 2025
-                          </Paragraph>
+                          {isPromoActive() && (
+                            <Paragraph
+                              style={{
+                                margin: 0,
+                                fontSize: "13px",
+                                fontWeight: "600",
+                                color: "#d54839",
+                              }}
+                            >
+                              Promo price until{" "}
+                              {new Date(
+                                SHIRT_PRICING_CONFIG.promoEndDate
+                              ).toLocaleDateString("en-US", {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                              })}
+                            </Paragraph>
+                          )}
                         </motion.div>
 
                         {/* Deadline Notice */}
@@ -1474,7 +1490,14 @@ export default function MemberRegistration() {
                               color: "#173052",
                             }}
                           >
-                            Orders available until January 5, 2026
+                            Orders available until{" "}
+                            {new Date(
+                              SHIRT_PRICING_CONFIG.orderDeadline
+                            ).toLocaleDateString("en-US", {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            })}
                           </Paragraph>
                         </motion.div>
                         <div style={{ marginBottom: "28px" }}>

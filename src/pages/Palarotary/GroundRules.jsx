@@ -486,11 +486,12 @@ export default function GroundRules() {
             className=" grid grid-cols-12 gap-6"
           >
             {sports.map((sport, index) => (
-              <div key={index} className=" col-span-4">
+              <div key={index} className=" col-span-4 h-full ">
                 <motion.div
                   ref={(el) => (sectionsRef.current[index + 1] = el)}
                   whileHover={{ y: -8, scale: 1.02 }}
                   transition={{ type: "spring", stiffness: 300 }}
+                  className="h-full"
                 >
                   <Card
                     style={{

@@ -189,29 +189,65 @@ export const ZONE_INFORMATION = [
   { zone: "ZONE 8", area: "Mandaluyong", color: "Lavender" },
 ];
 
+// Pricing configuration
+export const SHIRT_PRICING_CONFIG = {
+  promoPrice: 320,
+  regularPrice: 350,
+  promoEndDate: "2025-12-25", // December 25, 2025
+  orderDeadline: "2026-01-05", // January 5, 2026
+};
+
+// Function to get current shirt price based on date
+export const getCurrentShirtPrice = () => {
+  const now = new Date();
+  const promoEnd = new Date(SHIRT_PRICING_CONFIG.promoEndDate + "T23:59:59");
+
+  // Check if current date is before or on promo end date
+  if (now <= promoEnd) {
+    return SHIRT_PRICING_CONFIG.promoPrice;
+  }
+
+  return SHIRT_PRICING_CONFIG.regularPrice;
+};
+
+// Function to check if promo is active
+export const isPromoActive = () => {
+  const now = new Date();
+  const promoEnd = new Date(SHIRT_PRICING_CONFIG.promoEndDate + "T23:59:59");
+  return now <= promoEnd;
+};
+
+// Function to check if orders are still accepted
+export const canPlaceOrder = () => {
+  const now = new Date();
+  const deadline = new Date(SHIRT_PRICING_CONFIG.orderDeadline + "T23:59:59");
+  return now <= deadline;
+};
+
+// Legacy pricing object for backward compatibility
 export const SHIRT_PRICING = {
-  base: 300,
+  base: getCurrentShirtPrice(),
   sizes: {
-    "2XS": 300,
-    XS: 300,
-    S: 300,
-    M: 300,
-    L: 300,
-    XL: 300,
-    "2XL": 300,
-    "3XL": 300,
-    "4XL": 300,
-    "5XL": 300,
-    "6XL": 300,
-    "7XL": 300,
+    "2XS": getCurrentShirtPrice(),
+    XS: getCurrentShirtPrice(),
+    S: getCurrentShirtPrice(),
+    M: getCurrentShirtPrice(),
+    L: getCurrentShirtPrice(),
+    XL: getCurrentShirtPrice(),
+    "2XL": getCurrentShirtPrice(),
+    "3XL": getCurrentShirtPrice(),
+    "4XL": getCurrentShirtPrice(),
+    "5XL": getCurrentShirtPrice(),
+    "6XL": getCurrentShirtPrice(),
+    "7XL": getCurrentShirtPrice(),
     // Kids sizes
-    6: 300,
-    8: 300,
-    10: 300,
-    12: 300,
-    14: 300,
-    16: 300,
-    18: 300,
-    "20 / 2XS": 300,
+    6: getCurrentShirtPrice(),
+    8: getCurrentShirtPrice(),
+    10: getCurrentShirtPrice(),
+    12: getCurrentShirtPrice(),
+    14: getCurrentShirtPrice(),
+    16: getCurrentShirtPrice(),
+    18: getCurrentShirtPrice(),
+    "20 / 2XS": getCurrentShirtPrice(),
   },
 };
