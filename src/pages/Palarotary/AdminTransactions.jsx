@@ -17,6 +17,7 @@ import {
   Modal,
   Select,
   Space,
+  Switch,
   Table,
   Tag,
   Timeline,
@@ -24,6 +25,7 @@ import {
 import { useState } from "react";
 import {
   useGetAdminTransactionsApi,
+  useToggleClubVerificationAdminTransactionsApi,
   useUpdateAdminTransactionsApi,
 } from "../../services/requests/usePalarotary";
 import { formatDateTime } from "../../utils/formatDate";
@@ -45,6 +47,8 @@ const AdminTransactions = () => {
 
   const { data, isLoading, refetch } = useGetAdminTransactionsApi(filters);
   const updateAdminTransactionsApi = useUpdateAdminTransactionsApi();
+  const toggleClubVerificationAdminTransactionsApi =
+    useToggleClubVerificationAdminTransactionsApi();
 
   const handleStatusFilter = (value) => {
     setFilters({ ...filters, status: value, page: 1 });
@@ -52,6 +56,23 @@ const AdminTransactions = () => {
 
   const handleSearch = (e) => {
     setFilters({ ...filters, search: e.target.value, page: 1 });
+  };
+
+  const handleToggleVerification = async (clubId) => {
+    toggleClubVerificationAdminTransactionsApi.mutate(
+      {
+        clubId,
+      },
+      {
+        onSuccess: () => {
+          message.success("Toggle club verification successfully");
+          refetch();
+        },
+        onError: (error) => {
+          message.error(error?.message || "Failed to toggle verification");
+        },
+      }
+    );
   };
 
   const handleApprove = async (transactionNumber) => {
@@ -141,12 +162,6 @@ const AdminTransactions = () => {
       key: "clubName",
     },
     {
-      title: "Payment Channel",
-      dataIndex: "paymentChannel",
-      key: "paymentChannel",
-      render: (channel) => channel || "-",
-    },
-    {
       title: "Status",
       dataIndex: "status",
       key: "status",
@@ -158,6 +173,12 @@ const AdminTransactions = () => {
         };
         return status ? <Tag color={colorMap[status]}>{status}</Tag> : "-";
       },
+    },
+    {
+      title: "Payment Channel",
+      dataIndex: "paymentChannel",
+      key: "paymentChannel",
+      render: (channel) => channel || "-",
     },
     {
       title: "Proof Uploads",
@@ -177,6 +198,19 @@ const AdminTransactions = () => {
             </Button>
           )}
         </Space>
+      ),
+    },
+    {
+      title: "isVisible",
+      dataIndex: "isVerified",
+      key: "isVerified",
+      render: (isVerified, { clubId }) => (
+        <Switch
+          checkedChildren="Yes"
+          unCheckedChildren="No"
+          checked={isVerified == 1}
+          onChange={() => handleToggleVerification(clubId)}
+        />
       ),
     },
   ];

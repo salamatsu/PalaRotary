@@ -11,7 +11,7 @@ export const useCurrentActiveUserToken = create(
       reset: () => set({ token: null, user: null }),
     }),
     {
-      name: "ams-active-user-auth",
+      name: "palarotary-active-user-auth",
       storage: createJSONStorage(() => localStorage),
     }
   )
@@ -27,7 +27,7 @@ export const useAdminAuthStore = create(
       reset: () => set({ userData: null, token: null }),
     }),
     {
-      name: "ams-admin-auth",
+      name: "palarotary-admin-auth",
       storage: createJSONStorage(() => localStorage),
     }
   )

@@ -269,6 +269,18 @@ export const updateAdminTransactionsApi = async (payload) => {
   }
 };
 
+export const toggleClubVerificationAdminTransactionsApi = async (payload) => {
+  try {
+    const response = await axios.post(
+      `/api/v2/clubs/cms/transactions/toggle-club-verification`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+};
+
 // ============================================
 // ADMIN APIS - Merchandise
 // ============================================

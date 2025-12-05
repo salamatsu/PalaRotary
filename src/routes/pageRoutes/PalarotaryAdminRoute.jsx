@@ -43,7 +43,7 @@ const PalarotaryAdminRoute = () => {
     {
       route: "/clubs",
       name: "clubs",
-      label: "Clubs",
+      label: "Club Registrations",
       icon: <BankOutlined className="h-5 w-5" />,
       component: (
         <Suspense fallback={<ComponentLoader />}>

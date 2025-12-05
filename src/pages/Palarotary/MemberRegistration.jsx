@@ -1,25 +1,24 @@
 import {
   ArrowLeftOutlined,
   CheckCircleOutlined,
+  CloseOutlined,
   DownloadOutlined,
   UserAddOutlined,
-  CloseOutlined,
 } from "@ant-design/icons";
 import {
+  Alert,
   App,
   Button,
   Card,
   Col,
   Form,
   Input,
-  Row,
-  Select,
-  Typography,
-  Alert,
-  Progress,
   Modal,
-  Spin,
+  Progress,
+  Select,
   Space,
+  Spin,
+  Typography,
 } from "antd";
 import { motion } from "framer-motion";
 import gsap from "gsap";
@@ -31,40 +30,25 @@ import {
   useApprovedClubs,
   useRegisterMember,
 } from "../../services/requests/usePalarotary";
-import { imageToBase64 } from "../../utils/tobase64";
 import { useRegistrationStore } from "../../store/useRegistrationStore";
-import { ComponentLoader } from "../../components/LoadingFallback";
+import { imageToBase64 } from "../../utils/tobase64";
 
 const { Paragraph } = Typography;
-// {
-//     "attendeeId": "KUZW80G76FL4HGW7",
-//     "qrCode": "P20251MIFRH18N1126",
-//     "fullName": "CHRISTOPHER DUNGARAN",
-//     "firstName": "CHRISTOPHER",
-//     "lastName": "DUNGARAN",
-//     "email": "toopsidy0023@gmail.com",
-//     "clubName": "DARK HORSE",
-//     "eventId": 1,
-//     "badgeUrl": "http://192.168.2.169:3000/api/v1/users/badge/KUZW80G76FL4HGW7"
-// }
 
 export default function MemberRegistration() {
-  const { message } = App.useApp();
+  const { message, modal } = App.useApp();
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const [formLoadTime] = useState(Date.now());
   const [familyMembers, setFamilyMembers] = useState([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submissionProgress, setSubmissionProgress] = useState(0);
-  const [currentProcessing, setCurrentProcessing] = useState("");
 
   const containerRef = useRef(null);
   const formRef = useRef(null);
   const badgeRef = useRef(null);
   const [selectedZone, setSelectedZone] = useState(null);
 
-  // Watch category field to show/hide designation field
-  const category = Form.useWatch("category", form);
+  // Watch companyName field to show/hide designation field
+  const companyName = Form.useWatch("companyName", form);
 
   const registerMember = useRegisterMember();
   const { data: clubsData, isLoading: loadingClubs } = useApprovedClubs();
@@ -80,7 +64,6 @@ export default function MemberRegistration() {
     registrations.success.length > 0
   );
 
-  console.log(registerMember.data);
   const clubs = clubsData?.data || [];
 
   // Extract unique zones from clubs
@@ -172,6 +155,63 @@ export default function MemberRegistration() {
     }
   }, [registrationComplete, registrations.success]);
 
+  // Helper function to generate loading modal content
+  const getLoadingModalContent = (currentProcessing, submissionProgress) => (
+    <div style={{ textAlign: "center", padding: "20px" }}>
+      <motion.div
+        animate={{ rotate: 360 }}
+        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+        style={{
+          width: "80px",
+          height: "80px",
+          margin: "0 auto 24px",
+          borderRadius: "50%",
+          border: "6px solid #e0f2fe",
+          borderTopColor: "#1e3a8a",
+        }}
+      />
+
+      <h2
+        style={{
+          fontSize: "24px",
+          fontWeight: "700",
+          color: "#1e3a8a",
+          marginBottom: "16px",
+        }}
+      >
+        Registering Members...
+      </h2>
+
+      <p
+        style={{
+          fontSize: "14px",
+          color: "#6b7280",
+          marginBottom: "24px",
+        }}
+      >
+        Processing: <strong>{currentProcessing}</strong>
+      </p>
+
+      <Progress
+        percent={submissionProgress}
+        strokeColor={{
+          "0%": "#1e3a8a",
+          "100%": "#3b82f6",
+        }}
+        style={{ marginBottom: "16px" }}
+      />
+
+      <p
+        style={{
+          fontSize: "12px",
+          color: "#9ca3af",
+        }}
+      >
+        Please wait while we register your members. Do not close this window.
+      </p>
+    </div>
+  );
+
   const onFinish = async (values) => {
     try {
       // Bot detection: Check honeypot fields
@@ -193,7 +233,7 @@ export default function MemberRegistration() {
 
       // Validate family members
       const invalidMembers = familyMembers.filter(
-        (member) => !member.firstName || !member.lastName || !member.category
+        (member) => !member.firstName || !member.lastName || !member.companyName
       );
 
       if (invalidMembers.length > 0) {
@@ -208,7 +248,19 @@ export default function MemberRegistration() {
 
       // Reset previous registrations
       resetRegistrations();
-      setIsSubmitting(true);
+
+      // Create loading modal
+      const modalLoading = modal.info({
+        closable: false,
+        maskClosable: false,
+        okButtonProps: { style: { display: "none" } },
+        styles: {
+          mask: {
+            backdropFilter: "blur(8px)",
+          },
+        },
+        content: getLoadingModalContent("", 0),
+      });
 
       // Helper function to remove empty values from object
       const removeEmptyValues = (obj) => {
@@ -237,10 +289,11 @@ export default function MemberRegistration() {
       const primaryMember = removeEmptyValues({
         zone: cleanValues.zone,
         clubId: cleanValues.clubId,
-        category: cleanValues.category,
+        companyName: cleanValues.companyName,
         designation:
-          cleanValues.category === "Spouse / Partner" ||
-          cleanValues.category === "Child"
+          cleanValues.companyName === "Rotaract / Interact" ||
+          cleanValues.companyName === "Spouse / Partner" ||
+          cleanValues.companyName === "Child"
             ? cleanValues.designation
             : "",
         firstName: cleanValues.firstName,
@@ -258,10 +311,11 @@ export default function MemberRegistration() {
         const familyMember = removeEmptyValues({
           zone: cleanValues.zone,
           clubId: cleanValues.clubId,
-          category: member.category,
+          companyName: member.companyName,
           designation:
-            member.category === "Spouse / Partner" ||
-            member.category === "Child"
+            member.companyName === "Rotaract / Interact" ||
+            member.companyName === "Spouse / Partner" ||
+            member.companyName === "Child"
               ? primaryMemberFullName
               : "",
           firstName: member.firstName,
@@ -280,7 +334,12 @@ export default function MemberRegistration() {
       for (let i = 0; i < membersToRegister.length; i++) {
         const member = membersToRegister[i];
         const memberName = `${member.firstName} ${member.lastName}`;
-        setCurrentProcessing(memberName);
+        const currentProgress = Math.round(((i + 1) / totalMembers) * 100);
+
+        // Update modal with current progress
+        modalLoading.update({
+          content: getLoadingModalContent(memberName, currentProgress),
+        });
 
         try {
           const response = await registerMember.mutateAsync(member);
@@ -294,10 +353,10 @@ export default function MemberRegistration() {
             error: error.response?.data?.message || "Registration failed",
           });
         }
-
-        // Update progress
-        setSubmissionProgress(Math.round(((i + 1) / totalMembers) * 100));
       }
+
+      // Close the loading modal
+      modalLoading.destroy();
 
       // Animate form exit with GSAP
       gsap.to(formRef.current, {
@@ -307,7 +366,6 @@ export default function MemberRegistration() {
         ease: "power2.in",
         onComplete: () => {
           setRegistrationComplete(true);
-          setIsSubmitting(false);
 
           if (registrations.success.length > 0) {
             message.success(
@@ -322,7 +380,6 @@ export default function MemberRegistration() {
         },
       });
     } catch (error) {
-      setIsSubmitting(false);
       message.error(
         error.response?.data?.message || "Failed to register member"
       );
@@ -356,7 +413,10 @@ export default function MemberRegistration() {
   };
 
   const downloadAllBadges = async () => {
-    message.loading({ content: "Downloading all badges...", key: "download-all" });
+    message.loading({
+      content: "Downloading all badges...",
+      key: "download-all",
+    });
     try {
       for (const registration of registrations.success) {
         await downloadQRCode(registration.badgeUrl, registration.qrCode);
@@ -384,7 +444,8 @@ export default function MemberRegistration() {
         middleName: "",
         lastName: "",
         suffix: "",
-        category: "Child",
+        companyName: "Child",
+        designation: "",
       },
     ]);
   };
@@ -401,76 +462,6 @@ export default function MemberRegistration() {
     );
   };
 
-  // Loading Modal Component
-  const LoadingModal = () => (
-    <Modal
-      open={isSubmitting}
-      footer={null}
-      closable={false}
-      centered
-      maskClosable={false}
-      width={500}
-      styles={{
-        mask: {
-          backdropFilter: "blur(8px)",
-        },
-      }}
-    >
-      <div style={{ textAlign: "center", padding: "20px" }}>
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-          style={{
-            width: "80px",
-            height: "80px",
-            margin: "0 auto 24px",
-            borderRadius: "50%",
-            border: "6px solid #e0f2fe",
-            borderTopColor: "#1e3a8a",
-          }}
-        />
-
-        <h2
-          style={{
-            fontSize: "24px",
-            fontWeight: "700",
-            color: "#1e3a8a",
-            marginBottom: "16px",
-          }}
-        >
-          Registering Members...
-        </h2>
-
-        <p
-          style={{
-            fontSize: "14px",
-            color: "#6b7280",
-            marginBottom: "24px",
-          }}
-        >
-          Processing: <strong>{currentProcessing}</strong>
-        </p>
-
-        <Progress
-          percent={submissionProgress}
-          strokeColor={{
-            "0%": "#1e3a8a",
-            "100%": "#3b82f6",
-          }}
-          style={{ marginBottom: "16px" }}
-        />
-
-        <p
-          style={{
-            fontSize: "12px",
-            color: "#9ca3af",
-          }}
-        >
-          Please wait while we register your members. Do not close this window.
-        </p>
-      </div>
-    </Modal>
-  );
 
   if (registrationComplete && registrations.success.length > 0) {
     return (
@@ -712,7 +703,7 @@ export default function MemberRegistration() {
                               color: "#6b7280",
                             }}
                           >
-                            {registration.memberInfo?.category}
+                            {registration.memberInfo?.companyName}
                           </p>
                         </div>
 
@@ -1353,7 +1344,7 @@ export default function MemberRegistration() {
                     Category
                   </span>
                 }
-                name="category"
+                name="companyName"
                 rules={[{ required: true, message: "Required" }]}
               >
                 <Select
@@ -1362,7 +1353,11 @@ export default function MemberRegistration() {
                   style={{ borderRadius: "12px" }}
                   onChange={(value) => {
                     // Clear designation when category changes
-                    if (value !== "Spouse / Partner" && value !== "Child") {
+                    if (
+                      value !== "Rotaract / Interact" &&
+                      value !== "Spouse / Partner" &&
+                      value !== "Child"
+                    ) {
                       form.setFieldValue("designation", undefined);
                     }
                   }}
@@ -1379,7 +1374,9 @@ export default function MemberRegistration() {
               </Form.Item>
 
               {/* Conditional Field - Show only for Spouse/Partner or Child */}
-              {(category === "Spouse / Partner" || category === "Child") && (
+              {(companyName === "Spouse / Partner" ||
+                companyName === "Child" ||
+                companyName === "Rotaract / Interact") && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
@@ -1528,8 +1525,8 @@ export default function MemberRegistration() {
               </div>
 
               {/* Add Family Member Section - Only for Rotarian or Rotaract/Interact */}
-              {(category === "Rotarian" ||
-                category === "Rotaract / Interact") && (
+              {(companyName === "Rotarian" ||
+                companyName === "Rotaract / Interact") && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
@@ -1767,11 +1764,11 @@ export default function MemberRegistration() {
                                 </label>
                                 <Select
                                   placeholder="Select category"
-                                  value={member.category}
+                                  value={member.companyName}
                                   onChange={(value) =>
                                     updateFamilyMember(
                                       member.id,
-                                      "category",
+                                      "companyName",
                                       value
                                     )
                                   }
@@ -1850,7 +1847,6 @@ export default function MemberRegistration() {
                     htmlType="submit"
                     size="large"
                     block
-                    loading={isSubmitting}
                     style={{
                       background:
                         "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)",
@@ -1893,9 +1889,6 @@ export default function MemberRegistration() {
           </div>
         </Card>
       </motion.div>
-
-      {/* Loading Modal */}
-      <LoadingModal />
 
       <Modal
         open={loadingClubs}

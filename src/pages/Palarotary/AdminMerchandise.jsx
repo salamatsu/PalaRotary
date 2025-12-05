@@ -339,7 +339,7 @@ const AdminMerchandise = () => {
 
   // Check if there's a conflict for the selected order
   const hasConflict = useMemo(() => {
-    if (!selectedOrder?.merchandiseId || !zoneData?.pendingRequests) {
+    if (!selectedOrder?.merchandiseId || !zoneData?.allOrders) {
       return false;
     }
 
@@ -347,8 +347,10 @@ const AdminMerchandise = () => {
     if (!orderData?.shirtNumber) return false;
 
     // Count how many pending requests exist for this shirt number
-    const conflictingRequests = zoneData.pendingRequests.filter(
-      (item) => item.shirtNumber === orderData.shirtNumber
+    const conflictingRequests = zoneData.allOrders.filter(
+      (item) =>
+        item.shirtNumber === orderData.shirtNumber &&
+        item.paymentStatus === "PENDING"
     );
 
     return conflictingRequests.length > 1;
@@ -360,51 +362,38 @@ const AdminMerchandise = () => {
     const takenNumbers = new Map();
     const pendingNumbers = new Map();
 
-    // Parse approved unique numbers
-    if (zoneData?.uniqueNumbers) {
-      zoneData.uniqueNumbers.forEach((item) => {
-        takenNumbers.set(item.shirtNumber, {
-          name: item.name,
-          email: item.email,
-          orderStatus: item.orderStatus,
-          paymentStatus: item.paymentStatus,
-          status: "approved",
-        });
-      });
-    }
+    // Process all orders from the new structure
+    if (zoneData?.allOrders) {
+      zoneData.allOrders.forEach((item) => {
+        // Check if order is approved (APPROVED or PAID status indicates approved)
+        const isApproved =
+          item.orderStatus === "APPROVED" || item.orderStatus === "approved";
 
-    // Parse approved duplicate numbers (if any)
-    if (zoneData?.duplicateNumbers) {
-      zoneData.duplicateNumbers.forEach((item) => {
-        if (!takenNumbers.has(item.shirtNumber)) {
-          takenNumbers.set(item.shirtNumber, {
-            name: item.name,
-            email: item.email,
-            orderStatus: item.orderStatus,
-            paymentStatus: item.paymentStatus,
-            status: "approved",
-          });
-        }
-      });
-    }
-
-    // Parse pending requests
-    if (zoneData?.pendingRequests) {
-      zoneData.pendingRequests.forEach((item) => {
-        // Only show as pending if not already approved
-        if (!takenNumbers.has(item.shirtNumber)) {
+        if (isApproved) {
+          // Add to taken numbers (only keep first approved for display)
+          if (!takenNumbers.has(item.shirtNumber)) {
+            takenNumbers.set(item.shirtNumber, {
+              name: item.name,
+              email: item.email,
+              orderStatus: item.orderStatus,
+              paymentStatus: item.paymentStatus,
+              status: "approved",
+            });
+          }
+        } else {
+          // Add to pending numbers
           if (!pendingNumbers.has(item.shirtNumber)) {
             pendingNumbers.set(item.shirtNumber, []);
           }
           pendingNumbers.get(item.shirtNumber).push({
-            merchandiseId: item.merchandiseId,
+            merchandiseId: item.id,
             name: item.name,
             email: item.email,
             mobileNumber: item.mobileNumber,
             size: item.size,
-            desiredNumber: item.desiredNumber,
             paymentStatus: item.paymentStatus,
             transactionNumber: item.transactionNumber,
+            createdAt: item.createdAt,
           });
         }
       });
@@ -512,14 +501,19 @@ const AdminMerchandise = () => {
               >
                 <Space size="large">
                   <span>
-                    <strong>Available:</strong>{" "}
-                    {zoneData.summary.totalAvailable}
+                    <strong>Total Orders:</strong>{" "}
+                    {zoneData.summary.totalOrders}
                   </span>
                   <span>
-                    <strong>Pending:</strong> {zoneData.summary.totalPending}
+                    <strong>Pending:</strong>{" "}
+                    {zoneData.summary.pendingOrders}
                   </span>
                   <span>
-                    <strong>Approved:</strong> {zoneData.summary.totalUnique}
+                    <strong>Paid:</strong> {zoneData.summary.paidOrders}
+                  </span>
+                  <span>
+                    <strong>Unique Numbers:</strong>{" "}
+                    {zoneData.summary.uniqueShirtNumbers}
                   </span>
                 </Space>
               </div>
@@ -802,9 +796,6 @@ const AdminMerchandise = () => {
               <Descriptions.Item label="Shirt Number">
                 {getAdminMerchandiseByIdApi.data?.shirtNumber}
               </Descriptions.Item>
-              <Descriptions.Item label="Desired Number">
-                {getAdminMerchandiseByIdApi.data?.desiredNumber || "N/A"}
-              </Descriptions.Item>
               <Descriptions.Item label="Duplicate Count">
                 {getAdminMerchandiseByIdApi.data?.duplicateCount}
               </Descriptions.Item>
@@ -834,28 +825,6 @@ const AdminMerchandise = () => {
               </Descriptions.Item>
               <Descriptions.Item label="Taken By">
                 {getAdminMerchandiseByIdApi.data?.shirtNumberTakenBy?.name ||
-                  "N/A"}
-              </Descriptions.Item>
-              <Descriptions.Item label="Desired Number Available">
-                {getAdminMerchandiseByIdApi.data?.isDesiredNumberAvailable !==
-                null ? (
-                  <Tag
-                    color={
-                      getAdminMerchandiseByIdApi.data?.isDesiredNumberAvailable
-                        ? "green"
-                        : "red"
-                    }
-                  >
-                    {getAdminMerchandiseByIdApi.data?.isDesiredNumberAvailable
-                      ? "Available"
-                      : "Taken"}
-                  </Tag>
-                ) : (
-                  "N/A"
-                )}
-              </Descriptions.Item>
-              <Descriptions.Item label="Taken By">
-                {getAdminMerchandiseByIdApi.data?.desiredNumberTakenBy?.name ||
                   "N/A"}
               </Descriptions.Item>
             </Descriptions>
@@ -1037,11 +1006,6 @@ const AdminMerchandise = () => {
               <strong>{selectedOrder?.shirtNumber}</strong> (
               {selectedOrder?.size})
             </p>
-            {selectedOrder?.desiredNumber && (
-              <p>
-                Desired Number: <strong>{selectedOrder?.desiredNumber}</strong>
-              </p>
-            )}
           </div>
 
           <Form.Item
@@ -1213,30 +1177,6 @@ const AdminMerchandise = () => {
             </div>
           )}
 
-          {zoneData?.availableNumbers &&
-            zoneData.availableNumbers.length > 0 && (
-              <div
-                style={{
-                  marginBottom: 16,
-                  padding: "12px",
-                  background: "#f0f9ff",
-                  borderRadius: "4px",
-                  border: "1px solid #bae0ff",
-                }}
-              >
-                <div
-                  style={{ marginBottom: 6, fontWeight: 500, color: "#0958d9" }}
-                >
-                  💡 Available Numbers in {filters.zone}:
-                </div>
-                <div style={{ fontSize: "12px", color: "#1677ff" }}>
-                  {zoneData.availableNumbers.slice(0, 20).join(", ")}
-                  {zoneData.availableNumbers.length > 20 &&
-                    ` and ${zoneData.availableNumbers.length - 20} more...`}
-                </div>
-              </div>
-            )}
-
           <Space direction="vertical" style={{ width: "100%" }} size="middle">
             {selectedNumberConflicts?.pendingRequests.map((request, index) => (
               <Card
@@ -1282,12 +1222,6 @@ const AdminMerchandise = () => {
                         <span style={{ color: "#666" }}>Transaction:</span>{" "}
                         {request.transactionNumber}
                       </div>
-                      {request.desiredNumber && (
-                        <div>
-                          <span style={{ color: "#666" }}>Desired Number:</span>{" "}
-                          <Tag color="blue">{request.desiredNumber}</Tag>
-                        </div>
-                      )}
                     </Space>
                   </Col>
                   <Col span={6}>

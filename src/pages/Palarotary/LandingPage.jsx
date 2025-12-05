@@ -287,7 +287,7 @@ export default function PalarotaryLandingPage() {
             >
               {[
                 { icon: CalendarOutlined, text: "January 25, 2026", delay: 0 },
-                { icon: ClockCircleOutlined, text: "8am - 6pm", delay: 0.1 },
+                { icon: ClockCircleOutlined, text: "7am - 4pm", delay: 0.1 },
                 {
                   icon: EnvironmentOutlined,
                   text: "Marikina Sports Center",

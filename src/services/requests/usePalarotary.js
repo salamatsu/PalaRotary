@@ -27,6 +27,7 @@ import {
   rejectClub,
   scanQRCodeApi,
   submitShirtOrder,
+  toggleClubVerificationAdminTransactionsApi,
   updateAdminMerchandiseStatusApi,
   updateAdminTransactionsApi,
   uploadPaymentProof,
@@ -191,6 +192,12 @@ export const useGetAdminTransactionsApi = (payload) => {
 export const useUpdateAdminTransactionsApi = () => {
   return useMutation({
     mutationFn: updateAdminTransactionsApi,
+  });
+};
+
+export const useToggleClubVerificationAdminTransactionsApi = () => {
+  return useMutation({
+    mutationFn: toggleClubVerificationAdminTransactionsApi,
   });
 };
 
