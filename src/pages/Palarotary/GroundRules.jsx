@@ -164,14 +164,14 @@ export default function GroundRules() {
       ],
     },
     {
-      title: "Swimming",
-      emoji: "🏊",
+      title: "Table Tennis",
+      emoji: "🏓",
       color: "#0ea5e9",
       events: [
-        "50m Women (Primary, Secondary, Open)",
-        "100m Men (Primary, Secondary, Open)",
-        "4x50m relay Men/Women",
-        "2 rounds – Elimination and Final",
+        "Mixed Doubles (1M + 1F per team)",
+        "Best of 3 games (11 points per game)",
+        "Single Elimination format",
+        "Players bring own paddles",
       ],
     },
     {

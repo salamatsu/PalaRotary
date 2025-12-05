@@ -123,7 +123,7 @@ export default function GeneralGuide() {
     { time: "9:30 – 11:00 AM", activity: "Pickleball" },
     { time: "10:00 – 11:30 AM", activity: "Fun Games" },
     { time: "10:00 – 12:00 NN", activity: "Badminton" },
-    { time: "12:00 – 2:00 PM", activity: "Swimming" },
+    { time: "12:00 – 2:00 PM", activity: "Table Tennis" },
     { time: "1:00 – 4:00 PM", activity: "Basketball" },
     { time: "5:00 PM", activity: "Awarding and Closing Ceremonies" },
   ];
@@ -907,7 +907,7 @@ export default function GeneralGuide() {
                 { name: "Basketball", emoji: "🏀", color: "#1c3c6d" },
                 { name: "Pickleball", emoji: "🏓", color: "#16a34a" },
                 { name: "Mobile Legends", emoji: "🎮", color: "#9333ea" },
-                { name: "Swimming", emoji: "🏊", color: "#0ea5e9" },
+                { name: "Table Tennis", emoji: "🏓", color: "#0ea5e9" },
                 { name: "Volleyball", emoji: "🏐", color: "#dc2626" },
               ].map((event, i) => (
                 <motion.div

@@ -21,6 +21,8 @@ import {
   logoBanner,
   playersImg,
   yearImg,
+  dgsiLogo,
+  eventbookLogo,
 } from "../../assets/images/logos";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -194,7 +196,6 @@ export default function PalarotaryLandingPage() {
     <div
       ref={containerRef}
       style={{
-        minHeight: "100vh",
         background: "linear-gradient(135deg, #f8f9fc 0%, #e8edf5 100%)",
         position: "relative",
         overflow: "hidden",
@@ -233,7 +234,7 @@ export default function PalarotaryLandingPage() {
         />
       ))}
 
-      <div className=" my-0 mx-auto relative px-0 py-20 ">
+      <div className=" my-0 mx-auto relative px-0 ">
         <img src={cloud} className=" absolute z-0 w-full bottom-0 top-0 l-0 " />
         <img
           src={playersImg}
@@ -245,44 +246,63 @@ export default function PalarotaryLandingPage() {
           style={{ y: yHero, opacity }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className=" h-screen flex flex-col justify-center items-center"
+          className="h-screen flex flex-col justify-center items-center mb-56 px-4"
         >
-          <div
-            style={{
-              textAlign: "center",
-              marginBottom: "60px",
-              color: "#1a1a2e",
-            }}
-          >
+          <div className="w-full max-w-6xl mx-auto text-center">
+            {/* Main Logo */}
             <motion.div
               className="hero-title"
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <center>
-                <img src={logoBanner} className=" w-full max-w-[500px]" />
-                <img src={logo2} className=" w-full max-w-[1000px]" />
-              </center>
+              <img
+                src={logoBanner}
+                className="w-full max-w-[400px] mx-auto mb-6"
+                alt="Palarotary Banner"
+              />
+              <img
+                src={logo2}
+                className="w-full max-w-[800px] mx-auto"
+                alt="Palarotary Logo"
+              />
             </motion.div>
 
+            {/* Year Image */}
             <motion.div
               className="hero-subtitle"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <center>
-                <img src={yearImg} className=" w-full max-w-[500px]" />
-              </center>
+              <img
+                src={yearImg}
+                className="w-full max-w-[400px] mx-auto "
+                alt="2026"
+              />
+              {/* Hosted By */}
+              <Paragraph
+                style={{
+                  fontSize: "20px",
+                  fontWeight: "700",
+                  color: "#1c3c6d",
+                  letterSpacing: "0.5px",
+                }}
+              >
+                Hosted by: RC Metro East Taytay
+              </Paragraph>
             </motion.div>
 
-            <div
+            {/* Date/Time/Venue Badges */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
               style={{
                 display: "flex",
                 justifyContent: "center",
                 gap: "16px",
                 flexWrap: "wrap",
-                marginTop: "40px",
+                marginBottom: "40px",
               }}
             >
               {[
@@ -297,15 +317,19 @@ export default function PalarotaryLandingPage() {
                 <motion.div
                   key={index}
                   className="info-badge w-full max-w-[300px] flex items-center justify-center"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.7 + index * 0.1 }}
                   whileHover={{
-                    scale: 1.1,
-                    y: -5,
-                    boxShadow: "0 10px 30px rgba(28, 60, 109, 0.25)",
+                    scale: 1.05,
+                    y: -8,
+                    boxShadow: "0 12px 35px rgba(28, 60, 109, 0.3)",
                   }}
                   whileTap={{ scale: 0.95 }}
                   style={{
-                    background: "#ffffff",
-                    padding: "16px 28px",
+                    background:
+                      "linear-gradient(135deg, #ffffff 0%, #f8f9fc 100%)",
+                    padding: "18px 32px",
                     borderRadius: "16px",
                     backdropFilter: "blur(10px)",
                     border:
@@ -315,8 +339,7 @@ export default function PalarotaryLandingPage() {
                         : index === 1
                         ? "#f7a50a"
                         : "#d54839"),
-                    boxShadow: "0 8px 32px rgba(28, 60, 109, 0.1)",
-                    // cursor: "pointer",
+                    boxShadow: "0 8px 32px rgba(28, 60, 109, 0.12)",
                   }}
                 >
                   <motion.div
@@ -342,6 +365,96 @@ export default function PalarotaryLandingPage() {
                   </strong>
                 </motion.div>
               ))}
+            </motion.div>
+
+            {/* Powered By Section */}
+            <div>
+              <div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1 }}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "16px",
+                }}
+              >
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  transition={{ delay: 1.2 }}
+                  animate={{ opacity: 1, y: 1 }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "16px",
+                    flexWrap: "wrap",
+                    padding: "16px 32px",
+                    borderRadius: "16px",
+                    backdropFilter: "blur(10px)",
+                    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
+                  }}
+                >
+                  <motion.img
+                    src={dgsiLogo}
+                    alt="DGSI Logo"
+                    whileHover={{ scale: 1.15, y: 1 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                    style={{
+                      height: "35px",
+                      width: "auto",
+                      objectFit: "contain",
+                      cursor: "pointer",
+                    }}
+                    onClick={() =>
+                      window.open("https://dynamicglobalsoft.com/", "_blank")
+                    }
+                  />
+                  <motion.img
+                    src={eventbookLogo}
+                    alt="Eventbook Logo"
+                    whileHover={{ scale: 1.15, y: 1 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                    style={{
+                      height: "35px",
+                      width: "auto",
+                      objectFit: "contain",
+                      cursor: "pointer",
+                    }}
+                    onClick={() =>
+                      window.open("https://eventbook.com.ph/", "_blank")
+                    }
+                  />
+                </motion.div>
+                <motion.div
+                  style={{
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    color: "#1c3c6d",
+                    margin: 0,
+                    textTransform: "uppercase",
+                    letterSpacing: "1px",
+                  }}
+                  initial={{ opacity: 0, y: 20 }}
+                  transition={{ delay: 1.2 }}
+                  animate={{ opacity: 1, y: 1 }}
+                >
+                  powered by
+                </motion.div>
+
+                {/* <Paragraph
+                  style={{
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    color: "#1c3c6d",
+                    margin: 0,
+                    textTransform: "uppercase",
+                    letterSpacing: "1px",
+                  }}
+                >
+                </Paragraph> */}
+              </div>
             </div>
           </div>
         </motion.div>
@@ -991,7 +1104,7 @@ export default function PalarotaryLandingPage() {
                         "9 official sports events + Muse & Fun Games",
                         "International Sports Federation standards",
                         "Complete rules for Athletics, Badminton, Basketball",
-                        "Swimming, Volleyball, Pickleball, Mobile Legends",
+                        "Table Tennis, Volleyball, Pickleball, Mobile Legends",
                         "Code of conduct and compliance guidelines",
                       ].map((text, i) => (
                         <motion.div
