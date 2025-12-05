@@ -5,6 +5,9 @@ import {
   CheckCircleOutlined,
   ClockCircleOutlined,
   EnvironmentOutlined,
+  PlayCircleOutlined,
+  PauseCircleOutlined,
+  SoundOutlined,
   ShopOutlined,
   TeamOutlined,
   TrophyOutlined,
@@ -24,6 +27,7 @@ import {
   dgsiLogo,
   eventbookLogo,
 } from "../../assets/images/logos";
+import { videoTeaser } from "../../assets/video";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -36,7 +40,12 @@ export default function PalarotaryLandingPage() {
   const floatingElementsRef = useRef([]);
   const cardsRef = useRef(null);
   const featuresRef = useRef(null);
+  const videoRef = useRef(null);
   const [previewVisible, setPreviewVisible] = useState(false);
+  const [videoLoaded, setVideoLoaded] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const [showControls, setShowControls] = useState(true);
 
   const { scrollYProgress } = useScroll();
   const yHero = useTransform(scrollYProgress, [0, 1], [0, -200]);
@@ -140,6 +149,65 @@ export default function PalarotaryLandingPage() {
 
     return () => ctx.revert();
   }, []);
+
+  // Lazy load video when it comes into view
+  useEffect(() => {
+    const videoElement = videoRef.current;
+    if (!videoElement) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !videoLoaded) {
+            setVideoLoaded(true);
+            // Preload video and autoplay when loaded
+            videoElement.load();
+            videoElement.addEventListener("loadeddata", () => {
+              videoElement.play().then(() => {
+                setIsPlaying(true);
+              }).catch(() => {
+                setIsPlaying(false);
+              });
+            }, { once: true });
+          }
+        });
+      },
+      {
+        rootMargin: "200px", // Start loading before video is visible
+        threshold: 0.1,
+      }
+    );
+
+    observer.observe(videoElement);
+
+    return () => {
+      if (videoElement) {
+        observer.unobserve(videoElement);
+      }
+    };
+  }, [videoLoaded]);
+
+  // Video control handlers
+  const togglePlayPause = () => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (video.paused) {
+      video.play();
+      setIsPlaying(true);
+    } else {
+      video.pause();
+      setIsPlaying(false);
+    }
+  };
+
+  const toggleMute = () => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.muted = !video.muted;
+    setIsMuted(video.muted);
+  };
 
   const cardVariants = {
     hidden: { opacity: 0, y: 50, rotateX: -15 },
@@ -383,6 +451,215 @@ export default function PalarotaryLandingPage() {
         }}
         className="bg-transparent"
       >
+        {/* Video Teaser Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          style={{ marginBottom: "80px" }}
+        >
+          <Title
+            level={2}
+            style={{
+              textAlign: "center",
+              marginBottom: "40px",
+              color: "#1c3c6d",
+              fontSize: "clamp(28px, 4vw, 36px)",
+            }}
+          >
+            Experience PALAROTARY 2026
+          </Title>
+
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            transition={{ duration: 0.3 }}
+            style={{
+              maxWidth: "1200px",
+              margin: "0 auto",
+              borderRadius: "24px",
+              overflow: "hidden",
+              boxShadow: "0 20px 60px rgba(28, 60, 109, 0.25)",
+              background: "linear-gradient(135deg, #1c3c6d 0%, #2a5085 100%)",
+              padding: "8px",
+            }}
+          >
+            <div
+              style={{
+                position: "relative",
+                paddingBottom: "56.25%", // 16:9 aspect ratio
+                background: "#000",
+                borderRadius: "16px",
+                overflow: "hidden",
+                cursor: "pointer",
+              }}
+              onClick={togglePlayPause}
+              onMouseEnter={() => setShowControls(true)}
+              onMouseLeave={() => setShowControls(isPlaying ? false : true)}
+            >
+              <video
+                ref={videoRef}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+                loop
+                muted
+                playsInline
+                preload="none"
+                poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 675'%3E%3Crect fill='%231c3c6d' width='1200' height='675'/%3E%3Ctext x='50%25' y='50%25' font-size='48' fill='white' text-anchor='middle' dominant-baseline='middle'%3EPALAROTARY 2026%3C/text%3E%3C/svg%3E"
+              >
+                {videoLoaded && <source src={videoTeaser} type="video/mp4" />}
+                Your browser does not support the video tag.
+              </video>
+
+              {/* YouTube-like Overlay Controls */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: showControls || !isPlaying ? 1 : 0 }}
+                transition={{ duration: 0.3 }}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background:
+                    "linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 50%)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  pointerEvents: showControls || !isPlaying ? "auto" : "none",
+                }}
+              >
+                {/* Center Play/Pause Button */}
+                {!isPlaying && (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                    whileHover={{ scale: 1.1 }}
+                    style={{
+                      width: "80px",
+                      height: "80px",
+                      borderRadius: "50%",
+                      background: "rgba(255, 255, 255, 0.95)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
+                    }}
+                  >
+                    <PlayCircleOutlined
+                      style={{
+                        fontSize: "48px",
+                        color: "#1c3c6d",
+                      }}
+                    />
+                  </motion.div>
+                )}
+
+                {/* Mute/Unmute Button - Bottom Right */}
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleMute();
+                  }}
+                  style={{
+                    position: "absolute",
+                    bottom: "20px",
+                    right: "20px",
+                    width: "48px",
+                    height: "48px",
+                    borderRadius: "50%",
+                    background: "rgba(255, 255, 255, 0.9)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+                  }}
+                >
+                  {isMuted ? (
+                    <SoundOutlined
+                      style={{
+                        fontSize: "24px",
+                        color: "#1c3c6d",
+                        textDecoration: "line-through",
+                      }}
+                    />
+                  ) : (
+                    <SoundOutlined
+                      style={{
+                        fontSize: "24px",
+                        color: "#1c3c6d",
+                      }}
+                    />
+                  )}
+                </motion.div>
+
+                {/* Playing Indicator - Top Left */}
+                {isPlaying && showControls && (
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    style={{
+                      position: "absolute",
+                      top: "20px",
+                      left: "20px",
+                      padding: "8px 16px",
+                      borderRadius: "20px",
+                      background: "rgba(255, 255, 255, 0.9)",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+                    }}
+                  >
+                    <PauseCircleOutlined
+                      style={{
+                        fontSize: "20px",
+                        color: "#1c3c6d",
+                      }}
+                    />
+                    <span
+                      style={{
+                        fontSize: "14px",
+                        fontWeight: "600",
+                        color: "#1c3c6d",
+                      }}
+                    >
+                      Click to pause
+                    </span>
+                  </motion.div>
+                )}
+              </motion.div>
+            </div>
+          </motion.div>
+
+          <Paragraph
+            style={{
+              textAlign: "center",
+              marginTop: "24px",
+              fontSize: "16px",
+              color: "#6b7280",
+            }}
+          >
+            Watch the highlights and get ready for the biggest Rotary sports
+            event of 2026!
+            <br />
+            <span style={{ fontSize: "14px", color: "#9ca3af" }}>
+              Click to play/pause • Tap speaker icon to unmute
+            </span>
+          </Paragraph>
+        </motion.div>
+
         {/* Registration Cards */}
         <div ref={cardsRef}>
           <Title
