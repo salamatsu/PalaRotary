@@ -20,7 +20,7 @@ import {
   Tag,
   Typography,
 } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { draw } from "../../hooks/useCanvas";
 import {
   useGetAdminMerchandiseByZoneApi,
@@ -52,12 +52,41 @@ const AdminMerchandise = () => {
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
   const [previewData, setPreviewData] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
+  const [orderPreviews, setOrderPreviews] = useState({});
 
   const { data: statsData } = useGetAdminMerchandisesStatsApi();
   const { data: zoneData, isLoading: loadingZone } =
     useGetAdminMerchandiseByZoneApi(selectedZone);
 
   const stats = statsData?.data?.overview || {};
+
+  // Generate previews for orders when zone data changes
+  const generateOrderPreviews = async (orders) => {
+    const previews = {};
+    for (const order of orders) {
+      try {
+        const image = await draw({
+          name: order.name,
+          zone: order.zone,
+          number: order.shirtNumber || "00",
+        });
+        previews[order.id] = image;
+      } catch (error) {
+        console.error(
+          `Failed to generate preview for order ${order.id}:`,
+          error
+        );
+      }
+    }
+    setOrderPreviews(previews);
+  };
+
+  // Generate previews when zone data is available
+  useEffect(() => {
+    if (zoneData?.allOrders) {
+      generateOrderPreviews(zoneData.allOrders);
+    }
+  }, [zoneData]);
 
   // Process zone data for grid
   const processedGridData = () => {
@@ -221,13 +250,17 @@ const AdminMerchandise = () => {
                 style={{ width: 200 }}
                 size="large"
                 placeholder="Choose a zone"
-              >
-                {ZONES.map((zone) => (
+                options={ZONES.map((zone) => ({
+                  value: zone,
+                  label: zone,
+                }))}
+              />
+              {/* {ZONES.map((zone) => (
                   <Select.Option key={zone} value={zone}>
                     {zone}
                   </Select.Option>
                 ))}
-              </Select>
+              </Select> */}
             </Space>
           </Col>
           <Col xs={24} md={12} style={{ textAlign: "right" }}>
@@ -271,7 +304,7 @@ const AdminMerchandise = () => {
           {/* Zone Stats */}
           {zoneData?.summary && (
             <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-              <Col xs={12} sm={6}>
+              <Col xs={12} md={12}>
                 <Card
                   style={{
                     borderRadius: "12px",
@@ -286,7 +319,7 @@ const AdminMerchandise = () => {
                   />
                 </Card>
               </Col>
-              <Col xs={12} sm={6}>
+              <Col xs={12} md={12}>
                 <Card
                   style={{
                     borderRadius: "12px",
@@ -298,36 +331,6 @@ const AdminMerchandise = () => {
                     title="Unique Numbers"
                     value={zoneData.summary.uniqueShirtNumbers}
                     valueStyle={{ color: "#22c55e" }}
-                  />
-                </Card>
-              </Col>
-              <Col xs={12} sm={6}>
-                <Card
-                  style={{
-                    borderRadius: "12px",
-                    background: "#fffbeb",
-                    border: "1px solid #fde68a",
-                  }}
-                >
-                  <Statistic
-                    title="Pending"
-                    value={zoneData.summary.pendingOrders}
-                    valueStyle={{ color: "#f59e0b" }}
-                  />
-                </Card>
-              </Col>
-              <Col xs={12} sm={6}>
-                <Card
-                  style={{
-                    borderRadius: "12px",
-                    background: "#f0fdf4",
-                    border: "1px solid #bbf7d0",
-                  }}
-                >
-                  <Statistic
-                    title="Paid"
-                    value={zoneData.summary.paidOrders}
-                    valueStyle={{ color: "#10b981" }}
                   />
                 </Card>
               </Col>
@@ -361,6 +364,7 @@ const AdminMerchandise = () => {
                           borderRadius: "12px",
                           border: "1px solid #e5e7eb",
                           background: "#ffffff",
+                          cursor: "auto",
                         }}
                         hoverable
                       >
@@ -369,6 +373,36 @@ const AdminMerchandise = () => {
                           style={{ width: "100%" }}
                           size="small"
                         >
+                          {/* Shirt Preview Image */}
+                          <div
+                            style={{
+                              width: "100%",
+                              height: "200px",
+                              borderRadius: "8px",
+                              overflow: "hidden",
+                              background: "#f3f4f6",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              marginBottom: "8px",
+                            }}
+                          >
+                            {orderPreviews[order.id] ? (
+                              <Image
+                                src={orderPreviews[order.id]}
+                                alt={`Shirt preview for ${order.name}`}
+                                style={{
+                                  width: "100%",
+                                  height: "100%",
+                                  objectFit: "contain",
+                                }}
+                                preview
+                              />
+                            ) : (
+                              <Spin tip="Loading preview..." />
+                            )}
+                          </div>
+
                           <div
                             style={{
                               display: "flex",
@@ -405,7 +439,7 @@ const AdminMerchandise = () => {
                               {order.mobileNumber}
                             </Text>
                           </div>
-                          <Button
+                          {/* <Button
                             type="primary"
                             icon={<EyeOutlined />}
                             block
@@ -416,7 +450,7 @@ const AdminMerchandise = () => {
                             }}
                           >
                             View Preview
-                          </Button>
+                          </Button> */}
                         </Space>
                       </Card>
                     </Col>
@@ -450,39 +484,44 @@ const AdminMerchandise = () => {
                   }}
                 >
                   {gridData.map((item) => (
-                  <Badge
-                    key={item.number}
-                    count={item.orders.length > 1 ? item.orders.length : 0}
-                    offset={[-5, 5]}
-                  >
-                    <Card
-                      size="small"
-                      hoverable={item.hasOrders}
-                      onClick={() => handleNumberClick(item)}
-                      style={{
-                        borderRadius: "12px",
-                        background: item.hasOrders ? "#d1fae5" : "#f3f4f6",
-                        border: item.hasOrders
-                          ? "2px solid #10b981"
-                          : "1px solid #d1d5db",
-                        cursor: item.hasOrders ? "pointer" : "default",
-                        textAlign: "center",
-                        transition: "all 0.3s ease",
-                        width: "100%",
+                    <Badge
+                      key={item.number}
+                      count={item.orders.length > 1 ? item.orders.length : 0}
+                      offset={[-5, 5]}
+                      styles={{
+                        root: {
+                          width: "100%",
+                        },
                       }}
-                      styles={{ body: { padding: "16px 8px" } }}
                     >
-                      <div
+                      <Card
+                        size="small"
+                        hoverable={item.hasOrders}
+                        onClick={() => handleNumberClick(item)}
                         style={{
-                          fontSize: "24px",
-                          fontWeight: "700",
-                          color: item.hasOrders ? "#059669" : "#9ca3af",
+                          borderRadius: "12px",
+                          background: item.hasOrders ? "#d1fae5" : "#f3f4f6",
+                          border: item.hasOrders
+                            ? "2px solid #10b981"
+                            : "1px solid #d1d5db",
+                          cursor: item.hasOrders ? "pointer" : "default",
+                          textAlign: "center",
+                          transition: "all 0.3s ease",
+                          width: "100%",
                         }}
+                        styles={{ body: { padding: "16px 8px" } }}
                       >
-                        {item.number}
-                      </div>
-                    </Card>
-                  </Badge>
+                        <div
+                          style={{
+                            fontSize: "24px",
+                            fontWeight: "700",
+                            color: item.hasOrders ? "#059669" : "#9ca3af",
+                          }}
+                        >
+                          {item.number}
+                        </div>
+                      </Card>
+                    </Badge>
                   ))}
                 </div>
               )}
@@ -516,6 +555,35 @@ const AdminMerchandise = () => {
               }}
             >
               <Space direction="vertical" style={{ width: "100%" }}>
+                {/* Shirt Preview Image */}
+                <div
+                  style={{
+                    width: "100%",
+                    height: "180px",
+                    borderRadius: "8px",
+                    overflow: "hidden",
+                    background: "#ffffff",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginBottom: "8px",
+                  }}
+                >
+                  {orderPreviews[order.id] ? (
+                    <img
+                      src={orderPreviews[order.id]}
+                      alt={`Shirt preview for ${order.name}`}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain",
+                      }}
+                    />
+                  ) : (
+                    <Spin tip="Loading preview..." />
+                  )}
+                </div>
+
                 <div
                   style={{
                     display: "flex",
@@ -560,7 +628,7 @@ const AdminMerchandise = () => {
                   onClick={() => handleViewPreview(order)}
                   style={{ marginTop: 8 }}
                 >
-                  View Shirt Preview
+                  View Full Preview
                 </Button>
               </Space>
             </Card>

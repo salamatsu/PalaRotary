@@ -663,6 +663,7 @@ export default function MemberRegistration() {
                 <div
                   style={{
                     display: "flex",
+                    flexDirection: "column",
                     justifyContent: "space-between",
                     alignItems: "center",
                     marginBottom: "20px",

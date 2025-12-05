@@ -486,7 +486,10 @@ export default function GroundRules() {
             className=" grid grid-cols-12 gap-6"
           >
             {sports.map((sport, index) => (
-              <div key={index} className=" col-span-4 h-full ">
+              <div
+                key={index}
+                className=" col-span-12 md:col-span-6 lg:col-span-4 h-full "
+              >
                 <motion.div
                   ref={(el) => (sectionsRef.current[index + 1] = el)}
                   whileHover={{ y: -8, scale: 1.02 }}

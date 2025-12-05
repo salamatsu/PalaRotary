@@ -51,12 +51,12 @@ export default function PalarotaryLandingPage() {
       tl.fromTo(
         heroRef.current.querySelector(".hero-title"),
         { opacity: 0, y: 50, scale: 0.9 },
-        { opacity: 1, y: 0, scale: 1, duration: 1 }
+        { opacity: 1, y: 1, scale: 1, duration: 1 }
       )
         .fromTo(
           heroRef.current.querySelector(".hero-subtitle"),
           { opacity: 0, y: 30 },
-          { opacity: 1, y: 0, duration: 0.8 },
+          { opacity: 1, y: 1, duration: 0.8 },
           "-=0.6"
         )
         .fromTo(
@@ -248,12 +248,12 @@ export default function PalarotaryLandingPage() {
           animate={{ opacity: 1 }}
           className="h-screen flex flex-col justify-center items-center mb-56 px-4"
         >
-          <div className="w-full max-w-6xl mx-auto text-center">
+          <div className="w-full max-w-6xl mx-auto text-center flex flex-col ">
             {/* Main Logo */}
             <motion.div
               className="hero-title"
               initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
+              animate={{ opacity: 1, y: 1 }}
             >
               <img
                 src={logoBanner}
@@ -271,7 +271,7 @@ export default function PalarotaryLandingPage() {
             <motion.div
               className="hero-subtitle"
               initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
+              animate={{ opacity: 1, y: 1 }}
               transition={{ delay: 0.3 }}
             >
               <img
@@ -279,30 +279,32 @@ export default function PalarotaryLandingPage() {
                 className="w-full max-w-[400px] mx-auto "
                 alt="2026"
               />
-              {/* Hosted By */}
-              <Paragraph
-                style={{
-                  fontSize: "20px",
-                  fontWeight: "700",
-                  color: "#1c3c6d",
-                  letterSpacing: "0.5px",
-                }}
-              >
+            </motion.div>
+
+            {/* Hosted By */}
+            <motion.div
+              className="hero-subtitle"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 1 }}
+              transition={{ delay: 0.3 }}
+              style={{ marginBottom: "16px" }}
+            >
+              <span className=" text-[#1c3c6d] font-bold text-lg">
                 Hosted by: RC Metro East Taytay
-              </Paragraph>
+              </span>
             </motion.div>
 
             {/* Date/Time/Venue Badges */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
+              animate={{ opacity: 1, y: 1 }}
               transition={{ delay: 0.6 }}
               style={{
                 display: "flex",
                 justifyContent: "center",
                 gap: "16px",
                 flexWrap: "wrap",
-                marginBottom: "40px",
+                marginBottom: "16px",
               }}
             >
               {[
@@ -327,8 +329,9 @@ export default function PalarotaryLandingPage() {
                   }}
                   whileTap={{ scale: 0.95 }}
                   style={{
-                    background:
-                      "linear-gradient(135deg, #ffffff 0%, #f8f9fc 100%)",
+                    backgroundColor: "#ffffffc0",
+                    // background:
+                    //   "linear-gradient(135deg, #ffffff 0%, #f8f9fc 100%)",
                     padding: "18px 32px",
                     borderRadius: "16px",
                     backdropFilter: "blur(10px)",
@@ -366,96 +369,6 @@ export default function PalarotaryLandingPage() {
                 </motion.div>
               ))}
             </motion.div>
-
-            {/* Powered By Section */}
-            <div>
-              <div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1 }}
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: "16px",
-                }}
-              >
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  transition={{ delay: 1.2 }}
-                  animate={{ opacity: 1, y: 1 }}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "16px",
-                    flexWrap: "wrap",
-                    padding: "16px 32px",
-                    borderRadius: "16px",
-                    backdropFilter: "blur(10px)",
-                    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
-                  }}
-                >
-                  <motion.img
-                    src={dgsiLogo}
-                    alt="DGSI Logo"
-                    whileHover={{ scale: 1.15, y: 1 }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                    style={{
-                      height: "35px",
-                      width: "auto",
-                      objectFit: "contain",
-                      cursor: "pointer",
-                    }}
-                    onClick={() =>
-                      window.open("https://dynamicglobalsoft.com/", "_blank")
-                    }
-                  />
-                  <motion.img
-                    src={eventbookLogo}
-                    alt="Eventbook Logo"
-                    whileHover={{ scale: 1.15, y: 1 }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                    style={{
-                      height: "35px",
-                      width: "auto",
-                      objectFit: "contain",
-                      cursor: "pointer",
-                    }}
-                    onClick={() =>
-                      window.open("https://eventbook.com.ph/", "_blank")
-                    }
-                  />
-                </motion.div>
-                <motion.div
-                  style={{
-                    fontSize: "14px",
-                    fontWeight: "600",
-                    color: "#1c3c6d",
-                    margin: 0,
-                    textTransform: "uppercase",
-                    letterSpacing: "1px",
-                  }}
-                  initial={{ opacity: 0, y: 20 }}
-                  transition={{ delay: 1.2 }}
-                  animate={{ opacity: 1, y: 1 }}
-                >
-                  powered by
-                </motion.div>
-
-                {/* <Paragraph
-                  style={{
-                    fontSize: "14px",
-                    fontWeight: "600",
-                    color: "#1c3c6d",
-                    margin: 0,
-                    textTransform: "uppercase",
-                    letterSpacing: "1px",
-                  }}
-                >
-                </Paragraph> */}
-              </div>
-            </div>
           </div>
         </motion.div>
       </div>
@@ -598,8 +511,8 @@ export default function PalarotaryLandingPage() {
 
                     <div style={{ marginBottom: "28px" }}>
                       <p className="text-red-600 font-semibold italic text-center mb-3">
-                        "NOTE: Only authorized club representattives are
-                        permitted to register their respective clubs"
+                        NOTE: Only authorized club representatives are permitted
+                        to register their respective clubs
                       </p>
                       {[
                         "Select your zone and club",
@@ -953,15 +866,6 @@ export default function PalarotaryLandingPage() {
                       </div>
                       <Paragraph
                         style={{
-                          margin: "0 0 8px 0",
-                          fontSize: "14px",
-                          color: "#6b7280",
-                        }}
-                      >
-                        All sizes - with custom name and number (00-99)
-                      </Paragraph>
-                      <Paragraph
-                        style={{
                           margin: 0,
                           fontSize: "13px",
                           fontWeight: "600",
@@ -1058,13 +962,12 @@ export default function PalarotaryLandingPage() {
                 </div>
               </Card>
             </motion.div>
-            
           </div>
         </div>
         {/* Information Section - Ground Rules & General Guide */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          whileInView={{ opacity: 1, y: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
           style={{ marginBottom: "60px" }}
@@ -1359,7 +1262,7 @@ export default function PalarotaryLandingPage() {
         {/* Club Payment Proof Upload Section */}
         {/* <motion.div
           initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          whileInView={{ opacity: 1, y: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
           style={{ marginBottom: "60px" }}
@@ -1483,6 +1386,72 @@ export default function PalarotaryLandingPage() {
           >
             © 2026 PALAROTARY. All rights reserved.
           </Paragraph>
+
+          {/* Powered By Section */}
+          <div>
+            <span className="text-[#1c3c6d] ">Powered By</span>
+            <div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 1 }}
+              transition={{ delay: 1 }}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "16px",
+              }}
+            >
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                transition={{ delay: 1.2 }}
+                animate={{ opacity: 1, y: 1 }}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  // padding: "16px 16px 16px 16px",
+                  // borderRadius: "16px",
+                  // backgroundColor: "#ffffff55",
+                  // backdropFilter: "blur(10px)",
+                  // boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
+                }}
+              >
+                <div className=" flex flex-wrap gap-4">
+                  <motion.img
+                    src={dgsiLogo}
+                    alt="DGSI Logo"
+                    whileHover={{ scale: 1.15, y: 1 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                    style={{
+                      height: "35px",
+                      width: "auto",
+                      objectFit: "contain",
+                      cursor: "pointer",
+                    }}
+                    onClick={() =>
+                      window.open("https://dynamicglobalsoft.com/", "_blank")
+                    }
+                  />
+                  <motion.img
+                    src={eventbookLogo}
+                    alt="Eventbook Logo"
+                    whileHover={{ scale: 1.15, y: 1 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                    style={{
+                      height: "35px",
+                      width: "auto",
+                      objectFit: "contain",
+                      cursor: "pointer",
+                    }}
+                    onClick={() =>
+                      window.open("https://eventbook.com.ph/", "_blank")
+                    }
+                  />
+                </div>
+              </motion.div>
+            </div>
+          </div>
         </motion.div>
       </div>
 
