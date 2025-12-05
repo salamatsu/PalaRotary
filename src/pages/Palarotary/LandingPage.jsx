@@ -8,9 +8,12 @@ import {
   PlayCircleOutlined,
   PauseCircleOutlined,
   SoundOutlined,
+  FullscreenOutlined,
+  FullscreenExitOutlined,
   ShopOutlined,
   TeamOutlined,
   TrophyOutlined,
+  MutedOutlined,
 } from "@ant-design/icons";
 import { Button, Card, Modal, Typography } from "antd";
 import { motion, useScroll, useTransform } from "framer-motion";
@@ -41,11 +44,13 @@ export default function PalarotaryLandingPage() {
   const cardsRef = useRef(null);
   const featuresRef = useRef(null);
   const videoRef = useRef(null);
+  const videoContainerRef = useRef(null);
   const [previewVisible, setPreviewVisible] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
   const [showControls, setShowControls] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const { scrollYProgress } = useScroll();
   const yHero = useTransform(scrollYProgress, [0, 1], [0, -200]);
@@ -162,13 +167,32 @@ export default function PalarotaryLandingPage() {
             setVideoLoaded(true);
             // Preload video and autoplay when loaded
             videoElement.load();
-            videoElement.addEventListener("loadeddata", () => {
-              videoElement.play().then(() => {
-                setIsPlaying(true);
-              }).catch(() => {
-                setIsPlaying(false);
-              });
-            }, { once: true });
+            videoElement.addEventListener(
+              "loadeddata",
+              () => {
+                // Set video to unmuted for autoplay with sound
+                videoElement.muted = false;
+                setIsMuted(false);
+
+                videoElement
+                  .play()
+                  .then(() => {
+                    setIsPlaying(true);
+                  })
+                  .catch((err) => {
+                    // If autoplay with sound fails, try muted autoplay
+                    console.log("Autoplay with sound blocked, trying muted:", err);
+                    videoElement.muted = true;
+                    setIsMuted(true);
+                    videoElement.play().then(() => {
+                      setIsPlaying(true);
+                    }).catch(() => {
+                      setIsPlaying(false);
+                    });
+                  });
+              },
+              { once: true }
+            );
           }
         });
       },
@@ -208,6 +232,38 @@ export default function PalarotaryLandingPage() {
     video.muted = !video.muted;
     setIsMuted(video.muted);
   };
+
+  const toggleFullscreen = () => {
+    const container = videoContainerRef.current;
+    if (!container) return;
+
+    if (!document.fullscreenElement) {
+      container
+        .requestFullscreen()
+        .then(() => {
+          setIsFullscreen(true);
+        })
+        .catch((err) => {
+          console.error("Error attempting to enable fullscreen:", err);
+        });
+    } else {
+      document.exitFullscreen().then(() => {
+        setIsFullscreen(false);
+      });
+    }
+  };
+
+  // Listen for fullscreen changes
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    };
+  }, []);
 
   const cardVariants = {
     hidden: { opacity: 0, y: 50, rotateX: -15 },
@@ -289,9 +345,10 @@ export default function PalarotaryLandingPage() {
             top: `${Math.random() * 100}%`,
             pointerEvents: "none",
             filter: "blur(2px)",
+            zIndex: i % 3 === 0 ? 1 : i % 3 === 1 ? 2 : 3,
           }}
           animate={{
-            opacity: [0.15, 0.4, 0.15],
+            opacity: [0.9, 0.4, 0.9],
             scale: [1, 1.3, 1],
           }}
           transition={{
@@ -302,11 +359,28 @@ export default function PalarotaryLandingPage() {
         />
       ))}
 
-      <div className=" my-0 mx-auto relative px-0 ">
-        <img src={cloud} className=" absolute z-0 w-full bottom-0 top-0 l-0 " />
+      <div className="my-0 mx-auto relative px-0">
+        <img
+          src={cloud}
+          className="absolute z-0 w-full h-full object-cover md:object-contain  object-center"
+          style={{
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+          }}
+          alt="Background clouds"
+        />
         <img
           src={playersImg}
-          className=" absolute z-0 w-full bottom-0 top-0 l-0 opacity-50 "
+          className="absolute z-0 w-full h-full object-contain object-center opacity-50"
+          style={{
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+          }}
+          alt="Background players"
         />
         {/* Hero Section */}
         <motion.div
@@ -314,7 +388,7 @@ export default function PalarotaryLandingPage() {
           style={{ y: yHero, opacity }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="h-screen flex flex-col justify-center items-center mb-56 px-4"
+          className="h-screen flex flex-col justify-center items-center mb-0 md:mb-56 px-4"
         >
           <div className="w-full max-w-6xl mx-auto text-center flex flex-col ">
             {/* Main Logo */}
@@ -443,13 +517,12 @@ export default function PalarotaryLandingPage() {
 
       <div
         style={{
-          maxWidth: "1500px",
+          maxWidth: "1000px",
           margin: "0 auto",
           position: "relative",
           zIndex: 1,
           padding: "0 20px",
         }}
-        className="bg-transparent"
       >
         {/* Video Teaser Section */}
         <motion.div
@@ -485,11 +558,12 @@ export default function PalarotaryLandingPage() {
             }}
           >
             <div
+              ref={videoContainerRef}
               style={{
                 position: "relative",
                 paddingBottom: "56.25%", // 16:9 aspect ratio
                 background: "#000",
-                borderRadius: "16px",
+                borderRadius: isFullscreen ? "0" : "16px",
                 overflow: "hidden",
                 cursor: "pointer",
               }}
@@ -508,7 +582,6 @@ export default function PalarotaryLandingPage() {
                   objectFit: "cover",
                 }}
                 loop
-                muted
                 playsInline
                 preload="none"
                 poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 675'%3E%3Crect fill='%231c3c6d' width='1200' height='675'/%3E%3Ctext x='50%25' y='50%25' font-size='48' fill='white' text-anchor='middle' dominant-baseline='middle'%3EPALAROTARY 2026%3C/text%3E%3C/svg%3E"
@@ -563,45 +636,90 @@ export default function PalarotaryLandingPage() {
                   </motion.div>
                 )}
 
-                {/* Mute/Unmute Button - Bottom Right */}
-                <motion.div
-                  whileHover={{ scale: 1.1 }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleMute();
-                  }}
+                {/* Control Buttons - Bottom Right */}
+                <div
                   style={{
                     position: "absolute",
                     bottom: "20px",
                     right: "20px",
-                    width: "48px",
-                    height: "48px",
-                    borderRadius: "50%",
-                    background: "rgba(255, 255, 255, 0.9)",
                     display: "flex",
+                    gap: "12px",
                     alignItems: "center",
-                    justifyContent: "center",
-                    cursor: "pointer",
-                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
                   }}
                 >
-                  {isMuted ? (
-                    <SoundOutlined
-                      style={{
-                        fontSize: "24px",
-                        color: "#1c3c6d",
-                        textDecoration: "line-through",
-                      }}
-                    />
-                  ) : (
-                    <SoundOutlined
-                      style={{
-                        fontSize: "24px",
-                        color: "#1c3c6d",
-                      }}
-                    />
-                  )}
-                </motion.div>
+                  {/* Mute/Unmute Button */}
+                  <motion.div
+                    whileHover={{ scale: 1.1 }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleMute();
+                    }}
+                    style={{
+                      width: "48px",
+                      height: "48px",
+                      borderRadius: "50%",
+                      background: "rgba(255, 255, 255, 0.9)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+                    }}
+                  >
+                    {isMuted ? (
+                      <MutedOutlined
+                        style={{
+                          fontSize: "24px",
+                          color: "#1c3c6d",
+                          textDecoration: "line-through",
+                        }}
+                      />
+                    ) : (
+                      <SoundOutlined
+                        style={{
+                          fontSize: "24px",
+                          color: "#1c3c6d",
+                        }}
+                      />
+                    )}
+                  </motion.div>
+
+                  {/* Fullscreen Button */}
+                  <motion.div
+                    whileHover={{ scale: 1.1 }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleFullscreen();
+                    }}
+                    style={{
+                      width: "48px",
+                      height: "48px",
+                      borderRadius: "50%",
+                      background: "rgba(255, 255, 255, 0.9)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+                    }}
+                  >
+                    {isFullscreen ? (
+                      <FullscreenExitOutlined
+                        style={{
+                          fontSize: "24px",
+                          color: "#1c3c6d",
+                        }}
+                      />
+                    ) : (
+                      <FullscreenOutlined
+                        style={{
+                          fontSize: "24px",
+                          color: "#1c3c6d",
+                        }}
+                      />
+                    )}
+                  </motion.div>
+                </div>
 
                 {/* Playing Indicator - Top Left */}
                 {isPlaying && showControls && (
@@ -655,11 +773,22 @@ export default function PalarotaryLandingPage() {
             event of 2026!
             <br />
             <span style={{ fontSize: "14px", color: "#9ca3af" }}>
-              Click to play/pause • Tap speaker icon to unmute
+              Auto-plays with sound • Click to pause • Fullscreen available
             </span>
           </Paragraph>
         </motion.div>
+      </div>
 
+      <div
+        style={{
+          maxWidth: "1500px",
+          margin: "0 auto",
+          position: "relative",
+          zIndex: 1,
+          padding: "0 20px",
+        }}
+        className="bg-transparent"
+      >
         {/* Registration Cards */}
         <div ref={cardsRef}>
           <Title
