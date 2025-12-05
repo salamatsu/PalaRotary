@@ -1,1306 +1,647 @@
 import {
   AppstoreOutlined,
-  CheckOutlined,
-  ClockCircleOutlined,
-  CloseOutlined,
   EyeOutlined,
-  SearchOutlined,
-  ShoppingOutlined,
   UnorderedListOutlined,
 } from "@ant-design/icons";
 import {
-  App,
   Badge,
   Button,
   Card,
   Col,
-  Descriptions,
-  Divider,
-  Form,
-  Input,
-  InputNumber,
+  Drawer,
+  Empty,
+  Image,
   Modal,
   Row,
   Select,
   Space,
+  Spin,
   Statistic,
-  Table,
   Tag,
-  Tooltip,
+  Typography,
 } from "antd";
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import { draw } from "../../hooks/useCanvas";
 import {
-  useGetAdminMerchandiseByIdApi,
   useGetAdminMerchandiseByZoneApi,
-  useGetAdminMerchandisesApi,
   useGetAdminMerchandisesStatsApi,
-  useUpdateAdminMerchandiseStatusApi,
 } from "../../services/requests/usePalarotary";
-import { formatPHPCurrency } from "../../utils/formatCurrency";
 
-const { TextArea } = Input;
+const { Title, Text } = Typography;
 
-// Constants
-
-const SHIRT_ORDER_STATUS = {
-  approved: "approved", // unuque - no conflict/duplicate
-  approved_duplicate: "approved_duplicate",
-};
-
-const ORDER_STATUS = {
-  ["All Order Status"]: "",
-  PENDING: "PENDING",
-  APPROVED: "APPROVED",
-  REJECTED: "REJECTED",
-};
-
-const PAYMENT_STATUS = {
-  ALL: "ALL",
-  PENDING: "PENDING",
-  PAID: "PAID",
-  EXPIRED: "EXPIRED",
-  FAILED: "FAILED",
-  VOIDED: "VOIDED",
-};
-
-const ZONES = Array.from({ length: 10 }, (_, i) => `ZONE ${i + 1}`);
-
-const ORDER_STATUS_COLORS = {
-  PENDING: "processing",
-  pending: "processing",
-  APPROVED: "success",
-  approved: "success",
-  REJECTED: "error",
-  rejected: "error",
-};
-
-const PAYMENT_STATUS_COLORS = {
-  PENDING: "warning",
-  PAID: "success",
-  EXPIRED: "default",
-  FAILED: "error",
-  VOIDED: "default",
-};
-
-// Utility Components
-const StatusTag = ({ status, colorMap }) => (
-  <Tag color={colorMap[status]}>{status}</Tag>
-);
+const ZONES = [
+  "ZONE 1",
+  "ZONE 2",
+  "ZONE 3",
+  "ZONE 4A",
+  "ZONE 4B",
+  "ZONE 5A",
+  "ZONE 5B",
+  "ZONE 6",
+  "ZONE 7",
+  "ZONE 8",
+  "ZONE 9",
+];
 
 const AdminMerchandise = () => {
-  const { modal, message } = App.useApp();
-  const [filters, setFilters] = useState({
-    status: ORDER_STATUS["All Order Status"],
-    zone: "",
-    paymentStatus: PAYMENT_STATUS.ALL,
-    page: 1,
-    limit: 20,
-  });
+  const [selectedZone, setSelectedZone] = useState("");
+  const [viewMode, setViewMode] = useState("grid");
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [selectedNumber, setSelectedNumber] = useState(null);
+  const [selectedNumberOrders, setSelectedNumberOrders] = useState([]);
+  const [previewModalOpen, setPreviewModalOpen] = useState(false);
+  const [previewData, setPreviewData] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
 
-  const [selectedOrder, setSelectedOrder] = useState(null);
-  const [selectedNumberConflicts, setSelectedNumberConflicts] = useState(null);
-  const [conflictAssignedNumbers, setConflictAssignedNumbers] = useState({});
-  const [modals, setModals] = useState({
-    details: false,
-    reject: false,
-    approve: false,
-    conflicts: false,
-  });
-  const [viewMode, setViewMode] = useState("list"); // 'list' or 'grid'
-  const [assignedNumber, setAssignedNumber] = useState(null);
-  const [rejectForm] = Form.useForm();
-  const [approveForm] = Form.useForm();
-
-  const { data, isLoading, refetch } = useGetAdminMerchandisesApi(filters);
   const { data: statsData } = useGetAdminMerchandisesStatsApi();
-  const updateMerchandise = useUpdateAdminMerchandiseStatusApi();
+  const { data: zoneData, isLoading: loadingZone } =
+    useGetAdminMerchandiseByZoneApi(selectedZone);
 
-  const getAdminMerchandiseByIdApi = useGetAdminMerchandiseByIdApi(
-    selectedOrder?.merchandiseId
-  );
+  const stats = statsData?.data?.overview || {};
 
-  // Fetch zone-specific merchandise for grid view
-  const { data: zoneData, refetch: refetchZone } =
-    useGetAdminMerchandiseByZoneApi(filters.zone);
+  // Process zone data for grid
+  const processedGridData = () => {
+    if (!zoneData?.allOrders) return [];
 
-  const stats = statsData?.data || {};
+    const ordersByNumber = {};
 
-  // Handlers
-  const updateFilter = (key, value) => {
-    setFilters((prev) => ({ ...prev, [key]: value, page: 1 }));
-  };
-
-  const toggleModal = (modalName, isOpen, order = null) => {
-    setModals((prev) => ({ ...prev, [modalName]: isOpen }));
-    if (order) {
-      setSelectedOrder(order);
-      // Pre-fill with current shirt number
-      if (modalName === "approve") {
-        setAssignedNumber(order.shirtNumber);
-        approveForm.setFieldsValue({ assignedNumber: order.shirtNumber });
+    zoneData.allOrders.forEach((order) => {
+      const num = order.shirtNumber;
+      if (!ordersByNumber[num]) {
+        ordersByNumber[num] = [];
       }
-    }
-    if (!isOpen) {
-      if (modalName === "reject") rejectForm.resetFields();
-      if (modalName === "approve") {
-        approveForm.resetFields();
-        setAssignedNumber(null);
-      }
-    }
-  };
+      ordersByNumber[num].push(order);
+    });
 
-  const handleApprove = async (values) => {
-    await updateMerchandise.mutateAsync(
-      {
-        merchandiseId: selectedOrder.merchandiseId,
-        status: SHIRT_ORDER_STATUS.approved,
-        assignedNumber: values.assignedNumber,
-        remarks: values.remarks || "",
-      },
-      {
-        onSuccess: () => {
-          message.success("Order approved successfully");
-          refetch();
-          if (filters.zone) refetchZone();
-          toggleModal("approve", false);
-          toggleModal("details", false);
-          setModals((prev) => ({ ...prev, conflicts: false }));
-          setSelectedNumberConflicts(null);
-        },
-        onError: (error) => {
-          modal.warning({
-            title: "Failed to approve order",
-            content: error?.message || "Failed to approve order",
-          });
-        },
-      }
-    );
-  };
-
-  const handleReject = async (values) => {
-    try {
-      await updateMerchandise.mutateAsync({
-        ...values,
-        merchandiseId: selectedOrder.merchandiseId,
-        status: SHIRT_ORDER_STATUS.approved_duplicate,
-      });
-      message.success("Order rejected successfully");
-      refetch();
-      if (filters.zone) refetchZone();
-      toggleModal("reject", false);
-      toggleModal("details", false);
-      setModals((prev) => ({ ...prev, conflicts: false }));
-      setSelectedNumberConflicts(null);
-    } catch (error) {
-      message.error(error.response?.data?.message || "Failed to reject order");
-    }
-  };
-
-  const handleConflictApprove = async (request, assignedNumber) => {
-    if (!assignedNumber && assignedNumber !== 0) {
-      message.error("Please enter a shirt number");
-      return;
-    }
-
-    const formattedNumber = String(assignedNumber).padStart(2, "0");
-    const originalNumber = selectedNumberConflicts?.number;
-
-    const remarks =
-      originalNumber === formattedNumber
-        ? `Approved with original requested shirt number #${formattedNumber}`
-        : `Shirt number changed from #${originalNumber} to #${formattedNumber} due to conflict`;
-
-    await updateMerchandise.mutateAsync(
-      {
-        merchandiseId: request.merchandiseId,
-        status: SHIRT_ORDER_STATUS.approved,
-        assignedNumber: formattedNumber,
-        remarks: remarks,
-      },
-      {
-        onSuccess: () => {
-          message.success(`Order approved with shirt #${formattedNumber}`);
-          refetch();
-          if (filters.zone) refetchZone();
-          // Clear the assigned number for this request
-          setConflictAssignedNumbers((prev) => {
-            const updated = { ...prev };
-            delete updated[request.merchandiseId];
-            return updated;
-          });
-        },
-        onError: (error) => {
-          modal.warning({
-            title: "Failed to approve order",
-            content:
-              error?.message ||
-              error.response?.data?.message ||
-              "Failed to approve order",
-          });
-        },
-      }
-    );
-  };
-
-  // Table Columns
-  const columns = useMemo(
-    () => [
-      {
-        title: "Actions",
-        key: "actions",
-        width: 100,
-        fixed: "left",
-        render: (_, record) => (
-          <Button
-            icon={<EyeOutlined />}
-            onClick={() => toggleModal("details", true, record)}
-          >
-            View
-          </Button>
-        ),
-      },
-      {
-        title: "Transaction #",
-        dataIndex: "transactionNumber",
-        key: "transactionNumber",
-      },
-      {
-        title: "QR Code",
-        dataIndex: "qrCode",
-        key: "qrCode",
-      },
-      {
-        title: "Name",
-        dataIndex: "name",
-        key: "name",
-      },
-      {
-        title: "Email",
-        dataIndex: "email",
-        key: "email",
-      },
-      {
-        title: "Zone",
-        dataIndex: "zone",
-        key: "zone",
-        render: (zone) => <Tag color="blue">{zone}</Tag>,
-      },
-      {
-        title: "Size",
-        dataIndex: "size",
-        key: "size",
-        width: 80,
-      },
-      {
-        title: "Shirt #",
-        dataIndex: "shirtNumber",
-        key: "shirtNumber",
-        width: 80,
-        render: (num) => <Tag>{num}</Tag>,
-      },
-      {
-        title: "Amount",
-        dataIndex: "totalAmount",
-        key: "totalAmount",
-        width: 100,
-        render: (amount) => `₱${parseFloat(amount).toFixed(2)}`,
-      },
-      {
-        title: "Payment",
-        dataIndex: "paymentStatus",
-        key: "paymentStatus",
-        width: 100,
-        render: (status) => (
-          <StatusTag status={status} colorMap={PAYMENT_STATUS_COLORS} />
-        ),
-      },
-      {
-        title: "Order Status",
-        dataIndex: "orderStatus",
-        key: "orderStatus",
-        width: 120,
-        render: (status) => (
-          <StatusTag status={status} colorMap={ORDER_STATUS_COLORS} />
-        ),
-      },
-      {
-        title: "Created",
-        dataIndex: "createdAt",
-        key: "createdAt",
-        width: 100,
-        render: (date) => new Date(date).toLocaleDateString(),
-      },
-    ],
-    []
-  );
-
-  const merchandises = data?.data?.merchandises || [];
-  const pagination = data?.data?.pagination || {};
-
-  // Check if there's a conflict for the selected order
-  const hasConflict = useMemo(() => {
-    if (!selectedOrder?.merchandiseId || !zoneData?.allOrders) {
-      return false;
-    }
-
-    const orderData = getAdminMerchandiseByIdApi.data;
-    if (!orderData?.shirtNumber) return false;
-
-    // Count how many pending requests exist for this shirt number
-    const conflictingRequests = zoneData.allOrders.filter(
-      (item) =>
-        item.shirtNumber === orderData.shirtNumber &&
-        item.paymentStatus === "PENDING"
-    );
-
-    return conflictingRequests.length > 1;
-  }, [selectedOrder, zoneData, getAdminMerchandiseByIdApi.data]);
-
-  // Generate grid numbers (00-99) with status
-  const gridNumbers = useMemo(() => {
-    const numbers = [];
-    const takenNumbers = new Map();
-    const pendingNumbers = new Map();
-
-    // Process all orders from the new structure
-    if (zoneData?.allOrders) {
-      zoneData.allOrders.forEach((item) => {
-        // Check if order is approved (APPROVED or PAID status indicates approved)
-        const isApproved =
-          item.orderStatus === "APPROVED" || item.orderStatus === "approved";
-
-        if (isApproved) {
-          // Add to taken numbers (only keep first approved for display)
-          if (!takenNumbers.has(item.shirtNumber)) {
-            takenNumbers.set(item.shirtNumber, {
-              name: item.name,
-              email: item.email,
-              orderStatus: item.orderStatus,
-              paymentStatus: item.paymentStatus,
-              status: "approved",
-            });
-          }
-        } else {
-          // Add to pending numbers
-          if (!pendingNumbers.has(item.shirtNumber)) {
-            pendingNumbers.set(item.shirtNumber, []);
-          }
-          pendingNumbers.get(item.shirtNumber).push({
-            merchandiseId: item.id,
-            name: item.name,
-            email: item.email,
-            mobileNumber: item.mobileNumber,
-            size: item.size,
-            paymentStatus: item.paymentStatus,
-            transactionNumber: item.transactionNumber,
-            createdAt: item.createdAt,
-          });
-        }
-      });
-    }
-
+    const gridData = [];
     for (let i = 0; i <= 99; i++) {
-      const num = i.toString().padStart(2, "0");
-      const isApproved = takenNumbers.has(num);
-      const pendingList = pendingNumbers.get(num);
-      const hasPending = !!pendingList && pendingList.length > 0;
-
-      numbers.push({
+      const num = String(i).padStart(2, "0");
+      const orders = ordersByNumber[num] || [];
+      gridData.push({
         number: num,
-        isTaken: isApproved,
-        isPending: hasPending && !isApproved,
-        pendingCount: pendingList ? pendingList.length : 0,
-        info: takenNumbers.get(num) || null,
-        pendingInfo: pendingList || [],
+        orders,
+        hasOrders: orders.length > 0,
       });
     }
-    return numbers;
-  }, [zoneData]);
 
-  // Grid View Component
-  const GridView = () => {
-    const getCardStyle = (item) => {
-      if (item.isTaken) {
-        return {
-          backgroundColor: "#f6ffed",
-          borderColor: "#b7eb8f",
-          cursor: "default",
-        };
-      } else if (item.isPending) {
-        return {
-          backgroundColor: "#fffbe6",
-          borderColor: "#ffe58f",
-          cursor: "pointer",
-        };
-      } else {
-        return {
-          backgroundColor: "#ff333310",
-          borderColor: "#ff333350",
-          cursor: "default",
-        };
-      }
-    };
-
-    const getNumberColor = (item) => {
-      if (item.isTaken) return "#52c41a";
-      if (item.isPending) return "#faad14";
-      return "#ff333350";
-    };
-
-    const getTooltipContent = (item) => {
-      if (item.isTaken) {
-        return `Approved - ${item.info.name} (${item.info.email})`;
-      } else if (item.isPending) {
-        const pendingCount = item.pendingCount;
-        const firstPending = item.pendingInfo[0];
-        return pendingCount > 1
-          ? `${pendingCount} Pending Requests (Click to view)`
-          : `Pending - ${firstPending.name} (${firstPending.size})`;
-      }
-      return "Available";
-    };
-
-    return (
-      <div style={{ marginTop: 16 }}>
-        {!filters.zone ? (
-          <Card>
-            <div
-              style={{
-                textAlign: "center",
-                padding: "40px 20px",
-                color: "#999",
-              }}
-            >
-              <AppstoreOutlined style={{ fontSize: 48, marginBottom: 16 }} />
-              <h3>Please select a zone to view the grid</h3>
-              <p>
-                Choose a zone from the filter above to see shirt number
-                availability
-              </p>
-            </div>
-          </Card>
-        ) : (
-          <Card
-            title={`Shirt Numbers Grid - ${filters.zone}`}
-            extra={
-              <Space>
-                <Badge color="green" text="Available" />
-                <Badge color="orange" text="Pending" />
-                <Badge color="red" text="Taken" />
-              </Space>
-            }
-          >
-            {zoneData?.summary && (
-              <div
-                style={{
-                  marginBottom: 16,
-                  padding: "12px",
-                  background: "#f5f5f5",
-                  borderRadius: "4px",
-                }}
-              >
-                <Space size="large">
-                  <span>
-                    <strong>Total Orders:</strong>{" "}
-                    {zoneData.summary.totalOrders}
-                  </span>
-                  <span>
-                    <strong>Pending:</strong>{" "}
-                    {zoneData.summary.pendingOrders}
-                  </span>
-                  <span>
-                    <strong>Paid:</strong> {zoneData.summary.paidOrders}
-                  </span>
-                  <span>
-                    <strong>Unique Numbers:</strong>{" "}
-                    {zoneData.summary.uniqueShirtNumbers}
-                  </span>
-                </Space>
-              </div>
-            )}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(70px, 1fr))",
-                gap: "8px",
-              }}
-            >
-              {gridNumbers.map((item) => (
-                <Tooltip key={item.number} title={getTooltipContent(item)}>
-                  <Card
-                    size="small"
-                    style={{
-                      textAlign: "center",
-                      ...getCardStyle(item),
-                    }}
-                    styles={{ body: { padding: "12px 8px" } }}
-                    onClick={() => {
-                      if (item.isPending && item.pendingInfo.length > 0) {
-                        // Open conflicts modal to show all pending requests for this number
-                        setSelectedNumberConflicts({
-                          number: item.number,
-                          pendingRequests: item.pendingInfo,
-                          count: item.pendingCount,
-                        });
-
-                        // Initialize assigned numbers with the current requested number
-                        const initialNumbers = {};
-                        item.pendingInfo.forEach((request) => {
-                          initialNumbers[request.merchandiseId] = parseInt(
-                            item.number,
-                            10
-                          );
-                        });
-                        setConflictAssignedNumbers(initialNumbers);
-
-                        setModals((prev) => ({ ...prev, conflicts: true }));
-                      }
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontSize: "20px",
-                        fontWeight: "bold",
-                        color: getNumberColor(item),
-                        position: "relative",
-                      }}
-                    >
-                      {item.number}
-                      {item.isPending && item.pendingCount > 1 && (
-                        <Badge
-                          count={item.pendingCount}
-                          style={{
-                            position: "absolute",
-                            top: -8,
-                            right: -8,
-                            fontSize: "10px",
-                          }}
-                        />
-                      )}
-                    </div>
-                    {item.isTaken && (
-                      <div style={{ fontSize: "10px", color: "#999" }}>
-                        {item.info.name}
-                      </div>
-                    )}
-                    {item.isPending && (
-                      <div style={{ fontSize: "10px", color: "#faad14" }}>
-                        {item.pendingInfo[0].size}
-                      </div>
-                    )}
-                  </Card>
-                </Tooltip>
-              ))}
-            </div>
-          </Card>
-        )}
-      </div>
-    );
+    return gridData;
   };
+
+  // Process zone data for list
+  const processedListData = () => {
+    if (!zoneData?.allOrders) return [];
+    return zoneData.allOrders;
+  };
+
+  const handleNumberClick = (numberData) => {
+    if (numberData.hasOrders) {
+      setSelectedNumber(numberData.number);
+      setSelectedNumberOrders(numberData.orders);
+      setDrawerOpen(true);
+    }
+  };
+
+  const handleViewPreview = async (order) => {
+    setPreviewData(order);
+    setPreviewModalOpen(true);
+
+    // Generate preview image
+    try {
+      const image = await draw({
+        name: order.name,
+        zone: order.zone,
+        number: order.shirtNumber || "00",
+      });
+      setPreviewImage(image);
+    } catch (error) {
+      console.error("Failed to generate preview:", error);
+    }
+  };
+
+  const gridData = processedGridData();
+  const listData = processedListData();
 
   return (
-    <div style={{ padding: 24 }}>
-      {/* Statistics Overview */}
+    <div style={{ padding: "24px", background: "#f5f7fa", minHeight: "100vh" }}>
+      {/* Header Stats */}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        <Col xs={24} sm={12} md={6}>
-          <Card>
-            <Statistic
-              title="Total Orders"
-              value={stats.overview?.totalOrders || 0}
-              prefix={<ShoppingOutlined />}
-              valueStyle={{ color: "#1890ff" }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={6}>
-          <Card>
-            <Statistic
-              title="Pending Orders"
-              value={stats.overview?.pendingOrders || 0}
-              prefix={<ClockCircleOutlined />}
-              valueStyle={{ color: "#faad14" }}
-            />
-            {/* <div style={{ fontSize: "12px", color: "#999", marginTop: "4px" }}>
-              {stats.overview?.pendingPaidOrders || 0} paid /{" "}
-              {stats.overview?.pendingUnpaidOrders || 0} unpaid
-            </div> */}
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={6}>
-          <Card>
-            <Statistic
-              title="Approved Orders"
-              value={stats.overview?.approvedOrders || 0}
-              prefix={<CheckOutlined />}
-              valueStyle={{ color: "#52c41a" }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={6}>
-          <Card>
-            <Statistic
-              title="Total Revenue"
-              value={parseFloat(stats.overview?.totalRevenue || 0)}
-              prefix="₱"
-              precision={2}
-              valueStyle={{ color: "#cf1322" }}
-            />
+        <Col xs={24}>
+          <Card
+            style={{
+              borderRadius: "16px",
+              background: "#1c3c6d",
+              border: "none",
+            }}
+          >
+            <Title
+              level={2}
+              style={{ color: "white", margin: 0, marginBottom: 24 }}
+            >
+              Merchandise Orders
+            </Title>
+            <Row gutter={[16, 16]}>
+              <Col xs={12} md={6}>
+                <div style={{ textAlign: "center" }}>
+                  <div
+                    style={{
+                      fontSize: "36px",
+                      fontWeight: "700",
+                      color: "white",
+                    }}
+                  >
+                    {stats.totalOrders || 0}
+                  </div>
+                  <div style={{ color: "rgba(255,255,255,0.9)" }}>
+                    Total Orders
+                  </div>
+                </div>
+              </Col>
+              <Col xs={12} md={6}>
+                <div style={{ textAlign: "center" }}>
+                  <div
+                    style={{
+                      fontSize: "36px",
+                      fontWeight: "700",
+                      color: "#ffd700",
+                    }}
+                  >
+                    {stats.pendingOrders || 0}
+                  </div>
+                  <div style={{ color: "rgba(255,255,255,0.9)" }}>Pending</div>
+                </div>
+              </Col>
+              <Col xs={12} md={6}>
+                <div style={{ textAlign: "center" }}>
+                  <div
+                    style={{
+                      fontSize: "36px",
+                      fontWeight: "700",
+                      color: "#10b981",
+                    }}
+                  >
+                    {stats.approvedOrders || 0}
+                  </div>
+                  <div style={{ color: "rgba(255,255,255,0.9)" }}>Approved</div>
+                </div>
+              </Col>
+              <Col xs={12} md={6}>
+                <div style={{ textAlign: "center" }}>
+                  <div
+                    style={{
+                      fontSize: "36px",
+                      fontWeight: "700",
+                      color: "#fbbf24",
+                    }}
+                  >
+                    ₱{parseFloat(stats.totalRevenue || 0).toFixed(0)}
+                  </div>
+                  <div style={{ color: "rgba(255,255,255,0.9)" }}>Revenue</div>
+                </div>
+              </Col>
+            </Row>
           </Card>
         </Col>
       </Row>
 
+      {/* Controls */}
       <Card
-        title="Merchandise Orders"
-        extra={
-          <Space>
-            <Button
-              type={viewMode === "list" ? "primary" : "default"}
-              icon={<UnorderedListOutlined />}
-              onClick={() => setViewMode("list")}
-            >
-              List
-            </Button>
-            <Button
-              type={viewMode === "grid" ? "primary" : "default"}
-              icon={<AppstoreOutlined />}
-              onClick={() => setViewMode("grid")}
-            >
-              Grid
-            </Button>
-          </Space>
-        }
+        style={{
+          borderRadius: "16px",
+          marginBottom: 24,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+        }}
       >
-        <Space wrap style={{ marginBottom: 16, display: "flex", gap: 12 }}>
-          <Input
-            placeholder="Search by transaction #, name, email, or QR code"
-            prefix={<SearchOutlined />}
-            onChange={(e) => updateFilter("search", e.target.value)}
-            style={{ maxWidth: 400 }}
-            allowClear
-          />
-          <Select
-            value={filters.status}
-            onChange={(val) => updateFilter("status", val)}
-            style={{ width: 180 }}
-            options={Object.entries(ORDER_STATUS).map(([key, value]) => ({
-              label: key,
-              value: value,
-            }))}
-          />
-          <Select
-            value={filters.zone}
-            onChange={(val) => updateFilter("zone", val)}
-            style={{ width: 130 }}
-            options={[
-              {
-                value: "",
-                label: "All Zones",
-              },
-              ...ZONES.map((zone) => ({
-                value: zone,
-                label: zone,
-              })),
-            ]}
-          />
-          <Select
-            value={filters.paymentStatus}
-            onChange={(val) => updateFilter("paymentStatus", val)}
-            style={{ width: 180 }}
-            options={[
-              {
-                value: "",
-                label: "All Payment Status",
-              },
-              ...Object.entries(PAYMENT_STATUS)
-                .filter(([key]) => key !== "ALL")
-                .map(([key, value]) => ({
-                  value,
-                  label: key,
-                })),
-            ]}
-          />
-        </Space>
-
-        {viewMode === "list" ? (
-          <Table
-            dataSource={merchandises}
-            columns={columns}
-            loading={isLoading}
-            rowKey="merchandiseId"
-            scroll={{ x: 1400 }}
-            pagination={{
-              current: parseInt(pagination.currentPage) || 1,
-              pageSize: parseInt(pagination.limit) || 20,
-              total: pagination.totalRecords || 0,
-              onChange: (page) => updateFilter("page", page),
-              showSizeChanger: false,
-            }}
-          />
-        ) : (
-          <GridView />
-        )}
-      </Card>
-
-      <Modal
-        title="Order Details"
-        open={getAdminMerchandiseByIdApi.data && modals.details}
-        onCancel={() => setModals((prev) => ({ ...prev, details: false }))}
-        footer={null}
-        width={800}
-        destroyOnHidden={true}
-      >
-        {getAdminMerchandiseByIdApi.data && (
-          <div style={{ maxHeight: "70vh", overflowY: "auto" }}>
-            {/* Customer Information */}
-            <Descriptions
-              title="Customer Information"
-              bordered
-              column={2}
-              size="small"
-            >
-              <Descriptions.Item label="Name">
-                {getAdminMerchandiseByIdApi.data?.name}
-              </Descriptions.Item>
-              <Descriptions.Item label="Email">
-                {getAdminMerchandiseByIdApi.data?.email}
-              </Descriptions.Item>
-              <Descriptions.Item label="Zone">
-                {getAdminMerchandiseByIdApi.data?.zone}
-              </Descriptions.Item>
-              <Descriptions.Item label="QR Code">
-                {getAdminMerchandiseByIdApi.data?.qrCode}
-              </Descriptions.Item>
-            </Descriptions>
-
-            <Divider />
-
-            {/* Order Information */}
-            <Descriptions
-              title="Order Information"
-              bordered
-              column={2}
-              size="small"
-            >
-              <Descriptions.Item label="Transaction Number" span={2}>
-                {getAdminMerchandiseByIdApi.data?.transactionNumber}
-              </Descriptions.Item>
-              <Descriptions.Item label="Transaction ID">
-                {getAdminMerchandiseByIdApi.data?.transactionId}
-              </Descriptions.Item>
-              <Descriptions.Item label="Details ID">
-                {getAdminMerchandiseByIdApi.data?.transactionDetailsId}
-              </Descriptions.Item>
-              <Descriptions.Item label="Size">
-                {getAdminMerchandiseByIdApi.data?.size}
-              </Descriptions.Item>
-              <Descriptions.Item label="Shirt Number">
-                {getAdminMerchandiseByIdApi.data?.shirtNumber}
-              </Descriptions.Item>
-              <Descriptions.Item label="Duplicate Count">
-                {getAdminMerchandiseByIdApi.data?.duplicateCount}
-              </Descriptions.Item>
-            </Descriptions>
-
-            <Divider />
-
-            {/* Availability Status */}
-            <Descriptions
-              title="Availability Status"
-              bordered
-              column={2}
-              size="small"
-            >
-              <Descriptions.Item label="Shirt Number Available">
-                <Tag
-                  color={
-                    getAdminMerchandiseByIdApi.data?.isShirtNumberAvailable
-                      ? "green"
-                      : "red"
-                  }
-                >
-                  {getAdminMerchandiseByIdApi.data?.isShirtNumberAvailable
-                    ? "Available"
-                    : "Taken"}
-                </Tag>
-              </Descriptions.Item>
-              <Descriptions.Item label="Taken By">
-                {getAdminMerchandiseByIdApi.data?.shirtNumberTakenBy?.name ||
-                  "N/A"}
-              </Descriptions.Item>
-            </Descriptions>
-
-            <Divider />
-
-            {/* Payment Information */}
-            <Descriptions
-              title="Payment Information"
-              bordered
-              column={2}
-              size="small"
-            >
-              <Descriptions.Item label="Payment Status">
-                <Tag
-                  color={
-                    getAdminMerchandiseByIdApi.data?.paymentStatus === "PENDING"
-                      ? "orange"
-                      : "green"
-                  }
-                >
-                  {getAdminMerchandiseByIdApi.data?.paymentStatus}
-                </Tag>
-              </Descriptions.Item>
-              <Descriptions.Item label="Order Status">
-                <Tag
-                  color={
-                    getAdminMerchandiseByIdApi.data?.orderStatus === "pending"
-                      ? "orange"
-                      : "green"
-                  }
-                >
-                  {getAdminMerchandiseByIdApi.data?.orderStatus.toUpperCase()}
-                </Tag>
-              </Descriptions.Item>
-              <Descriptions.Item label="Total Amount">
-                ₱{getAdminMerchandiseByIdApi.data?.totalAmount.toFixed(2)}
-              </Descriptions.Item>
-              <Descriptions.Item label="Paid Amount">
-                {getAdminMerchandiseByIdApi.data?.paidAmount
-                  ? formatPHPCurrency(
-                      getAdminMerchandiseByIdApi.data?.paidAmount
-                    )
-                  : "N/A"}
-              </Descriptions.Item>
-              <Descriptions.Item label="Reference Number" span={2}>
-                {getAdminMerchandiseByIdApi.data?.referenceNumber}
-              </Descriptions.Item>
-              <Descriptions.Item label="Payment Method">
-                {getAdminMerchandiseByIdApi.data?.paymentMethod || "N/A"}
-              </Descriptions.Item>
-              <Descriptions.Item label="Payment Channel">
-                {getAdminMerchandiseByIdApi.data?.paymentChannel || "N/A"}
-              </Descriptions.Item>
-            </Descriptions>
-
-            <Divider />
-
-            {/* Message & Remarks */}
-            <Descriptions
-              title="Additional Information"
-              bordered
-              column={1}
-              size="small"
-            >
-              <Descriptions.Item label="Message">
-                {getAdminMerchandiseByIdApi.data?.message}
-              </Descriptions.Item>
-              {getAdminMerchandiseByIdApi.data?.itemRemarks && (
-                <Descriptions.Item label="Item Remarks">
-                  {getAdminMerchandiseByIdApi.data?.itemRemarks}
-                </Descriptions.Item>
-              )}
-              {getAdminMerchandiseByIdApi.data?.transactionRemarks && (
-                <Descriptions.Item label="Transaction Remarks">
-                  {getAdminMerchandiseByIdApi.data?.transactionRemarks}
-                </Descriptions.Item>
-              )}
-            </Descriptions>
-
-            <Divider />
-
-            {/* Timestamps */}
-            <Descriptions title="Timestamps" bordered column={2} size="small">
-              <Descriptions.Item label="Created At">
-                {new Date(
-                  getAdminMerchandiseByIdApi.data?.createdAt
-                ).toLocaleString()}
-              </Descriptions.Item>
-              <Descriptions.Item label="Updated At">
-                {new Date(
-                  getAdminMerchandiseByIdApi.data?.updatedAt
-                ).toLocaleString()}
-              </Descriptions.Item>
-            </Descriptions>
-
-            {(getAdminMerchandiseByIdApi.data?.orderStatus === "PENDING" ||
-              getAdminMerchandiseByIdApi.data?.orderStatus === "pending") && (
-              <>
-                {hasConflict &&
-                getAdminMerchandiseByIdApi.data?.paymentStatus === "PAID" ? (
-                  <Space
-                    style={{
-                      marginTop: 16,
-                      width: "100%",
-                      justifyContent: "flex-end",
-                    }}
-                  >
-                    <Button
-                      type="primary"
-                      icon={<CheckOutlined />}
-                      onClick={() =>
-                        toggleModal("approve", true, selectedOrder)
-                      }
-                      style={{ background: "#52c41a", borderColor: "#52c41a" }}
-                      disabled={getAdminMerchandiseByIdApi.isFetching}
-                    >
-                      Approve Order
-                    </Button>
-                    <Button
-                      danger
-                      icon={<CloseOutlined />}
-                      onClick={() => toggleModal("reject", true, selectedOrder)}
-                    >
-                      Reject Order
-                    </Button>
-                  </Space>
-                ) : (
-                  <div
-                    style={{
-                      marginTop: 16,
-                      padding: "12px",
-                      background: "#fffbe6",
-                      borderRadius: "4px",
-                      border: "1px solid #ffe58f",
-                    }}
-                  >
-                    {getAdminMerchandiseByIdApi.data?.paymentStatus !==
-                    "PAID" ? (
-                      <small style={{ color: "#d48806", fontWeight: 600 }}>
-                        ⏳ Waiting for payment confirmation. Actions will be
-                        available after payment is confirmed.
-                      </small>
-                    ) : (
-                      <small style={{ color: "#389e0d", fontWeight: 600 }}>
-                        ✓ Payment confirmed. No conflicts detected - order will
-                        be auto-approved.
-                      </small>
-                    )}
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        )}
-      </Modal>
-
-      <Modal
-        title="Approve Order"
-        open={modals.approve}
-        onCancel={() => toggleModal("approve", false)}
-        footer={null}
-      >
-        <Form
-          form={approveForm}
-          layout="vertical"
-          onFinish={handleApprove}
-          initialValues={{ assignedNumber: selectedOrder?.shirtNumber }}
-        >
-          <div style={{ marginBottom: 16 }}>
-            <p>
-              Transaction: <strong>{selectedOrder?.transactionNumber}</strong>
-            </p>
-            <p>
-              Customer: <strong>{selectedOrder?.name}</strong>
-            </p>
-            <p>
-              Current Shirt Number:{" "}
-              <strong>{selectedOrder?.shirtNumber}</strong> (
-              {selectedOrder?.size})
-            </p>
-          </div>
-
-          <Form.Item
-            label="Assigned Shirt Number"
-            name="assignedNumber"
-            rules={[
-              { required: true, message: "Please enter a shirt number" },
-              {
-                pattern: /^[0-9]{1,2}$/,
-                message: "Please enter a valid number (0-99)",
-              },
-            ]}
-          >
-            <InputNumber
-              min={0}
-              max={99}
-              style={{ width: "100%" }}
-              placeholder="Enter shirt number (0-99)"
-              formatter={(value) =>
-                value ? String(value).padStart(2, "0") : ""
-              }
-              parser={(value) => (value ? parseInt(value, 10) : "")}
-              onChange={(val) => setAssignedNumber(val)}
-            />
-          </Form.Item>
-
-          <Form.Item label="Remarks (Optional)" name="remarks">
-            <TextArea
-              rows={3}
-              placeholder="Add any notes about this approval..."
-            />
-          </Form.Item>
-
-          <Form.Item style={{ marginBottom: 0 }}>
-            <Space style={{ width: "100%", justifyContent: "flex-end" }}>
-              <Button onClick={() => toggleModal("approve", false)}>
-                Cancel
+        <Row gutter={[16, 16]} align="middle">
+          <Col xs={24} md={12}>
+            <Space>
+              <Text strong>Select Zone:</Text>
+              <Select
+                value={selectedZone}
+                onChange={setSelectedZone}
+                style={{ width: 200 }}
+                size="large"
+                placeholder="Choose a zone"
+              >
+                {ZONES.map((zone) => (
+                  <Select.Option key={zone} value={zone}>
+                    {zone}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Space>
+          </Col>
+          <Col xs={24} md={12} style={{ textAlign: "right" }}>
+            <Space>
+              <Button
+                type={viewMode === "list" ? "primary" : "default"}
+                icon={<UnorderedListOutlined />}
+                onClick={() => setViewMode("list")}
+                size="large"
+              >
+                List
               </Button>
               <Button
-                type="primary"
-                htmlType="submit"
-                loading={updateMerchandise.isPending}
-                style={{ background: "#52c41a", borderColor: "#52c41a" }}
-                icon={<CheckOutlined />}
+                type={viewMode === "grid" ? "primary" : "default"}
+                icon={<AppstoreOutlined />}
+                onClick={() => setViewMode("grid")}
+                size="large"
               >
-                Approve Order
+                Grid
               </Button>
             </Space>
-          </Form.Item>
-        </Form>
-      </Modal>
+          </Col>
+        </Row>
+      </Card>
 
-      <Modal
-        title="Reject Order"
-        open={modals.reject}
-        onCancel={() => toggleModal("reject", false)}
-        footer={null}
-      >
-        <div>
-          <p>
-            Transaction: <strong>{selectedOrder?.transactionNumber}</strong>
-          </p>
-          <p>
-            Customer: <strong>{selectedOrder?.name}</strong>
-          </p>
-          <p>
-            Shirt Number: <strong>{selectedOrder?.shirtNumber}</strong> (
-            {selectedOrder?.size})
-          </p>
-          <div style={{ marginTop: 16 }}>
-            <div style={{ marginBottom: 8 }}>
-              <label style={{ fontWeight: 500 }}>
-                Rejection Reason <span style={{ color: "red" }}>*</span>
-              </label>
-            </div>
-            <TextArea
-              rows={4}
-              placeholder="Explain why this order is being rejected..."
-              value={rejectForm.getFieldValue("remarks")}
-              onChange={(e) =>
-                rejectForm.setFieldValue("remarks", e.target.value)
-              }
-            />
-          </div>
-          <Space
-            style={{
-              marginTop: 16,
-              width: "100%",
-              justifyContent: "flex-end",
-            }}
-          >
-            <Button onClick={() => toggleModal("reject", false)}>Cancel</Button>
-            <Button
-              type="primary"
-              danger
-              loading={updateMerchandise.isPending}
-              onClick={() => {
-                const remarks = rejectForm.getFieldValue("remarks");
-                if (!remarks) {
-                  message.error("Please provide a reason for rejection");
-                  return;
-                }
-                handleReject({ remarks });
-              }}
-            >
-              Reject Order
-            </Button>
-          </Space>
-        </div>
-      </Modal>
-
-      {/* Conflicts Modal - Shows all pending requests for a shirt number */}
-      <Modal
-        title={
-          <span>
-            Pending Requests for Shirt #{selectedNumberConflicts?.number}
-            <Tag color="orange" style={{ marginLeft: 8 }}>
-              {selectedNumberConflicts?.count} Request
-              {selectedNumberConflicts?.count > 1 ? "s" : ""}
-            </Tag>
-          </span>
-        }
-        open={modals.conflicts}
-        onCancel={() => {
-          setModals((prev) => ({ ...prev, conflicts: false }));
-          setSelectedNumberConflicts(null);
-          setConflictAssignedNumbers({});
-        }}
-        footer={null}
-        width={1000}
-      >
-        <div style={{ maxHeight: "70vh", overflowY: "auto" }}>
-          <p style={{ marginBottom: 12, color: "#666" }}>
-            Multiple users have requested shirt number #
-            {selectedNumberConflicts?.number}. You can only assign and approve
-            orders with confirmed payment (PAID status).
-          </p>
-
-          {selectedNumberConflicts?.pendingRequests && (
-            <div
-              style={{
-                marginBottom: 16,
-                padding: "12px",
-                background: "#f6ffed",
-                borderRadius: "4px",
-                border: "1px solid #b7eb8f",
-              }}
-            >
-              <Space size="large">
-                <span style={{ color: "#389e0d", fontWeight: 600 }}>
-                  ✓{" "}
-                  {
-                    selectedNumberConflicts.pendingRequests.filter(
-                      (r) => r.paymentStatus === "PAID"
-                    ).length
-                  }{" "}
-                  Paid
-                </span>
-                <span style={{ color: "#d48806", fontWeight: 600 }}>
-                  ⏳{" "}
-                  {
-                    selectedNumberConflicts.pendingRequests.filter(
-                      (r) => r.paymentStatus !== "PAID"
-                    ).length
-                  }{" "}
-                  Pending Payment
-                </span>
-              </Space>
-            </div>
+      {/* Content Area */}
+      {!selectedZone ? (
+        <Card
+          style={{
+            borderRadius: "16px",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+          }}
+        >
+          <Empty
+            description="Please select a zone to view orders"
+            style={{ padding: "60px 0" }}
+          />
+        </Card>
+      ) : (
+        <>
+          {/* Zone Stats */}
+          {zoneData?.summary && (
+            <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+              <Col xs={12} sm={6}>
+                <Card
+                  style={{
+                    borderRadius: "12px",
+                    background: "#f0f9ff",
+                    border: "1px solid #bae6fd",
+                  }}
+                >
+                  <Statistic
+                    title="Total Orders"
+                    value={zoneData.summary.totalOrders}
+                    valueStyle={{ color: "#0ea5e9" }}
+                  />
+                </Card>
+              </Col>
+              <Col xs={12} sm={6}>
+                <Card
+                  style={{
+                    borderRadius: "12px",
+                    background: "#f0fdf4",
+                    border: "1px solid #bbf7d0",
+                  }}
+                >
+                  <Statistic
+                    title="Unique Numbers"
+                    value={zoneData.summary.uniqueShirtNumbers}
+                    valueStyle={{ color: "#22c55e" }}
+                  />
+                </Card>
+              </Col>
+              <Col xs={12} sm={6}>
+                <Card
+                  style={{
+                    borderRadius: "12px",
+                    background: "#fffbeb",
+                    border: "1px solid #fde68a",
+                  }}
+                >
+                  <Statistic
+                    title="Pending"
+                    value={zoneData.summary.pendingOrders}
+                    valueStyle={{ color: "#f59e0b" }}
+                  />
+                </Card>
+              </Col>
+              <Col xs={12} sm={6}>
+                <Card
+                  style={{
+                    borderRadius: "12px",
+                    background: "#f0fdf4",
+                    border: "1px solid #bbf7d0",
+                  }}
+                >
+                  <Statistic
+                    title="Paid"
+                    value={zoneData.summary.paidOrders}
+                    valueStyle={{ color: "#10b981" }}
+                  />
+                </Card>
+              </Col>
+            </Row>
           )}
 
-          <Space direction="vertical" style={{ width: "100%" }} size="middle">
-            {selectedNumberConflicts?.pendingRequests.map((request, index) => (
-              <Card
-                key={request.merchandiseId}
-                size="small"
-                style={{
-                  borderLeft: `4px solid ${
-                    request.paymentStatus === "PAID" ? "#52c41a" : "#faad14"
-                  }`,
-                }}
-              >
-                <Row gutter={[16, 8]} align="middle">
-                  <Col span={12}>
-                    <div style={{ marginBottom: 8 }}>
-                      <strong style={{ fontSize: "16px" }}>
-                        #{index + 1} - {request.name}
-                      </strong>
-                      <Tag
-                        color={
-                          request.paymentStatus === "PAID" ? "green" : "orange"
-                        }
-                        style={{ marginLeft: 8 }}
-                      >
-                        {request.paymentStatus}
-                      </Tag>
-                    </div>
-                    <Space direction="vertical" size={4}>
-                      <div>
-                        <span style={{ color: "#666" }}>Email:</span>{" "}
-                        {request.email}
-                      </div>
-                      {request.mobileNumber && (
-                        <div>
-                          <span style={{ color: "#666" }}>Mobile:</span>{" "}
-                          {request.mobileNumber}
-                        </div>
-                      )}
-                      <div>
-                        <span style={{ color: "#666" }}>Size:</span>{" "}
-                        <Tag>{request.size}</Tag>
-                      </div>
-                      <div>
-                        <span style={{ color: "#666" }}>Transaction:</span>{" "}
-                        {request.transactionNumber}
-                      </div>
-                    </Space>
-                  </Col>
-                  <Col span={6}>
-                    <div style={{ marginBottom: 8 }}>
-                      <label
+          {/* List View */}
+          {viewMode === "list" && (
+            <Card
+              style={{
+                borderRadius: "16px",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+              }}
+            >
+              <Title level={4} style={{ marginBottom: 16 }}>
+                Orders for {selectedZone}
+              </Title>
+              {loadingZone ? (
+                <div style={{ textAlign: "center", padding: "60px 0" }}>
+                  <Spin size="large" />
+                </div>
+              ) : listData.length === 0 ? (
+                <Empty description="No orders found" />
+              ) : (
+                <Row gutter={[16, 16]}>
+                  {listData.map((order) => (
+                    <Col xs={24} md={12} lg={8} key={order.id}>
+                      <Card
+                        size="small"
                         style={{
-                          display: "block",
-                          fontWeight: 500,
-                          marginBottom: 4,
+                          borderRadius: "12px",
+                          border: "1px solid #e5e7eb",
+                          background: "#ffffff",
                         }}
+                        hoverable
                       >
-                        Assign Shirt #
-                      </label>
-                      <InputNumber
-                        min={0}
-                        max={99}
-                        style={{ width: "100%" }}
-                        placeholder="Enter number"
-                        value={
-                          conflictAssignedNumbers[request.merchandiseId] ??
-                          parseInt(selectedNumberConflicts?.number, 10)
-                        }
-                        formatter={(value) =>
-                          value !== undefined && value !== null
-                            ? String(value).padStart(2, "0")
-                            : ""
-                        }
-                        parser={(value) =>
-                          value ? parseInt(value, 10) : undefined
-                        }
-                        onChange={(val) => {
-                          setConflictAssignedNumbers((prev) => ({
-                            ...prev,
-                            [request.merchandiseId]: val,
-                          }));
-                        }}
-                        disabled={request.paymentStatus !== "PAID"}
-                      />
-                    </div>
-                  </Col>
-                  <Col span={6} style={{ textAlign: "right" }}>
-                    <Button
-                      type="primary"
-                      icon={<CheckOutlined />}
-                      block
-                      style={{
-                        background: "#52c41a",
-                        borderColor: "#52c41a",
-                      }}
-                      onClick={() => {
-                        const assignedNum =
-                          conflictAssignedNumbers[request.merchandiseId] ??
-                          parseInt(selectedNumberConflicts?.number, 10);
-                        handleConflictApprove(request, assignedNum);
-                      }}
-                      disabled={request.paymentStatus !== "PAID"}
-                      loading={updateMerchandise.isPending}
-                    >
-                      Approve
-                    </Button>
-                    {request.paymentStatus !== "PAID" && (
-                      <small
-                        style={{
-                          display: "block",
-                          color: "#cf1322",
-                          fontWeight: 600,
-                          marginTop: 8,
-                          fontSize: "11px",
-                        }}
-                      >
-                        Payment required
-                      </small>
-                    )}
-                  </Col>
+                        <Space
+                          direction="vertical"
+                          style={{ width: "100%" }}
+                          size="small"
+                        >
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                            }}
+                          >
+                            <Tag color="blue">{order.zone}</Tag>
+                            <Tag
+                              style={{
+                                fontSize: "16px",
+                                fontWeight: "700",
+                                padding: "4px 12px",
+                              }}
+                            >
+                              #{order.shirtNumber}
+                            </Tag>
+                          </div>
+                          <div>
+                            <Text strong style={{ fontSize: "16px" }}>
+                              {order.name}
+                            </Text>
+                          </div>
+                          <div>
+                            <Text type="secondary">Size: {order.size}</Text>
+                          </div>
+                          <div>
+                            <Text type="secondary" style={{ fontSize: "12px" }}>
+                              {order.email}
+                            </Text>
+                          </div>
+                          <div>
+                            <Text type="secondary" style={{ fontSize: "12px" }}>
+                              {order.mobileNumber}
+                            </Text>
+                          </div>
+                          <Button
+                            type="primary"
+                            icon={<EyeOutlined />}
+                            block
+                            onClick={() => handleViewPreview(order)}
+                            style={{
+                              marginTop: 8,
+                              borderRadius: "8px",
+                            }}
+                          >
+                            View Preview
+                          </Button>
+                        </Space>
+                      </Card>
+                    </Col>
+                  ))}
                 </Row>
-              </Card>
-            ))}
+              )}
+            </Card>
+          )}
+
+          {/* Grid View */}
+          {viewMode === "grid" && (
+            <Card
+              style={{
+                borderRadius: "16px",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+              }}
+            >
+              <Title level={4} style={{ marginBottom: 16 }}>
+                Shirt Numbers - {selectedZone}
+              </Title>
+              {loadingZone ? (
+                <div style={{ textAlign: "center", padding: "60px 0" }}>
+                  <Spin size="large" />
+                </div>
+              ) : (
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(80px, 1fr))",
+                    gap: "12px",
+                  }}
+                >
+                  {gridData.map((item) => (
+                  <Badge
+                    key={item.number}
+                    count={item.orders.length > 1 ? item.orders.length : 0}
+                    offset={[-5, 5]}
+                  >
+                    <Card
+                      size="small"
+                      hoverable={item.hasOrders}
+                      onClick={() => handleNumberClick(item)}
+                      style={{
+                        borderRadius: "12px",
+                        background: item.hasOrders ? "#d1fae5" : "#f3f4f6",
+                        border: item.hasOrders
+                          ? "2px solid #10b981"
+                          : "1px solid #d1d5db",
+                        cursor: item.hasOrders ? "pointer" : "default",
+                        textAlign: "center",
+                        transition: "all 0.3s ease",
+                        width: "100%",
+                      }}
+                      styles={{ body: { padding: "16px 8px" } }}
+                    >
+                      <div
+                        style={{
+                          fontSize: "24px",
+                          fontWeight: "700",
+                          color: item.hasOrders ? "#059669" : "#9ca3af",
+                        }}
+                      >
+                        {item.number}
+                      </div>
+                    </Card>
+                  </Badge>
+                  ))}
+                </div>
+              )}
+            </Card>
+          )}
+        </>
+      )}
+
+      {/* Drawer - Number Details */}
+      <Drawer
+        title={
+          <Space>
+            <span>Shirt Number #{selectedNumber}</span>
+            <Tag color="green">{selectedNumberOrders.length} Orders</Tag>
           </Space>
-        </div>
+        }
+        placement="right"
+        width={600}
+        onClose={() => setDrawerOpen(false)}
+        open={drawerOpen}
+      >
+        <Space direction="vertical" style={{ width: "100%" }} size="middle">
+          {selectedNumberOrders.map((order, index) => (
+            <Card
+              key={order.id}
+              size="small"
+              style={{
+                borderRadius: "12px",
+                border: "1px solid #e5e7eb",
+                background: "#fafafa",
+              }}
+            >
+              <Space direction="vertical" style={{ width: "100%" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text strong style={{ fontSize: "16px" }}>
+                    Order #{index + 1}
+                  </Text>
+                  <Tag color="blue">{order.zone}</Tag>
+                </div>
+                <div>
+                  <Text strong>{order.name}</Text>
+                </div>
+                <div>
+                  <Space>
+                    <Tag>Size: {order.size}</Tag>
+                    <Tag
+                      color={
+                        order.paymentStatus === "PAID" ? "green" : "orange"
+                      }
+                    >
+                      {order.paymentStatus}
+                    </Tag>
+                  </Space>
+                </div>
+                <div>
+                  <Text type="secondary" style={{ fontSize: "12px" }}>
+                    {order.email}
+                  </Text>
+                </div>
+                <div>
+                  <Text type="secondary" style={{ fontSize: "12px" }}>
+                    {order.mobileNumber}
+                  </Text>
+                </div>
+                <Button
+                  type="primary"
+                  icon={<EyeOutlined />}
+                  block
+                  onClick={() => handleViewPreview(order)}
+                  style={{ marginTop: 8 }}
+                >
+                  View Shirt Preview
+                </Button>
+              </Space>
+            </Card>
+          ))}
+        </Space>
+      </Drawer>
+
+      {/* Preview Modal */}
+      <Modal
+        title="Shirt Preview"
+        open={previewModalOpen}
+        onCancel={() => {
+          setPreviewModalOpen(false);
+          setPreviewImage(null);
+          setPreviewData(null);
+        }}
+        footer={null}
+        width={700}
+      >
+        {previewData && (
+          <Space direction="vertical" style={{ width: "100%" }} size="large">
+            <Card size="small" style={{ background: "#f5f7fa" }}>
+              <Row gutter={[16, 16]}>
+                <Col span={12}>
+                  <Text type="secondary">Name:</Text>
+                  <div>
+                    <Text strong>{previewData.name}</Text>
+                  </div>
+                </Col>
+                <Col span={12}>
+                  <Text type="secondary">Shirt Number:</Text>
+                  <div>
+                    <Text strong>#{previewData.shirtNumber}</Text>
+                  </div>
+                </Col>
+                <Col span={12}>
+                  <Text type="secondary">Zone:</Text>
+                  <div>
+                    <Tag color="blue">{previewData.zone}</Tag>
+                  </div>
+                </Col>
+                <Col span={12}>
+                  <Text type="secondary">Size:</Text>
+                  <div>
+                    <Tag>{previewData.size}</Tag>
+                  </div>
+                </Col>
+                <Col span={24}>
+                  <Text type="secondary">Email:</Text>
+                  <div>
+                    <Text>{previewData.email}</Text>
+                  </div>
+                </Col>
+                <Col span={24}>
+                  <Text type="secondary">Mobile:</Text>
+                  <div>
+                    <Text>{previewData.mobileNumber}</Text>
+                  </div>
+                </Col>
+              </Row>
+            </Card>
+
+            {previewImage ? (
+              <div style={{ textAlign: "center" }}>
+                <Image
+                  src={previewImage}
+                  alt="Shirt Preview"
+                  style={{
+                    borderRadius: "12px",
+                    maxWidth: "100%",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                  }}
+                />
+              </div>
+            ) : (
+              <div style={{ textAlign: "center", padding: "40px" }}>
+                <Text type="secondary">Generating preview...</Text>
+              </div>
+            )}
+          </Space>
+        )}
       </Modal>
     </div>
   );
