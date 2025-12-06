@@ -500,7 +500,6 @@ const ShirtOrdering = () => {
         style={{
           minHeight: "100vh",
           background: "linear-gradient(135deg, #1E3A71 0%, #0f2847 100%)",
-          // padding: "40px 20px",
         }}
       >
         {/* Sticky Navbar */}
@@ -525,7 +524,7 @@ const ShirtOrdering = () => {
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              // padding: "16px 20px",
+              padding: "16px 0px",
               // borderBottom: "1px solid rgba(255,255,255,0.2)",
             }}
           >
@@ -1389,10 +1388,11 @@ const ShirtOrdering = () => {
           </Space>
         }
         placement="bottom"
-        height="80%"
+        height="90%"
+        closeIcon={false}
         extra={
           <Button type="text" onClick={() => setShowCartDrawer(false)}>
-            <CloseOutlined /> Close
+            <CloseOutlined />
           </Button>
         }
         footer={
@@ -1425,10 +1425,10 @@ const ShirtOrdering = () => {
                   fontWeight: "600",
                   borderRadius: "12px",
                   boxShadow: "0 6px 20px rgba(30, 58, 113, 0.4)",
+                  textWrap: "wrap",
                 }}
               >
-                Proceed to Checkout ({orders.length}{" "}
-                {orders.length === 1 ? "item" : "items"} - ₱{getTotalAmount()})
+                Proceed to Checkout
               </Button>
             </div>
           )
