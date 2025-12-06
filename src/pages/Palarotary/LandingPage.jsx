@@ -33,6 +33,7 @@ import {
   eventbookLogo,
 } from "../../assets/images/logos";
 import { videoTeaser } from "../../assets/video";
+import { formatCurrency } from "../../utils/formatCurrency";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -910,7 +911,7 @@ export default function PalarotaryLandingPage() {
                           fontSize: "32px",
                         }}
                       >
-                        ₱4,000
+                        {formatCurrency(4000)}
                       </Title>
                       <Paragraph
                         style={{
@@ -1265,7 +1266,7 @@ export default function PalarotaryLandingPage() {
                             fontSize: "32px",
                           }}
                         >
-                          ₱320
+                          {formatCurrency(320)}
                         </Title>
                         <Paragraph
                           style={{
@@ -1275,7 +1276,7 @@ export default function PalarotaryLandingPage() {
                             textDecoration: "line-through",
                           }}
                         >
-                          ₱350
+                          {formatCurrency(350)}
                         </Paragraph>
                       </div>
                       <Paragraph
