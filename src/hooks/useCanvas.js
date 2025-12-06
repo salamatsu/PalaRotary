@@ -25,10 +25,17 @@ export const draw = async (data) => {
 
   const width = 800;
   const height = 481;
-  const nameHeight = 70;
-  const nameWidth = 180;
-  const numberHeight = 180;
-  const numberWidth = 400;
+  // V1 SHIRT CONFIG
+  // const nameHeight = 70;
+  // const nameWidth = 180;
+  // const numberHeight = 180;
+  // const numberWidth = 400;
+
+  // V2 SHIRT CONFIG
+  const nameHeight = 88;
+  const nameWidth = 150;
+  const numberHeight = 173;
+  const numberWidth = 481;
 
   try {
     // Ensure font is loaded before drawing
@@ -55,7 +62,7 @@ export const draw = async (data) => {
 
     // Draw number if provided with Athletic font
     if (number) {
-      context.font = " 90pt 'Athletic', 'Arial'";
+      context.font = " 92pt 'Athletic', 'Arial'";
       context.fillText(number, 600, numberHeight, numberWidth);
     }
 
