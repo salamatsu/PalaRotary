@@ -167,7 +167,8 @@ const ShirtOrdering = () => {
           const preview = await draw({
             name: "SHIRT NAME",
             zone: data.zone,
-            number: "00",
+            number: "10",
+            // number: "00",
           });
           setCurrentOrder((prev) => ({ ...prev, preview }));
         } catch (error) {

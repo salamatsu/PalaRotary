@@ -25,6 +25,57 @@ export const SHIRT_ZONES_IMAGE = {
   ["ZONE 8"]: zone8,
 };
 
+export const SHIRT_ZONES_FONT_COLORS = {
+  ["ZONE 1"]: {
+    nameColor: "#4E4E4E",
+    numberColor: "#424342",
+  },
+  ["ZONE 2"]: {
+    nameColor: "#D64B4E",
+    numberColor: "#CA383C",
+  },
+  ["ZONE 3"]: {
+    nameColor: "#3D4979",
+    numberColor: "#3F4B7E",
+  },
+  ["ZONE 4"]: {
+    nameColor: "#484876",
+    numberColor: "#414C7D",
+  },
+  ["ZONE 4A"]: {
+    nameColor: "#3D4979",
+    numberColor: "#3F4B7E",
+  },
+  ["ZONE 4B"]: {
+    nameColor: "#3D4979",
+    numberColor: "#3F4B7E",
+  },
+  ["ZONE 5"]: {
+    nameColor: "#3D4979",
+    numberColor: "#3F4B7E",
+  },
+  ["ZONE 5A"]: {
+    nameColor: "#3D4979",
+    numberColor: "#3F4B7E",
+  },
+  ["ZONE 5B"]: {
+    nameColor: "#3D4979",
+    numberColor: "#3F4B7E",
+  },
+  ["ZONE 6"]: {
+    nameColor: "#3D9871",
+    numberColor: "#29875B",
+  },
+  ["ZONE 7"]: {
+    nameColor: "#8D4B4C",
+    numberColor: "#512425",
+  },
+  ["ZONE 8"]: {
+    nameColor: "#6A4982",
+    numberColor: "#664577",
+  },
+};
+
 export const USER_ROLES = {
   admin: "Admin",
   guest: "Guest",

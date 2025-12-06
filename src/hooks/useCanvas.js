@@ -1,17 +1,18 @@
 import { createCanvas, loadImage } from "canvas";
 
 import { imageToBase64 } from "../utils/tobase64";
-import { SHIRT_ZONES_IMAGE } from "../lib/constants";
+import { SHIRT_ZONES_FONT_COLORS, SHIRT_ZONES_IMAGE } from "../lib/constants";
 import Athletic from "../assets/fonts/Athletic.ttf";
+import VarsityTeam from "../assets/fonts/VarsityTeam-Bold.otf";
 
 // Load custom font for canvas use
 const loadFont = async () => {
   try {
-    const font = new FontFace("Athletic", `url(${Athletic})`);
+    const font = new FontFace("VarsityTeam", `url(${VarsityTeam})`);
     await font.load();
     document.fonts.add(font);
   } catch (error) {
-    console.warn("Failed to load Athletic font:", error);
+    console.warn("Failed to load VarsityTeam font:", error);
   }
 };
 
@@ -22,6 +23,7 @@ export const draw = async (data) => {
   const name = `${data?.name}`?.toUpperCase()?.trim() || "LAST NAME";
   const number = data?.number || "00"; // shirt number
   const imageTemplate = SHIRT_ZONES_IMAGE[data.zone || "ZONE 5"];
+  const zoneColor = SHIRT_ZONES_FONT_COLORS[data.zone || "ZONE 5"];
 
   const width = 800;
   const height = 481;
@@ -32,10 +34,10 @@ export const draw = async (data) => {
   // const numberWidth = 400;
 
   // V2 SHIRT CONFIG
-  const nameHeight = 88;
+  const nameHeight = 86;
   const nameWidth = 150;
-  const numberHeight = 173;
-  const numberWidth = 481;
+  const numberHeight = 167;
+  const numberWidth = 485;
 
   try {
     // Ensure font is loaded before drawing
@@ -54,16 +56,23 @@ export const draw = async (data) => {
 
     context.textBaseline = "middle";
     context.textAlign = "center";
+    context.letterSpacing = "1px";
+
+    // Draw name with VarsityTeam font
+    context.font = " 26pt 'VarsityTeam'";
     context.fillStyle = "white";
+    context.strokeStyle = zoneColor?.nameColor;
 
-    // Draw name with Athletic font
-    context.font = " 26pt 'Athletic', 'Arial'";
-    context.fillText(name, 600, nameHeight, nameWidth);
+    context.lineWidth = 2;
+    context.fillText(name, 602, nameHeight, nameWidth);
+    context.strokeText(name, 602, nameHeight, nameWidth);
 
-    // Draw number if provided with Athletic font
+    // Draw number if provided with VarsityTeam font
     if (number) {
-      context.font = " 92pt 'Athletic', 'Arial'";
-      context.fillText(number, 600, numberHeight, numberWidth);
+      context.strokeStyle = zoneColor?.numberColor;
+      context.font = " 106pt 'VarsityTeam'";
+      context.fillText(number, 602, numberHeight, numberWidth);
+      context.strokeText(number, 602, numberHeight, numberWidth);
     }
 
     return canvas.toDataURL();
