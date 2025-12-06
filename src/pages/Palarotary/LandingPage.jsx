@@ -14,6 +14,8 @@ import {
   TeamOutlined,
   TrophyOutlined,
   MutedOutlined,
+  GiftOutlined,
+  RocketOutlined,
 } from "@ant-design/icons";
 import { Button, Card, Modal, Typography } from "antd";
 import { motion, useScroll, useTransform } from "framer-motion";
@@ -48,6 +50,10 @@ export default function PalarotaryLandingPage() {
   const [previewVisible, setPreviewVisible] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+
+  // Control "Coming Soon" status for information cards
+  const [groundRulesComingSoon, setGroundRulesComingSoon] = useState(true);
+  const [generalGuideComingSoon, setGeneralGuideComingSoon] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -457,7 +463,7 @@ export default function PalarotaryLandingPage() {
             >
               {[
                 { icon: CalendarOutlined, text: "January 25, 2026", delay: 0 },
-                { icon: ClockCircleOutlined, text: "7am - 4pm", delay: 0.1 },
+                { icon: ClockCircleOutlined, text: "6am - 4pm", delay: 0.1 },
                 {
                   icon: EnvironmentOutlined,
                   text: "Marikina Sports Center",
@@ -792,7 +798,7 @@ export default function PalarotaryLandingPage() {
         className="bg-transparent"
       >
         {/* Registration Cards */}
-        <div ref={cardsRef}>
+        <div ref={cardsRef} className=" min-h-screen mb-50">
           <Title
             level={2}
             style={{
@@ -802,11 +808,11 @@ export default function PalarotaryLandingPage() {
               fontSize: "clamp(28px, 4vw, 36px)",
             }}
           >
-            Register & Customize Shirt
+            Get Started with PALAROTARY 2026
           </Title>
           <div className=" grid grid-cols-12 gap-6 mb-6">
             <motion.div
-              className="registration-card h-full col-span-12 lg:col-span-4"
+              className="registration-card h-full col-span-12 md:col-span-6 lg:col-span-3"
               variants={cardVariants}
               initial="hidden"
               whileInView="visible"
@@ -983,7 +989,7 @@ export default function PalarotaryLandingPage() {
             </motion.div>
 
             <motion.div
-              className="registration-card h-full col-span-12 md:col-span-6 lg:col-span-4"
+              className="registration-card h-full col-span-12 md:col-span-6 lg:col-span-3"
               variants={cardVariants}
               initial="hidden"
               whileInView="visible"
@@ -1157,7 +1163,7 @@ export default function PalarotaryLandingPage() {
             </motion.div>
 
             <motion.div
-              className="registration-card col-span-12 md:col-span-6 lg:col-span-4"
+              className="registration-card col-span-12 md:col-span-6 lg:col-span-3"
               variants={cardVariants}
               initial="hidden"
               whileInView="visible"
@@ -1370,8 +1376,220 @@ export default function PalarotaryLandingPage() {
                 </div>
               </Card>
             </motion.div>
+
+            {/* Sponsor and Exhibitor Card */}
+            <motion.div
+              className="registration-card col-span-12 md:col-span-6 lg:col-span-3"
+              variants={cardVariants}
+              initial="hidden"
+              whileInView="visible"
+              whileHover="hover"
+              viewport={{ once: true }}
+            >
+              <Card
+                style={{
+                  height: "100%",
+                  borderRadius: "24px",
+                  boxShadow: "0 10px 40px rgba(123, 31, 162, 0.15)",
+                  border: "2px solid #e9d5ff",
+                  overflow: "hidden",
+                  background:
+                    "linear-gradient(135deg, #ffffff 0%, #f5f3ff 100%)",
+                }}
+                styles={{
+                  body: {
+                    height: "100%",
+                  },
+                }}
+              >
+                <div className="p-0 md:p-4 flex h-full flex-col">
+                  <div className=" flex-1">
+                    <motion.div
+                      style={{ textAlign: "center", marginBottom: "24px" }}
+                      whileHover={{ scale: 1.1, rotate: [0, -10, 10, 0] }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <div
+                        style={{
+                          width: "100px",
+                          height: "100px",
+                          borderRadius: "50%",
+                          background:
+                            "linear-gradient(135deg, #7b1fa2 0%, #6a1b9a 100%)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          margin: "0 auto 20px",
+                          boxShadow: "0 10px 30px rgba(123, 31, 162, 0.3)",
+                        }}
+                      >
+                        <GiftOutlined
+                          style={{ fontSize: "48px", color: "white" }}
+                        />
+                      </div>
+                    </motion.div>
+
+                    <Title
+                      level={2}
+                      style={{
+                        marginBottom: "12px",
+                        textAlign: "center",
+                        fontSize: "28px",
+                      }}
+                    >
+                      Sponsor & Exhibitor
+                    </Title>
+                    <Paragraph
+                      style={{
+                        fontSize: "16px",
+                        color: "#666",
+                        marginBottom: "24px",
+                        textAlign: "center",
+                      }}
+                    >
+                      Partner with us to reach 1,000+ Rotarians
+                    </Paragraph>
+
+                    <motion.div
+                      whileHover={{ scale: 1.03 }}
+                      animate={{
+                        boxShadow: [
+                          "0 4px 15px rgba(123, 31, 162, 0.2)",
+                          "0 8px 25px rgba(123, 31, 162, 0.3)",
+                          "0 4px 15px rgba(123, 31, 162, 0.2)",
+                        ],
+                      }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #e9d5ff20 0%, #d8b4fe20 100%)",
+                        padding: "20px",
+                        borderRadius: "16px",
+                        marginBottom: "24px",
+                        border: "2px solid #7b1fa240",
+                      }}
+                    >
+                      <Title
+                        level={3}
+                        style={{
+                          margin: 0,
+                          color: "#7b1fa2",
+                          fontSize: "28px",
+                          textAlign: "center",
+                        }}
+                      >
+                        Join us
+                      </Title>
+                      <Paragraph
+                        style={{
+                          margin: "8px 0 0 0",
+                          fontSize: "14px",
+                          color: "#6b7280",
+                          textAlign: "center",
+                        }}
+                      >
+                        Sponsorship and Exhibits
+                      </Paragraph>
+                    </motion.div>
+
+                    <div style={{ marginBottom: "28px" }}>
+                      {[
+                        "Maximum brand visibility to 1,000+ attendees",
+                        "Logo placement on all event materials",
+                        "Direct engagement with Rotary community",
+                      ].map((text, i) => (
+                        <motion.div
+                          key={i}
+                          className="feature-item"
+                          initial={{ opacity: 0, x: -20 }}
+                          whileInView={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.1 }}
+                          viewport={{ once: true }}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "12px",
+                            marginBottom: "12px",
+                          }}
+                        >
+                          <CheckCircleOutlined
+                            style={{ fontSize: "18px", color: "#7b1fa2" }}
+                          />
+                          <span style={{ fontSize: "15px", color: "#1a1a2e" }}>
+                            {text}
+                          </span>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "12px",
+                    }}
+                  >
+                    <motion.div
+                      variants={buttonVariants}
+                      initial="rest"
+                      whileHover="hover"
+                      whileTap="tap"
+                    >
+                      <Button
+                        type="primary"
+                        size="large"
+                        block
+                        icon={<RocketOutlined />}
+                        onClick={() => navigate("/sponsor")}
+                        style={{
+                          background:
+                            "linear-gradient(135deg, #7b1fa2 0%, #6a1b9a 100%)",
+                          border: "none",
+                          height: "52px",
+                          fontSize: "16px",
+                          fontWeight: "600",
+                          borderRadius: "12px",
+                          boxShadow: "0 6px 20px rgba(123, 31, 162, 0.4)",
+                        }}
+                      >
+                        I want to Sponsor
+                      </Button>
+                    </motion.div>
+
+                    <motion.div
+                      variants={buttonVariants}
+                      initial="rest"
+                      whileHover="hover"
+                      whileTap="tap"
+                    >
+                      <Button
+                        type="default"
+                        size="large"
+                        block
+                        icon={<GiftOutlined />}
+                        onClick={() => navigate("/exhibitor")}
+                        style={{
+                          background: "white",
+                          border: "2px solid #7b1fa2",
+                          color: "#7b1fa2",
+                          height: "52px",
+                          fontSize: "16px",
+                          fontWeight: "600",
+                          borderRadius: "12px",
+                          boxShadow: "0 4px 15px rgba(123, 31, 162, 0.2)",
+                        }}
+                      >
+                        I want to Exhibit
+                      </Button>
+                    </motion.div>
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
           </div>
         </div>
+
         {/* Information Section - Ground Rules & General Guide */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -1399,7 +1617,7 @@ export default function PalarotaryLandingPage() {
               variants={cardVariants}
               initial="hidden"
               whileInView="visible"
-              whileHover="hover"
+              whileHover={groundRulesComingSoon ? {} : "hover"}
               viewport={{ once: true }}
             >
               <Card
@@ -1411,6 +1629,8 @@ export default function PalarotaryLandingPage() {
                   overflow: "hidden",
                   background:
                     "linear-gradient(135deg, #ffffff 0%, #f0f2f7 100%)",
+                  position: "relative",
+                  cursor: groundRulesComingSoon ? "not-allowed" : "pointer",
                 }}
                 styles={{
                   body: {
@@ -1418,7 +1638,50 @@ export default function PalarotaryLandingPage() {
                   },
                 }}
               >
-                <div className="p-0 md:p-4 flex h-full flex-col">
+                {/* Coming Soon Overlay */}
+                {groundRulesComingSoon && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "50%",
+                      left: "50%",
+                      transform: "translate(-50%, -50%)",
+                      zIndex: 10,
+                      textAlign: "center",
+                    }}
+                  >
+                    <motion.div
+                      // initial={{ scale: 0.8, opacity: 0 }}
+                      // animate={{ scale: 1, opacity: 1 }}
+                      transition={{
+                        duration: 0.5,
+                        repeat: Infinity,
+                        repeatType: "reverse",
+                      }}
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #1c3c6d 0%, #2a5085 100%)",
+                        color: "white",
+                        padding: "20px 40px",
+                        borderRadius: "16px",
+                        fontSize: "24px",
+                        fontWeight: "bold",
+                        boxShadow: "0 10px 40px rgba(28, 60, 109, 0.4)",
+                        border: "3px solid white",
+                      }}
+                    >
+                      COMING SOON
+                    </motion.div>
+                  </div>
+                )}
+
+                <div
+                  className="p-0 md:p-4 flex h-full flex-col"
+                  style={{
+                    // filter: groundRulesComingSoon ? "blur(4px)" : "none",
+                    pointerEvents: groundRulesComingSoon ? "none" : "auto",
+                  }}
+                >
                   <div className="flex-1">
                     <motion.div
                       style={{ textAlign: "center", marginBottom: "24px" }}
@@ -1461,12 +1724,18 @@ export default function PalarotaryLandingPage() {
                         color: "#666",
                         marginBottom: "24px",
                         textAlign: "center",
+                        filter: generalGuideComingSoon ? "blur(4px)" : "none",
                       }}
                     >
                       Official tournament rules and regulations
                     </Paragraph>
 
-                    <div style={{ marginBottom: "28px" }}>
+                    <div
+                      style={{
+                        marginBottom: "28px",
+                        filter: generalGuideComingSoon ? "blur(4px)" : "none",
+                      }}
+                    >
                       {[
                         "9 official sports events + Muse & Fun Games",
                         "International Sports Federation standards",
@@ -1510,7 +1779,10 @@ export default function PalarotaryLandingPage() {
                       size="large"
                       block
                       icon={<ArrowRightOutlined />}
-                      onClick={() => navigate("/ground-rules")}
+                      onClick={() =>
+                        !groundRulesComingSoon && navigate("/ground-rules")
+                      }
+                      disabled={groundRulesComingSoon}
                       style={{
                         background:
                           "linear-gradient(135deg, #1c3c6d 0%, #173052 100%)",
@@ -1520,6 +1792,7 @@ export default function PalarotaryLandingPage() {
                         fontWeight: "600",
                         borderRadius: "12px",
                         boxShadow: "0 6px 20px rgba(28, 60, 109, 0.4)",
+                        opacity: groundRulesComingSoon ? 0.5 : 1,
                       }}
                     >
                       View Ground Rules
@@ -1535,7 +1808,7 @@ export default function PalarotaryLandingPage() {
               variants={cardVariants}
               initial="hidden"
               whileInView="visible"
-              whileHover="hover"
+              whileHover={generalGuideComingSoon ? {} : "hover"}
               viewport={{ once: true }}
             >
               <Card
@@ -1547,6 +1820,8 @@ export default function PalarotaryLandingPage() {
                   overflow: "hidden",
                   background:
                     "linear-gradient(135deg, #ffffff 0%, #fff9eb 100%)",
+                  position: "relative",
+                  cursor: generalGuideComingSoon ? "not-allowed" : "pointer",
                 }}
                 styles={{
                   body: {
@@ -1554,7 +1829,50 @@ export default function PalarotaryLandingPage() {
                   },
                 }}
               >
-                <div className="p-0 md:p-4 flex h-full flex-col">
+                {/* Coming Soon Overlay */}
+                {generalGuideComingSoon && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "50%",
+                      left: "50%",
+                      transform: "translate(-50%, -50%)",
+                      zIndex: 10,
+                      textAlign: "center",
+                    }}
+                  >
+                    <motion.div
+                      // initial={{ scale: 0.8, opacity: 0 }}
+                      // animate={{ scale: 1, opacity: 1 }}
+                      transition={{
+                        duration: 0.5,
+                        repeat: Infinity,
+                        repeatType: "reverse",
+                      }}
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #f7a50a 0%, #c68408 100%)",
+                        color: "white",
+                        padding: "20px 40px",
+                        borderRadius: "16px",
+                        fontSize: "24px",
+                        fontWeight: "bold",
+                        boxShadow: "0 10px 40px rgba(247, 165, 10, 0.4)",
+                        border: "3px solid white",
+                      }}
+                    >
+                      COMING SOON
+                    </motion.div>
+                  </div>
+                )}
+
+                <div
+                  className="p-0 md:p-4 flex h-full flex-col"
+                  style={{
+                    // filter: generalGuideComingSoon ? "blur(4px)" : "none",
+                    pointerEvents: generalGuideComingSoon ? "none" : "auto",
+                  }}
+                >
                   <div className="flex-1">
                     <motion.div
                       style={{ textAlign: "center", marginBottom: "24px" }}
@@ -1597,12 +1915,18 @@ export default function PalarotaryLandingPage() {
                         color: "#666",
                         marginBottom: "24px",
                         textAlign: "center",
+                        filter: generalGuideComingSoon ? "blur(4px)" : "none",
                       }}
                     >
                       Complete technical guidelines and regulations
                     </Paragraph>
 
-                    <div style={{ marginBottom: "28px" }}>
+                    <div
+                      style={{
+                        marginBottom: "28px",
+                        filter: generalGuideComingSoon ? "blur(4px)" : "none",
+                      }}
+                    >
                       {[
                         "Eligibility requirements and attendance rules",
                         "Zone colors and uniform guidelines",
@@ -1646,7 +1970,10 @@ export default function PalarotaryLandingPage() {
                       size="large"
                       block
                       icon={<ArrowRightOutlined />}
-                      onClick={() => navigate("/general-guide")}
+                      onClick={() =>
+                        !generalGuideComingSoon && navigate("/general-guide")
+                      }
+                      disabled={generalGuideComingSoon}
                       style={{
                         background:
                           "linear-gradient(135deg, #f7a50a 0%, #c68408 100%)",
@@ -1656,6 +1983,7 @@ export default function PalarotaryLandingPage() {
                         fontWeight: "600",
                         borderRadius: "12px",
                         boxShadow: "0 6px 20px rgba(247, 165, 10, 0.4)",
+                        opacity: generalGuideComingSoon ? 0.5 : 1,
                       }}
                     >
                       View General Guide
@@ -1666,101 +1994,6 @@ export default function PalarotaryLandingPage() {
             </motion.div>
           </div>
         </motion.div>
-
-        {/* Club Payment Proof Upload Section */}
-        {/* <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          style={{ marginBottom: "60px" }}
-        >
-          <Card
-            style={{
-              borderRadius: "24px",
-              boxShadow: "0 10px 40px rgba(247, 165, 10, 0.15)",
-              border: "2px solid #fff3d6",
-              background: "linear-gradient(135deg, #ffffff 0%, #fff9eb 100%)",
-            }}
-          >
-            <div style={{ textAlign: "center", padding: "20px" }}>
-              <motion.div
-                whileHover={{ scale: 1.05, rotate: [0, -5, 5, 0] }}
-                transition={{ duration: 0.5 }}
-                style={{ marginBottom: "20px" }}
-              >
-                <div
-                  style={{
-                    width: "80px",
-                    height: "80px",
-                    borderRadius: "50%",
-                    background:
-                      "linear-gradient(135deg, #f7a50a 0%, #c68408 100%)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    margin: "0 auto",
-                    boxShadow: "0 8px 25px rgba(247, 165, 10, 0.3)",
-                  }}
-                >
-                  <UploadOutlined
-                    style={{ fontSize: "40px", color: "white" }}
-                  />
-                </div>
-              </motion.div>
-
-              <Title
-                level={3}
-                style={{
-                  color: "#1c3c6d",
-                  marginBottom: "12px",
-                  fontWeight: "bold",
-                }}
-              >
-                CLUB REGISTRATION
-              </Title>
-
-              <Paragraph
-                style={{
-                  fontSize: "16px",
-                  color: "#6b7280",
-                  marginBottom: "28px",
-                  maxWidth: "600px",
-                  margin: "0 auto 28px",
-                }}
-              >
-                Upload or update your payment proof for verification
-              </Paragraph>
-
-              <motion.div
-                variants={buttonVariants}
-                initial="rest"
-                whileHover="hover"
-                whileTap="tap"
-              >
-                <Button
-                  type="primary"
-                  size="large"
-                  icon={<ArrowRightOutlined />}
-                  onClick={() => navigate("/club-payment-proof")}
-                  style={{
-                    background:
-                      "linear-gradient(135deg, #f7a50a 0%, #c68408 100%)",
-                    border: "none",
-                    height: "56px",
-                    fontSize: "17px",
-                    fontWeight: "600",
-                    borderRadius: "12px",
-                    boxShadow: "0 6px 20px rgba(247, 165, 10, 0.4)",
-                    minWidth: "300px",
-                  }}
-                >
-                  Register your club
-                </Button>
-              </motion.div>
-            </div>
-          </Card>
-        </motion.div> */}
 
         {/* Footer */}
         <motion.div
