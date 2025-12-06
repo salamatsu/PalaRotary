@@ -14,6 +14,7 @@ import {
   Card,
   Form,
   Image,
+  Input,
   Modal,
   Radio,
   Select,
@@ -505,7 +506,7 @@ export default function ClubPaymentProof() {
               form={form}
               layout="vertical"
               onFinish={handleSubmit}
-              requiredMark={false}
+              // requiredMark={false}
               scrollToFirstError
             >
               {/* Zone Selection */}
@@ -566,7 +567,7 @@ export default function ClubPaymentProof() {
               </Form.Item>
 
               {/* Auto-filled Contact Information */}
-              {/* {selectedClub && (
+              {selectedClub && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
@@ -591,20 +592,8 @@ export default function ClubPaymentProof() {
                       }}
                     >
                       <Text strong style={{ color: "#1c3c6d" }}>
-                        Club Information <small>(optional)</small>
+                        Contact Information
                       </Text>
-                      <Button
-                        type="text"
-                        icon={isEditable ? <LockOutlined /> : <EditOutlined />}
-                        onClick={handleEditToggle}
-                        style={{
-                          color: isEditable ? "#d54839" : "#f7a50a",
-                          fontWeight: "600",
-                          fontSize: "14px",
-                        }}
-                      >
-                        {isEditable ? "Lock" : "Edit"}
-                      </Button>
                     </div>
 
                     <div
@@ -629,6 +618,7 @@ export default function ClubPaymentProof() {
                           style={{
                             background: isEditable ? "#fff" : "#f5f7fa",
                           }}
+                          placeholder="Enter first name"
                         />
                       </Form.Item>
 
@@ -647,6 +637,7 @@ export default function ClubPaymentProof() {
                           style={{
                             background: isEditable ? "#fff" : "#f5f7fa",
                           }}
+                          placeholder="Enter last name"
                         />
                       </Form.Item>
                     </div>
@@ -667,6 +658,7 @@ export default function ClubPaymentProof() {
                         size="large"
                         disabled={!isEditable}
                         style={{ background: isEditable ? "#fff" : "#f5f7fa" }}
+                        placeholder="Enter email"
                       />
                     </Form.Item>
 
@@ -677,16 +669,23 @@ export default function ClubPaymentProof() {
                         </Text>
                       }
                       name="mobileNumber"
+                      rules={[
+                        {
+                          pattern: /^[0-9]{10,11}$/,
+                          message: "Enter valid 10-11 digit phone number",
+                        },
+                      ]}
                     >
                       <Input
                         size="large"
                         disabled={!isEditable}
                         style={{ background: isEditable ? "#fff" : "#f5f7fa" }}
+                        placeholder="Enter mobile number"
                       />
                     </Form.Item>
                   </div>
                 </motion.div>
-              )} */}
+              )}
 
               <Form.Item
                 label={
@@ -759,8 +758,9 @@ export default function ClubPaymentProof() {
                               alignItems: "center",
                               gap: "8px",
                             }}
+                            className=" justify-between"
                           >
-                            BDO Bank Transfer
+                            <span>BDO Bank Transfer</span>
                             {paymentChannel === "BANK" && (
                               <Badge
                                 count={
@@ -861,8 +861,9 @@ export default function ClubPaymentProof() {
                               alignItems: "center",
                               gap: "8px",
                             }}
+                            className=" justify-between"
                           >
-                            GCash Payment
+                            <span>GCash Payment</span>
                             {paymentChannel === "GCASH" && (
                               <Badge
                                 count={
