@@ -1347,6 +1347,54 @@ export default function PalarotaryLandingPage() {
                         </motion.div>
                       ))}
                     </div>
+
+                    {/* Contact Information */}
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #1c3c6d15 0%, #17305215 100%)",
+                        padding: "16px",
+                        borderRadius: "12px",
+                        marginBottom: "20px",
+                        border: "2px solid #1c3c6d30",
+                      }}
+                    >
+                      <Paragraph
+                        style={{
+                          margin: "0 0 8px 0",
+                          fontSize: "13px",
+                          fontWeight: "600",
+                          color: "#1c3c6d",
+                          textAlign: "center",
+                        }}
+                      >
+                        For Inquiry:
+                      </Paragraph>
+                      <Paragraph
+                        style={{
+                          margin: "0 0 4px 0",
+                          fontSize: "15px",
+                          fontWeight: "700",
+                          color: "#173052",
+                          textAlign: "center",
+                        }}
+                      >
+                        VP Ariel Espino
+                      </Paragraph>
+                      <Paragraph
+                        copyable
+                        style={{
+                          margin: 0,
+                          fontSize: "15px",
+                          fontWeight: "600",
+                          color: "#1c3c6d",
+                          textAlign: "center",
+                        }}
+                      >
+                        0916 527 6918
+                      </Paragraph>
+                    </motion.div>
                   </div>
                   <motion.div
                     variants={buttonVariants}
