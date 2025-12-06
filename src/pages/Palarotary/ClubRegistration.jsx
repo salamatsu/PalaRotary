@@ -1,31 +1,29 @@
 import {
   ArrowLeftOutlined,
-  BankOutlined,
   CheckCircleOutlined,
-  InfoCircleOutlined,
-  MobileOutlined,
-  UploadOutlined,
   EyeOutlined,
+  InfoCircleOutlined,
+  UploadOutlined,
 } from "@ant-design/icons";
 import {
   App,
   Button,
   Card,
-  Divider,
   Form,
   Image,
   Input,
   Modal,
   Progress,
-  Select,
   Upload,
 } from "antd";
+import imageCompression from "browser-image-compression";
 import { AnimatePresence, motion } from "framer-motion";
 import gsap from "gsap";
-import imageCompression from "browser-image-compression";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { logo2, logoBanner } from "../../assets/images/logos";
+import bdo from "../../assets/images/Other/bdo.png";
+import gcash from "../../assets/images/Other/gcash.png";
 import { useRegisterClub } from "../../services/requests/usePalarotary";
 
 export default function ClubRegistration() {
@@ -328,7 +326,20 @@ export default function ClubRegistration() {
     });
   };
 
-  const paymentMethods = [];
+  const paymentMethods = [
+    {
+      payment_method: "BDO",
+      account_name: "Rotary Club of Manila Hilltop",
+      account_number: "0021 5801 5570",
+      logo: bdo,
+    },
+    {
+      payment_method: "GCASH",
+      account_name: "Karl Marcus Montaner",
+      mobile_number: "0917 522 5257",
+      logo: gcash,
+    },
+  ];
   const progressPercent = ((currentStep + 1) / 2) * 100;
 
   // Advanced Framer Motion variants
@@ -861,9 +872,9 @@ export default function ClubRegistration() {
                         whileHover={{ scale: 1.02 }}
                         style={{
                           background: "#ffffff",
-                          padding: "12px",
-                          marginBottom: "8px",
-                          borderRadius: "8px",
+                          padding: "16px",
+                          marginBottom: "12px",
+                          borderRadius: "12px",
                           border: "2px solid #e8edf5",
                         }}
                       >
@@ -871,24 +882,24 @@ export default function ClubRegistration() {
                           style={{
                             display: "flex",
                             alignItems: "center",
-                            gap: "8px",
-                            marginBottom: "6px",
+                            gap: "12px",
+                            marginBottom: "12px",
                           }}
                         >
-                          {method.payment_method === "BDO" ? (
-                            <BankOutlined
-                              style={{ fontSize: "18px", color: "#1c3c6d" }}
-                            />
-                          ) : (
-                            <MobileOutlined
-                              style={{ fontSize: "18px", color: "#f7a50a" }}
-                            />
-                          )}
+                          <img
+                            src={method.logo}
+                            alt={method.payment_method}
+                            style={{
+                              width: "60px",
+                              height: "60px",
+                              objectFit: "contain",
+                            }}
+                          />
                           <h4
                             style={{
                               margin: 0,
                               fontWeight: "700",
-                              fontSize: "14px",
+                              fontSize: "16px",
                               color: "#1a1a2e",
                             }}
                           >
@@ -899,22 +910,34 @@ export default function ClubRegistration() {
                         </div>
                         <div
                           style={{
-                            fontSize: "12px",
-                            color: "#6b7280",
-                            lineHeight: "1.5",
+                            fontSize: "13px",
+                            color: "#1a1a2e",
+                            lineHeight: "1.6",
+                            background: "#f8f9fc",
+                            padding: "12px",
+                            borderRadius: "8px",
                           }}
                         >
-                          <p style={{ margin: "2px 0" }}>
-                            <strong>Name:</strong> {method.account_name}
+                          <p style={{ margin: "4px 0" }}>
+                            <strong style={{ color: "#1c3c6d" }}>
+                              Account Name:
+                            </strong>{" "}
+                            {method.account_name}
                           </p>
                           {method.account_number && (
-                            <p style={{ margin: "2px 0" }}>
-                              <strong>Account:</strong> {method.account_number}
+                            <p style={{ margin: "4px 0" }}>
+                              <strong style={{ color: "#1c3c6d" }}>
+                                Account #:
+                              </strong>{" "}
+                              {method.account_number}
                             </p>
                           )}
                           {method.mobile_number && (
-                            <p style={{ margin: "2px 0" }}>
-                              <strong>Mobile:</strong> {method.mobile_number}
+                            <p style={{ margin: "4px 0" }}>
+                              <strong style={{ color: "#1c3c6d" }}>
+                                Mobile Number:
+                              </strong>{" "}
+                              {method.mobile_number}
                             </p>
                           )}
                         </div>

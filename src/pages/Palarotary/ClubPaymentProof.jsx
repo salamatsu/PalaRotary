@@ -1,6 +1,7 @@
 import {
   ArrowLeftOutlined,
   CheckCircleOutlined,
+  CheckOutlined,
   ExclamationCircleOutlined,
   EyeOutlined,
   InboxOutlined,
@@ -8,11 +9,13 @@ import {
 } from "@ant-design/icons";
 import {
   App,
+  Badge,
   Button,
   Card,
   Form,
   Image,
   Modal,
+  Radio,
   Select,
   Typography,
   Upload,
@@ -22,6 +25,8 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { logo2, logoBanner } from "../../assets/images/logos";
+import bdo from "../../assets/images/Other/bdo.png";
+import gcash from "../../assets/images/Other/gcash.png";
 import {
   useGetRegisteredClub,
   useUploadPaymentProof,
@@ -41,6 +46,7 @@ export default function ClubPaymentProof() {
   const [showEditConfirm, setShowEditConfirm] = useState(false);
   const [previewImage, setPreviewImage] = useState(null);
   const [compressing, setCompressing] = useState(false);
+  const [paymentChannel, setPaymentChannel] = useState(null);
 
   const { data: clubsData, isLoading: loadingClubs } = useGetRegisteredClub();
   const { mutate: uploadPayment, isPending: uploading } =
@@ -685,21 +691,233 @@ export default function ClubPaymentProof() {
               <Form.Item
                 label={
                   <Text strong style={{ color: "#1a1a2e" }}>
-                    Payment Channel
+                    Select Payment Channel
                   </Text>
                 }
                 name="paymentChannel"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please select a payment channel",
+                  },
+                ]}
               >
-                {/* GCASH | BANK */}
-                <Select
-                  placeholder="Select Payment Channel"
-                  size="large"
-                  style={{ borderRadius: "8px" }}
-                  options={[
-                    { value: "GCASH", label: "GCASH" },
-                    { value: "BANK", label: "BANK" },
-                  ]}
-                />
+                <Radio.Group
+                  onChange={(e) => setPaymentChannel(e.target.value)}
+                  style={{ width: "100%" }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "12px",
+                    }}
+                  >
+                    <Radio.Button
+                      value="BANK"
+                      style={{
+                        height: "auto",
+                        padding: "16px",
+                        borderRadius: "12px",
+                        textAlign: "left",
+                        position: "relative",
+                        border:
+                          paymentChannel === "BANK"
+                            ? "2px solid #1c3c6d"
+                            : undefined,
+                        boxShadow:
+                          paymentChannel === "BANK"
+                            ? "0 4px 12px rgba(28, 60, 109, 0.15)"
+                            : undefined,
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "12px",
+                        }}
+                      >
+                        <img
+                          src={bdo}
+                          alt="BDO"
+                          style={{
+                            width: "60px",
+                            height: "60px",
+                            objectFit: "contain",
+                            flexShrink: 0,
+                          }}
+                        />
+                        <div style={{ flex: 1 }}>
+                          <div
+                            style={{
+                              fontWeight: "700",
+                              fontSize: "16px",
+                              color: "#1a1a2e",
+                              marginBottom: "8px",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "8px",
+                            }}
+                          >
+                            BDO Bank Transfer
+                            {paymentChannel === "BANK" && (
+                              <Badge
+                                count={
+                                  <div
+                                    style={{
+                                      background:
+                                        "linear-gradient(135deg, #f7a50a 0%, #c68408 100%)",
+                                      color: "white",
+                                      padding: "4px 12px",
+                                      borderRadius: "12px",
+                                      fontSize: "11px",
+                                      fontWeight: "600",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "4px",
+                                    }}
+                                  >
+                                    <CheckOutlined
+                                      style={{ fontSize: "10px" }}
+                                    />
+                                    Selected
+                                  </div>
+                                }
+                              />
+                            )}
+                          </div>
+                          <div
+                            style={{
+                              fontSize: "13px",
+                              color: "#6b7280",
+                              lineHeight: "1.5",
+                            }}
+                          >
+                            <div>
+                              <strong style={{ color: "#1c3c6d" }}>
+                                Account Name:
+                              </strong>{" "}
+                              <Typography.Text copyable>
+                                Antonio Zapanta
+                              </Typography.Text>
+                            </div>
+                            <div>
+                              <strong style={{ color: "#1c3c6d" }}>
+                                Account #:
+                              </strong>{" "}
+                              <Typography.Text copyable>
+                                0040 6008 9624
+                              </Typography.Text>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </Radio.Button>
+
+                    <Radio.Button
+                      value="GCASH"
+                      style={{
+                        height: "auto",
+                        padding: "16px",
+                        borderRadius: "12px",
+                        textAlign: "left",
+                        position: "relative",
+                        border:
+                          paymentChannel === "GCASH"
+                            ? "2px solid #1c3c6d"
+                            : undefined,
+                        boxShadow:
+                          paymentChannel === "GCASH"
+                            ? "0 4px 12px rgba(28, 60, 109, 0.15)"
+                            : undefined,
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "12px",
+                        }}
+                      >
+                        <img
+                          src={gcash}
+                          alt="GCash"
+                          style={{
+                            width: "60px",
+                            height: "60px",
+                            objectFit: "contain",
+                            flexShrink: 0,
+                          }}
+                        />
+                        <div style={{ flex: 1 }}>
+                          <div
+                            style={{
+                              fontWeight: "700",
+                              fontSize: "16px",
+                              color: "#1a1a2e",
+                              marginBottom: "8px",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "8px",
+                            }}
+                          >
+                            GCash Payment
+                            {paymentChannel === "GCASH" && (
+                              <Badge
+                                count={
+                                  <div
+                                    style={{
+                                      background:
+                                        "linear-gradient(135deg, #f7a50a 0%, #c68408 100%)",
+                                      color: "white",
+                                      padding: "4px 12px",
+                                      borderRadius: "12px",
+                                      fontSize: "11px",
+                                      fontWeight: "600",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "4px",
+                                    }}
+                                  >
+                                    <CheckOutlined
+                                      style={{ fontSize: "10px" }}
+                                    />
+                                    Selected
+                                  </div>
+                                }
+                              />
+                            )}
+                          </div>
+                          <div
+                            style={{
+                              fontSize: "13px",
+                              color: "#6b7280",
+                              lineHeight: "1.5",
+                            }}
+                          >
+                            <div>
+                              <strong style={{ color: "#1c3c6d" }}>
+                                Account Name:
+                              </strong>{" "}
+                              <Typography.Text copyable>
+                                Karl Marcus Montaner
+                              </Typography.Text>
+                            </div>
+                            <div>
+                              <strong style={{ color: "#1c3c6d" }}>
+                                Mobile Number:
+                              </strong>{" "}
+                              <Typography.Text copyable>
+                                0917 522 5257
+                              </Typography.Text>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </Radio.Button>
+                  </div>
+                </Radio.Group>
               </Form.Item>
 
               {/* File Upload */}
