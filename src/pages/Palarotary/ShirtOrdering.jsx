@@ -28,17 +28,14 @@ import {
 } from "antd";
 import { gsap } from "gsap";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { data, useLocation, useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { draw } from "../../hooks/useCanvas";
 import {
   ADULT_SHIRT_SIZES,
-  KID_SHIRT_SIZES,
   getCurrentShirtPrice,
+  KID_SHIRT_SIZES,
 } from "../../lib/constants";
-import {
-  useApprovedClubs,
-  useSubmitShirtOrder,
-} from "../../services/requests/usePalarotary";
+import { useSubmitShirtOrder } from "../../services/requests/usePalarotary";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -72,20 +69,13 @@ const ShirtOrdering = () => {
   const [isOpenLink, setIsOpenLink] = useState(false);
   const [selectedZone, setSelectedZone] = useState(null);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+  const [showCartDrawer, setShowCartDrawer] = useState(false);
 
   const { mutate: submitOrder, isPending: submitting } = useSubmitShirtOrder();
-  const { data: clubsData, isLoading: loadingClubs } = useApprovedClubs();
-
-  // Extract unique zones from clubs data
-  const clubs = clubsData?.data || [];
-  const zones = [
-    ...new Set(clubs.map((club) => club.zone).filter(Boolean)),
-  ].sort();
 
   // Refs for GSAP animations
   const containerRef = useRef(null);
   const previewRef = useRef(null);
-  const cartRef = useRef(null);
   const orderCardsRef = useRef([]);
 
   // Initial animations
@@ -182,10 +172,10 @@ const ShirtOrdering = () => {
     generateInitialPreview();
   }, [location, navigate, form]);
 
-  // Warn user before leaving page if cart has items
+  // Warn user before leaving page if cart has items (disabled when payment drawer is open)
   useEffect(() => {
     const handleBeforeUnload = (e) => {
-      if (orders.length > 0) {
+      if (orders.length > 0 && !isOpenLink) {
         e.preventDefault();
         e.returnValue = "";
         return "";
@@ -197,7 +187,7 @@ const ShirtOrdering = () => {
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
-  }, [orders.length]);
+  }, [orders.length, isOpenLink]);
 
   const generatePreview = async (orderData, zoneOverride = null) => {
     const zone = zoneOverride || orderData.zone || selectedZone;
@@ -319,14 +309,10 @@ const ShirtOrdering = () => {
         preview: defaultPreview,
       });
 
-      // Scroll to cart with smooth animation
-      if (cartRef.current) {
-        gsap.to(window, {
-          scrollTo: { y: cartRef.current, offsetY: 100 },
-          duration: 1,
-          ease: "power2.inOut",
-        });
-      }
+      // Open cart drawer to show the added item
+      setTimeout(() => {
+        setShowCartDrawer(true);
+      }, 300);
     } catch (error) {
       message.error("Please fill in all required fields");
     }
@@ -518,13 +504,16 @@ const ShirtOrdering = () => {
         }}
       >
         <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
-          {/* Header */}
+          {/* Navbar */}
           <div
             className="header-section"
             style={{
-              textAlign: "center",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
               marginBottom: "40px",
-              position: "relative",
+              padding: "16px 0",
+              borderBottom: "1px solid rgba(255,255,255,0.2)",
             }}
           >
             <Button
@@ -533,9 +522,6 @@ const ShirtOrdering = () => {
               icon={<HomeOutlined />}
               onClick={handleBackToHome}
               style={{
-                position: "absolute",
-                left: "0",
-                top: "0",
                 background: "white",
                 borderRadius: "12px",
                 fontWeight: "500",
@@ -543,19 +529,35 @@ const ShirtOrdering = () => {
             >
               Back to Home
             </Button>
-            <Title
-              level={1}
-              style={{
-                color: "white",
-                fontSize: "clamp(32px, 6vw, 48px)",
-                marginBottom: "8px",
-              }}
-            >
-              Order Your Custom Shirt
-            </Title>
-            <Text style={{ color: "rgba(255,255,255,0.95)", fontSize: "18px" }}>
-              Design your personalized PALAROTARY 2026 shirt
-            </Text>
+
+            <div style={{ textAlign: "center", flex: 1, padding: "0 20px" }}>
+              <Title
+                level={2}
+                style={{
+                  color: "white",
+                  margin: 0,
+                  fontSize: "clamp(20px, 4vw, 32px)",
+                }}
+              >
+                Order Your Custom Shirt
+              </Title>
+            </div>
+
+            <Badge count={orders.length} style={{ backgroundColor: "#52c41a" }}>
+              <Button
+                type="default"
+                size="large"
+                icon={<ShoppingCartOutlined />}
+                onClick={() => setShowCartDrawer(true)}
+                style={{
+                  background: "white",
+                  borderRadius: "12px",
+                  fontWeight: "500",
+                }}
+              >
+                Cart
+              </Button>
+            </Badge>
           </div>
 
           {/* Main Content */}
@@ -681,39 +683,6 @@ const ShirtOrdering = () => {
                         Shirt Information
                       </Text>
                     </div>
-
-                    {/* Zone Selection */}
-                    {/* <Form.Item
-                      label={<Text strong>Zone</Text>}
-                      name="zone"
-                      rules={[
-                        { required: true, message: "Please select a zone" },
-                      ]}
-                    >
-                      <Select
-                        placeholder="Select zone"
-                        size="large"
-                        loading={loadingClubs}
-                        value={selectedZone}
-                        onChange={async (value) => {
-                          setSelectedZone(value);
-                          form.setFieldValue("zone", value);
-
-                          // Regenerate preview if name exists
-                          if (currentOrder.name) {
-                            const preview = await generatePreview(
-                              currentOrder,
-                              value
-                            );
-                            setCurrentOrder((prev) => ({ ...prev, preview }));
-                          }
-                        }}
-                        options={zones.map((zone) => ({
-                          value: zone,
-                          label: zone,
-                        }))}
-                      />
-                    </Form.Item> */}
 
                     {/* Name Input */}
                     <Form.Item
@@ -963,7 +932,7 @@ const ShirtOrdering = () => {
                         width: "100%",
                         maxWidth: "500px",
                         borderRadius: "12px",
-                        boxShadow: "0 8px 30px rgba(0,0,0,0.15)",
+                        // boxShadow: "0 8px 30px rgba(0,0,0,0.15)",
                       }}
                       preview
                     />
@@ -978,234 +947,6 @@ const ShirtOrdering = () => {
               </Card>
             </div>
           </div>
-
-          {/* Shopping Cart */}
-          {orders.length > 0 && (
-            <div ref={cartRef}>
-              <Card
-                style={{
-                  borderRadius: "24px",
-                  boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginBottom: "24px",
-                  }}
-                >
-                  <Space>
-                    <ShoppingCartOutlined
-                      style={{ fontSize: "24px", color: "#1E3A71" }}
-                    />
-                    <Title level={3} style={{ margin: 0 }}>
-                      Shopping Cart
-                    </Title>
-                    <Badge
-                      count={orders.length}
-                      style={{ backgroundColor: "#1E3A71" }}
-                    />
-                  </Space>
-                  <Title level={3} style={{ margin: 0, color: "#1E3A71" }}>
-                    Total: ₱{getTotalAmount()}
-                  </Title>
-                </div>
-
-                <Divider />
-
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns:
-                      "repeat(auto-fill, minmax(300px, 1fr))",
-                    gap: "16px",
-                    marginBottom: "24px",
-                  }}
-                >
-                  {orders.map((order, index) => {
-                    const isEditing = editingOrderId === order.id;
-                    const displayOrder = isEditing ? editingOrderData : order;
-
-                    return (
-                      <Card
-                        key={order.id}
-                        ref={(el) => (orderCardsRef.current[index] = el)}
-                        type="inner"
-                        style={{
-                          borderRadius: "12px",
-                          border: isEditing
-                            ? "2px solid #1E3A71"
-                            : "2px solid #f0f0f0",
-                        }}
-                      >
-                        {order.preview && (
-                          // <img
-                          //   src={order.preview}
-                          //   alt="Order Preview"
-                          //   style={{
-                          //     width: "100%",
-                          //     borderRadius: "8px",
-                          //     marginBottom: "12px",
-                          //   }}
-                          // />
-                          <Image
-                            src={order.preview}
-                            alt="Order Preview"
-                            style={{
-                              width: "100%",
-                              borderRadius: "8px",
-                              marginBottom: "12px",
-                            }}
-                          />
-                        )}
-
-                        <Space
-                          direction="vertical"
-                          size="small"
-                          style={{ width: "100%" }}
-                        >
-                          {isEditing ? (
-                            <>
-                              <Input
-                                value={displayOrder.name}
-                                onChange={(e) =>
-                                  handleEditFieldChange("name", e.target.value)
-                                }
-                                placeholder="Name"
-                                size="small"
-                              />
-                              <Select
-                                value={displayOrder.size}
-                                onChange={(value) =>
-                                  handleEditFieldChange("size", value)
-                                }
-                                style={{ width: "100%" }}
-                                size="small"
-                              >
-                                {(displayOrder.sizeCategory === "kid"
-                                  ? KID_SHIRT_SIZES
-                                  : ADULT_SHIRT_SIZES
-                                ).map((s) => (
-                                  <Option key={s.size} value={s.size}>
-                                    {s.size}
-                                  </Option>
-                                ))}
-                              </Select>
-                              <Input
-                                value={displayOrder.shirtNumber}
-                                onChange={(e) => {
-                                  let value = e.target.value.replace(/\D/g, "");
-                                  if (value.length <= 2) {
-                                    handleEditFieldChange("shirtNumber", value);
-                                  }
-                                }}
-                                placeholder="Shirt Number"
-                                maxLength={2}
-                                size="small"
-                              />
-                            </>
-                          ) : (
-                            <>
-                              <Text strong style={{ fontSize: "16px" }}>
-                                {order.name}
-                              </Text>
-                              <Text type="secondary">Size: {order.size}</Text>
-                              {order.shirtNumber && (
-                                <Text type="secondary">
-                                  Number: {order.shirtNumber}
-                                </Text>
-                              )}
-                            </>
-                          )}
-
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                              marginTop: "8px",
-                            }}
-                          >
-                            <Text
-                              strong
-                              style={{ color: "#1E3A71", fontSize: "18px" }}
-                            >
-                              ₱{displayOrder.price}
-                            </Text>
-                            <Space>
-                              {isEditing ? (
-                                <>
-                                  <Button
-                                    type="primary"
-                                    size="small"
-                                    icon={<SaveOutlined />}
-                                    onClick={() => handleSaveEdit(order.id)}
-                                  >
-                                    Save
-                                  </Button>
-                                  <Button
-                                    size="small"
-                                    icon={<CloseOutlined />}
-                                    onClick={() => handleCancelEdit(order.id)}
-                                  >
-                                    Cancel
-                                  </Button>
-                                </>
-                              ) : (
-                                <>
-                                  {/* <Button
-                                  type="text"
-                                  size="small"
-                                  icon={<EditOutlined />}
-                                  onClick={() => handleEditOrder(order.id)}
-                                >
-                                  Edit
-                                </Button> */}
-                                  <Button
-                                    type="text"
-                                    danger
-                                    size="small"
-                                    icon={<DeleteOutlined />}
-                                    onClick={() => removeOrder(order.id)}
-                                  >
-                                    Remove
-                                  </Button>
-                                </>
-                              )}
-                            </Space>
-                          </div>
-                        </Space>
-                      </Card>
-                    );
-                  })}
-                </div>
-
-                <Button
-                  type="primary"
-                  size="large"
-                  block
-                  onClick={handleCheckout}
-                  icon={<ArrowRightOutlined />}
-                  style={{
-                    background:
-                      "linear-gradient(135deg, #1E3A71 0%, #0f2847 100%)",
-                    border: "none",
-                    height: "60px",
-                    fontSize: "18px",
-                    fontWeight: "600",
-                    borderRadius: "12px",
-                    boxShadow: "0 6px 20px rgba(30, 58, 113, 0.4)",
-                  }}
-                >
-                  Proceed to Checkout ({orders.length}{" "}
-                  {orders.length === 1 ? "item" : "items"} - ₱{getTotalAmount()}
-                  )
-                </Button>
-              </Card>
-            </div>
-          )}
 
           {/* Edit Contact Modal */}
           <Modal
@@ -1516,16 +1257,220 @@ const ShirtOrdering = () => {
               grid-template-columns: 1fr !important;
             }
             .header-section {
-              padding-top: 60px !important;
+              flex-direction: column !important;
+              gap: 12px !important;
             }
-            .header-section button {
-              position: static !important;
-              margin-bottom: 20px !important;
+            .header-section > div {
+              padding: 0 !important;
             }
           }
         `}</style>
       </div>
 
+      {/* Shopping Cart Drawer */}
+      <Drawer
+        open={showCartDrawer}
+        onClose={() => setShowCartDrawer(false)}
+        title={
+          <Space>
+            <ShoppingCartOutlined style={{ fontSize: "24px", color: "#1E3A71" }} />
+            <span>Shopping Cart</span>
+            <Badge count={orders.length} style={{ backgroundColor: "#1E3A71" }} />
+          </Space>
+        }
+        placement="bottom"
+        height="80%"
+        extra={
+          <Button type="text" onClick={() => setShowCartDrawer(false)}>
+            <CloseOutlined /> Close
+          </Button>
+        }
+        footer={
+          orders.length > 0 && (
+            <div style={{ padding: "16px 0" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: "16px",
+                }}
+              >
+                <Title level={4} style={{ margin: 0, color: "#1E3A71" }}>
+                  Total: ₱{getTotalAmount()}
+                </Title>
+              </div>
+              <Button
+                type="primary"
+                size="large"
+                block
+                onClick={handleCheckout}
+                icon={<ArrowRightOutlined />}
+                style={{
+                  background: "linear-gradient(135deg, #1E3A71 0%, #0f2847 100%)",
+                  border: "none",
+                  height: "60px",
+                  fontSize: "18px",
+                  fontWeight: "600",
+                  borderRadius: "12px",
+                  boxShadow: "0 6px 20px rgba(30, 58, 113, 0.4)",
+                }}
+              >
+                Proceed to Checkout ({orders.length}{" "}
+                {orders.length === 1 ? "item" : "items"} - ₱{getTotalAmount()})
+              </Button>
+            </div>
+          )
+        }
+      >
+        {orders.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "60px 20px" }}>
+            <ShoppingCartOutlined
+              style={{ fontSize: "64px", color: "#d9d9d9", marginBottom: "16px" }}
+            />
+            <Title level={4} type="secondary">
+              Your cart is empty
+            </Title>
+            <Text type="secondary">Add some shirts to get started!</Text>
+          </div>
+        ) : (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+              gap: "16px",
+              padding: "16px",
+            }}
+          >
+            {orders.map((order, index) => {
+              const isEditing = editingOrderId === order.id;
+              const displayOrder = isEditing ? editingOrderData : order;
+
+              return (
+                <Card
+                  key={order.id}
+                  ref={(el) => (orderCardsRef.current[index] = el)}
+                  type="inner"
+                  style={{
+                    borderRadius: "12px",
+                    border: isEditing ? "2px solid #1E3A71" : "2px solid #f0f0f0",
+                  }}
+                >
+                  {order.preview && (
+                    <Image
+                      src={order.preview}
+                      alt="Order Preview"
+                      style={{
+                        width: "100%",
+                        borderRadius: "8px",
+                        marginBottom: "12px",
+                      }}
+                    />
+                  )}
+
+                  <Space direction="vertical" size="small" style={{ width: "100%" }}>
+                    {isEditing ? (
+                      <>
+                        <Input
+                          value={displayOrder.name}
+                          onChange={(e) =>
+                            handleEditFieldChange("name", e.target.value)
+                          }
+                          placeholder="Name"
+                          size="small"
+                        />
+                        <Select
+                          value={displayOrder.size}
+                          onChange={(value) => handleEditFieldChange("size", value)}
+                          style={{ width: "100%" }}
+                          size="small"
+                        >
+                          {(displayOrder.sizeCategory === "kid"
+                            ? KID_SHIRT_SIZES
+                            : ADULT_SHIRT_SIZES
+                          ).map((s) => (
+                            <Option key={s.size} value={s.size}>
+                              {s.size}
+                            </Option>
+                          ))}
+                        </Select>
+                        <Input
+                          value={displayOrder.shirtNumber}
+                          onChange={(e) => {
+                            let value = e.target.value.replace(/\D/g, "");
+                            if (value.length <= 2) {
+                              handleEditFieldChange("shirtNumber", value);
+                            }
+                          }}
+                          placeholder="Shirt Number"
+                          maxLength={2}
+                          size="small"
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <Text strong style={{ fontSize: "16px" }}>
+                          {order.name}
+                        </Text>
+                        <Text type="secondary">Size: {order.size}</Text>
+                        {order.shirtNumber && (
+                          <Text type="secondary">Number: {order.shirtNumber}</Text>
+                        )}
+                      </>
+                    )}
+
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        marginTop: "8px",
+                      }}
+                    >
+                      <Text strong style={{ color: "#1E3A71", fontSize: "18px" }}>
+                        ₱{displayOrder.price}
+                      </Text>
+                      <Space>
+                        {isEditing ? (
+                          <>
+                            <Button
+                              type="primary"
+                              size="small"
+                              icon={<SaveOutlined />}
+                              onClick={() => handleSaveEdit(order.id)}
+                            >
+                              Save
+                            </Button>
+                            <Button
+                              size="small"
+                              icon={<CloseOutlined />}
+                              onClick={() => handleCancelEdit(order.id)}
+                            >
+                              Cancel
+                            </Button>
+                          </>
+                        ) : (
+                          <Button
+                            type="text"
+                            danger
+                            size="small"
+                            icon={<DeleteOutlined />}
+                            onClick={() => removeOrder(order.id)}
+                          >
+                            Remove
+                          </Button>
+                        )}
+                      </Space>
+                    </div>
+                  </Space>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+      </Drawer>
+
+      {/* Payment Channels Drawer */}
       <Drawer
         open={isOpenLink}
         onClose={() => toggleOpenLink(false)}
