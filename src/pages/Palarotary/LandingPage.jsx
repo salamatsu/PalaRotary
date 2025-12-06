@@ -55,6 +55,8 @@ export default function PalarotaryLandingPage() {
   // Control "Coming Soon" status for information cards
   const [groundRulesComingSoon, setGroundRulesComingSoon] = useState(true);
   const [generalGuideComingSoon, setGeneralGuideComingSoon] = useState(true);
+  const [sponsorExhibitorComingSoon, setSponsorExhibitorComingSoon] =
+    useState(true);
   const [isMuted, setIsMuted] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -1432,7 +1434,7 @@ export default function PalarotaryLandingPage() {
               variants={cardVariants}
               initial="hidden"
               whileInView="visible"
-              whileHover="hover"
+              whileHover={sponsorExhibitorComingSoon ? {} : "hover"}
               viewport={{ once: true }}
             >
               <Card
@@ -1444,6 +1446,10 @@ export default function PalarotaryLandingPage() {
                   overflow: "hidden",
                   background:
                     "linear-gradient(135deg, #ffffff 0%, #f5f3ff 100%)",
+                  position: "relative",
+                  cursor: sponsorExhibitorComingSoon
+                    ? "not-allowed"
+                    : "pointer",
                 }}
                 styles={{
                   body: {
@@ -1451,7 +1457,47 @@ export default function PalarotaryLandingPage() {
                   },
                 }}
               >
-                <div className="p-0 md:p-4 flex h-full flex-col">
+                {/* Coming Soon Overlay */}
+                {sponsorExhibitorComingSoon && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "50%",
+                      left: "50%",
+                      transform: "translate(-50%, -50%)",
+                      zIndex: 10,
+                      textAlign: "center",
+                    }}
+                  >
+                    <motion.div
+                      transition={{
+                        duration: 0.5,
+                        repeat: Infinity,
+                        repeatType: "reverse",
+                      }}
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #7b1fa2 0%, #6a1b9a 100%)",
+                        color: "white",
+                        padding: "20px 40px",
+                        borderRadius: "16px",
+                        fontSize: "24px",
+                        fontWeight: "bold",
+                        boxShadow: "0 10px 40px rgba(123, 31, 162, 0.4)",
+                        border: "3px solid white",
+                      }}
+                    >
+                      COMING SOON
+                    </motion.div>
+                  </div>
+                )}
+
+                <div
+                  className="p-0 md:p-4 flex h-full flex-col"
+                  style={{
+                    pointerEvents: sponsorExhibitorComingSoon ? "none" : "auto",
+                  }}
+                >
                   <div className=" flex-1">
                     <motion.div
                       style={{ textAlign: "center", marginBottom: "24px" }}
@@ -1516,6 +1562,10 @@ export default function PalarotaryLandingPage() {
                         borderRadius: "16px",
                         marginBottom: "24px",
                         border: "2px solid #7b1fa240",
+
+                        filter: sponsorExhibitorComingSoon
+                          ? "blur(4px)"
+                          : "none",
                       }}
                     >
                       <Title
@@ -1541,7 +1591,14 @@ export default function PalarotaryLandingPage() {
                       </Paragraph>
                     </motion.div>
 
-                    <div style={{ marginBottom: "28px" }}>
+                    <div
+                      style={{
+                        marginBottom: "28px",
+                        filter: sponsorExhibitorComingSoon
+                          ? "blur(4px)"
+                          : "none",
+                      }}
+                    >
                       {[
                         "Showcase your brand",
                         "Promote your Products",
@@ -1591,7 +1648,10 @@ export default function PalarotaryLandingPage() {
                         size="large"
                         block
                         icon={<RocketOutlined />}
-                        onClick={() => navigate("/sponsor")}
+                        onClick={() =>
+                          !sponsorExhibitorComingSoon && navigate("/sponsor")
+                        }
+                        disabled={sponsorExhibitorComingSoon}
                         style={{
                           background:
                             "linear-gradient(135deg, #7b1fa2 0%, #6a1b9a 100%)",
@@ -1601,6 +1661,7 @@ export default function PalarotaryLandingPage() {
                           fontWeight: "600",
                           borderRadius: "12px",
                           boxShadow: "0 6px 20px rgba(123, 31, 162, 0.4)",
+                          opacity: sponsorExhibitorComingSoon ? 0.5 : 1,
                         }}
                       >
                         I want to Sponsor
@@ -1618,7 +1679,10 @@ export default function PalarotaryLandingPage() {
                         size="large"
                         block
                         icon={<GiftOutlined />}
-                        onClick={() => navigate("/exhibitor")}
+                        onClick={() =>
+                          !sponsorExhibitorComingSoon && navigate("/exhibitor")
+                        }
+                        disabled={sponsorExhibitorComingSoon}
                         style={{
                           background: "white",
                           border: "2px solid #7b1fa2",
@@ -1628,6 +1692,7 @@ export default function PalarotaryLandingPage() {
                           fontWeight: "600",
                           borderRadius: "12px",
                           boxShadow: "0 4px 15px rgba(123, 31, 162, 0.2)",
+                          opacity: sponsorExhibitorComingSoon ? 0.5 : 1,
                         }}
                       >
                         I want to Exhibit
