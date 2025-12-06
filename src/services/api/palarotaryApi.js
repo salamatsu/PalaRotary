@@ -287,7 +287,6 @@ export const toggleClubVerificationAdminTransactionsApi = async (payload) => {
 
 export const getAdminMerchandisesApi = async (payload) => {
   //page:1, limit:50, status:, zone:, paymentStatus:
-  console.log(payload);
   try {
     const response = await axios.get(
       `/api/v2/clubs/cms/merchandises?${formatQueryParams(payload, {

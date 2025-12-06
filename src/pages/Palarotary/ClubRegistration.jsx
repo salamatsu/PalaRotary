@@ -291,7 +291,6 @@ export default function ClubRegistration() {
 
           const response = await registerClub.mutateAsync(formData);
 
-          console.log("SUCCESS DATA", response.data);
           setClubData({
             ...values,
             zone: values.zone ? `ZONE ${values.zone}` : null,

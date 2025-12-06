@@ -36,15 +36,12 @@ const Success = () => {
   const [itemPreviews, setItemPreviews] = useState({});
   const [previewsLoading, setPreviewsLoading] = useState(false);
 
-  console.log(location.search);
-
   const {
     data: transactionData,
     isLoading,
     isSuccess,
   } = useGetTransactionInfo(tn);
 
-  console.log(transactionData?.data);
   // Extract data from API response
   const transaction = transactionData?.data?.transaction || {};
   const attendee = transactionData?.data?.attendee || {};

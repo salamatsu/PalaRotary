@@ -433,7 +433,6 @@ const ShirtOrdering = () => {
 
     submitOrder(orderData, {
       onSuccess: ({ data }) => {
-        console.log(data);
         setShowCheckoutConfirm(false);
         message.success("Order submitted successfully!");
 

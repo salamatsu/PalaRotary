@@ -29,8 +29,6 @@ const ShirtValidation = () => {
     // Split by colon
     const parts = scannedValue.split(":");
 
-    console.log(scannedValue);
-
     // Check if we have exactly 5 parts (qrCode:firstName:lastName:eventTag:origin)
     if (parts.length !== 5) {
       return {
@@ -136,19 +134,52 @@ const ShirtValidation = () => {
   };
 
   const handleUpload = async (file) => {
+    // Validate file type
+    const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      message.error("Please upload a valid image file (JPG, PNG, or WebP)");
+      return false;
+    }
+
+    // Validate file size (max 10MB)
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      message.error(
+        "Image file is too large. Please upload an image smaller than 10MB"
+      );
+      return false;
+    }
+
     setLoading(true);
     try {
-      console.log(file);
+      console.log("Scanning file:", file.name, file.type, file.size);
       const html5QrCode = new Html5Qrcode("qr-reader-upload");
 
-      const result = await html5QrCode.scanFile(file, false);
-      console.log(result);
+      // Try to scan with more lenient settings
+      const result = await html5QrCode.scanFile(file, true);
+      console.log("QR code detected:", result);
 
       // Validate and process QR code
       await validateMember(result);
     } catch (error) {
-      message.error("Failed to scan QR code from image");
       console.error("Upload scan error:", error);
+
+      // Provide specific error messages based on error type
+      if (error.name === "NotFoundException") {
+        message.error({
+          content:
+            "No QR code detected in the image. Please ensure the QR code is clearly visible and try again.",
+          duration: 5,
+        });
+      } else if (error.message?.includes("Unable to read")) {
+        message.error(
+          "Unable to read the image file. Please try a different image format."
+        );
+      } else {
+        message.error(
+          "Failed to scan QR code from image. Please ensure the image is clear and the QR code is fully visible."
+        );
+      }
     } finally {
       setLoading(false);
     }

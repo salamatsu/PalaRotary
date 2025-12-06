@@ -427,7 +427,7 @@ export default function MemberRegistration() {
       for (const registration of registrations.success) {
         await downloadQRCode(registration.badgeUrl, registration.qrCode);
         // Add delay between downloads to prevent browser blocking
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
       message.success({
         content: `All ${registrations.success.length} badge(s) downloaded!`,
