@@ -305,6 +305,7 @@ const ShirtValidation = () => {
                 className="w-full h-auto"
                 style={{ maxHeight: "400px", objectFit: "contain" }}
               />
+              {/* Overlay with darkened background */}
               <div
                 className="absolute inset-0 pointer-events-none"
                 style={{
@@ -312,8 +313,31 @@ const ShirtValidation = () => {
                   clipPath:
                     "polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 0, 20% 20%, 20% 80%, 80% 80%, 80% 20%, 20% 20%)",
                 }}
-              >
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 border-4 rounded-lg" />
+              />
+
+              {/* Corner brackets */}
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 pointer-events-none">
+                {/* Top-left corner */}
+                <div className="absolute top-0 left-0 w-12 h-12 border-l-4 border-t-4 border-blue-500" />
+
+                {/* Top-right corner */}
+                <div className="absolute top-0 right-0 w-12 h-12 border-r-4 border-t-4 border-blue-500" />
+
+                {/* Bottom-left corner */}
+                <div className="absolute bottom-0 left-0 w-12 h-12 border-l-4 border-b-4 border-blue-500" />
+
+                {/* Bottom-right corner */}
+                <div className="absolute bottom-0 right-0 w-12 h-12 border-r-4 border-b-4 border-blue-500" />
+
+                {/* Scanning animation line */}
+                <div
+                  className="absolute left-0 right-0 h-0.5 bg-blue-500"
+                  style={{
+                    top: "50%",
+                    animation: "scan 3s ease-in-out infinite",
+                    boxShadow: "0 0 10px rgba(59, 130, 246, 0.8)",
+                  }}
+                />
               </div>
             </div>
             <Button
@@ -325,6 +349,17 @@ const ShirtValidation = () => {
             >
               Stop Scanning
             </Button>
+
+            {/* Add keyframe animation for scanning line */}
+            <style>{`
+              @keyframes scan {
+                0%, 100% { transform: translateY(-128px); opacity: 0; }
+                10% { opacity: 1; }
+                90% { opacity: 1; }
+                50% { transform: translateY(0px); }
+                100% { transform: translateY(128px); opacity: 0; }
+              }
+            `}</style>
           </div>
         )}
 
