@@ -1495,8 +1495,9 @@ export default function PalarotaryLandingPage() {
 
                     <div style={{ marginBottom: "28px" }}>
                       {[
-                        "Maximum brand visibility to 1,000+ attendees",
-                        "Logo placement on all event materials",
+                        "Showcase your brand",
+                        "Promote your Products",
+                        "Connect with potential customers",
                         "Direct engagement with Rotary community",
                       ].map((text, i) => (
                         <motion.div
