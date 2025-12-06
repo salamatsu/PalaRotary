@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { Button, Upload, message, Card, Typography, Spin, Divider } from "antd";
 import {
@@ -7,8 +7,11 @@ import {
   Scan,
   ArrowRight,
   Home,
+  Camera,
 } from "lucide-react";
-import { Html5Qrcode } from "html5-qrcode";
+import { BrowserQRCodeReader } from "@zxing/browser";
+
+const { Dragger } = Upload;
 import { useGetVerifyQrCode } from "../../services/requests/usePalarotary";
 
 // QR Code Format: qrCode:firstName:lastName:eventTag:origin
@@ -23,6 +26,15 @@ const ShirtValidation = () => {
   const [scanning, setScanning] = useState(false);
   const navigate = useNavigate();
   const { mutateAsync: verifyQrCode } = useGetVerifyQrCode();
+  const videoRef = useRef(null);
+  const controlsRef = useRef(null);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      stopScanning();
+    };
+  }, []);
 
   // Validate QR code format before API call
   const validateQrCodeFormat = (scannedValue) => {
@@ -102,35 +114,91 @@ const ShirtValidation = () => {
     }
   };
 
+  const stopScanning = () => {
+    try {
+      if (controlsRef.current) {
+        controlsRef.current.stop();
+        controlsRef.current = null;
+      }
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
+      }
+    } catch (error) {
+      console.warn("Error stopping scanner:", error);
+    }
+    setScanning(false);
+  };
+
   const handleScan = async () => {
     setScanning(true);
     try {
-      const html5QrCode = new Html5Qrcode("qr-reader");
+      // Initialize the QR code reader
+      const codeReader = new BrowserQRCodeReader();
 
-      await html5QrCode.start(
-        { facingMode: "environment" },
-        {
-          fps: 10,
-          qrbox: { width: 250, height: 250 },
-        },
-        async (decodedText) => {
-          await html5QrCode.stop();
-          setScanning(false);
+      // Get available video devices
+      const videoInputDevices =
+        await BrowserQRCodeReader.listVideoInputDevices();
 
-          // Validate and process QR code
-          await validateMember(decodedText);
-        },
-        (error) => {
-          console.warn("QR scan error:", error);
+      if (videoInputDevices.length === 0) {
+        throw new Error("No camera found on this device");
+      }
+
+      // Select back camera if available (for mobile)
+      const selectedDeviceId =
+        videoInputDevices.find(
+          (device) =>
+            device.label.toLowerCase().includes("back") ||
+            device.label.toLowerCase().includes("rear")
+        )?.deviceId || videoInputDevices[0].deviceId;
+
+      console.log(
+        "Using camera:",
+        videoInputDevices.find((d) => d.deviceId === selectedDeviceId)?.label
+      );
+
+      // Start decoding from video device
+      controlsRef.current = await codeReader.decodeFromVideoDevice(
+        selectedDeviceId,
+        videoRef.current,
+        async (result, error) => {
+          if (result) {
+            console.log("QR Code detected:", result.getText());
+
+            // Stop scanning
+            stopScanning();
+
+            // Validate and process QR code
+            await validateMember(result.getText());
+          }
+          if (error && error.name !== "NotFoundException") {
+            console.warn("Scan error:", error);
+          }
         }
       );
     } catch (error) {
-      setScanning(false);
-      message.error(
-        "Failed to start camera. Please try uploading an image instead."
-      );
       console.error("Camera error:", error);
+      stopScanning();
+
+      if (error.name === "NotAllowedError") {
+        message.error({
+          content:
+            "Camera access denied. Please allow camera permissions in your browser settings.",
+          duration: 5,
+        });
+      } else if (error.name === "NotFoundError") {
+        message.error("No camera found on this device.");
+      } else if (error.message?.includes("No camera found")) {
+        message.error("No camera found on this device.");
+      } else {
+        message.error(
+          "Failed to start camera. Please try uploading an image instead."
+        );
+      }
     }
+  };
+
+  const handleStopScan = () => {
+    stopScanning();
   };
 
   const handleUpload = async (file) => {
@@ -153,14 +221,23 @@ const ShirtValidation = () => {
     setLoading(true);
     try {
       console.log("Scanning file:", file.name, file.type, file.size);
-      const html5QrCode = new Html5Qrcode("qr-reader-upload");
 
-      // Try to scan with more lenient settings
-      const result = await html5QrCode.scanFile(file, true);
-      console.log("QR code detected:", result);
+      // Create a URL from the file
+      const imageUrl = URL.createObjectURL(file);
+
+      // Initialize the QR code reader
+      const codeReader = new BrowserQRCodeReader();
+
+      // Decode from image URL
+      const result = await codeReader.decodeFromImageUrl(imageUrl);
+
+      // Clean up the object URL
+      URL.revokeObjectURL(imageUrl);
+
+      console.log("QR code detected:", result.getText());
 
       // Validate and process QR code
-      await validateMember(result);
+      await validateMember(result.getText());
     } catch (error) {
       console.error("Upload scan error:", error);
 
@@ -171,7 +248,10 @@ const ShirtValidation = () => {
             "No QR code detected in the image. Please ensure the QR code is clearly visible and try again.",
           duration: 5,
         });
-      } else if (error.message?.includes("Unable to read")) {
+      } else if (
+        error.message?.includes("Unable to read") ||
+        error.message?.includes("Could not load image")
+      ) {
         message.error(
           "Unable to read the image file. Please try a different image format."
         );
@@ -219,49 +299,83 @@ const ShirtValidation = () => {
 
         {scanning && (
           <div className="mb-6">
-            <div id="qr-reader" className="rounded-lg overflow-hidden" />
+            <div className="relative rounded-lg overflow-hidden mb-4 bg-black">
+              <video
+                ref={videoRef}
+                className="w-full h-auto"
+                style={{ maxHeight: "400px", objectFit: "contain" }}
+              />
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  boxShadow: "0 0 0 9999px rgba(0, 0, 0, 0.5)",
+                  clipPath:
+                    "polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 0, 20% 20%, 20% 80%, 80% 80%, 80% 20%, 20% 20%)",
+                }}
+              >
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 border-4 rounded-lg" />
+              </div>
+            </div>
+            <Button
+              type="default"
+              size="large"
+              onClick={handleStopScan}
+              block
+              danger
+            >
+              Stop Scanning
+            </Button>
           </div>
         )}
 
         {!scanning && (
           <div className="flex flex-col gap-3">
-            {/* <Button
+            <Button
               type="primary"
               size="large"
-              icon={<Scan size={20} />}
+              icon={<Camera size={20} />}
               onClick={handleScan}
               disabled={loading}
               block
+              className="h-14"
             >
               Scan QR Code with Camera
-            </Button> */}
+            </Button>
 
-            <Upload
+            <Divider style={{ margin: "8px 0" }}>or</Divider>
+
+            <Dragger
               beforeUpload={handleUpload}
               accept="image/*"
               showUploadList={false}
               disabled={loading}
-              style={{ width: "100%" }}
+              multiple={false}
+              style={{
+                background: loading ? "#f5f5f5" : "transparent",
+                border: "2px dashed #d9d9d9",
+              }}
             >
-              <Button
-                size="large"
-                icon={<UploadIcon size={20} />}
-                disabled={loading}
-                block
-              >
-                Upload QR Code Image
-              </Button>
-            </Upload>
+              <div className="py-8">
+                <p className="ant-upload-drag-icon mb-3">
+                  <UploadIcon size={48} className="text-blue-500 mx-auto" />
+                </p>
+                <p className="ant-upload-text text-base font-medium">
+                  Click or drag QR code image here
+                </p>
+                <p className="ant-upload-hint text-gray-500">
+                  Support for JPG, PNG, or WebP images
+                </p>
+              </div>
+            </Dragger>
 
             <Button
-              type="primary"
-              danger
+              type="default"
               size="large"
               icon={<Home size={20} />}
               onClick={handleBack}
               disabled={loading}
               block
-              className="h-14"
+              className="h-12"
             >
               Back to Home
             </Button>
@@ -276,8 +390,6 @@ const ShirtValidation = () => {
             )}
           </div>
         )}
-
-        <div id="qr-reader-upload" className="hidden" />
       </Card>
     </div>
   );
