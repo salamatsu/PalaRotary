@@ -422,8 +422,9 @@ export default function GeneralGuide() {
                   Who Can Participate
                 </Title>
                 <Text style={{ fontSize: "16px", lineHeight: "1.6" }}>
-                  Only Rotarians, their spouses, or children from District 3800
-                  are eligible to participate in all events.
+                  Rotarians and their spouses or children from District 3800, as
+                  well as members of Rotaract and Interact are eligible to
+                  participate in all events.
                 </Text>
               </motion.div>
               <motion.div
@@ -892,12 +893,13 @@ export default function GeneralGuide() {
               OFFICIAL PALAROTARY 2026 EVENTS
             </Title>
             <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: "12px",
-                justifyContent: "center",
-              }}
+              // style={{
+              //   display: "flex",
+              //   flexWrap: "wrap",
+              //   gap: "12px",
+              //   justifyContent: "center",
+              // }}
+              className=" grid grid-cols-2 md:flex flex-wrap gap-4 justify-center"
             >
               {[
                 { name: "Muse Competition", emoji: "🎀", color: "#ec4899" },
@@ -911,6 +913,7 @@ export default function GeneralGuide() {
                 { name: "Volleyball", emoji: "🏐", color: "#dc2626" },
               ].map((event, i) => (
                 <motion.div
+                  className=" col-span-2 sm:col-span-1 md:col-span-4"
                   key={i}
                   whileHover={{ scale: 1.1, rotate: [0, -5, 5, 0] }}
                   style={{

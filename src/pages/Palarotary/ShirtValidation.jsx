@@ -29,6 +29,8 @@ const ShirtValidation = () => {
     // Split by colon
     const parts = scannedValue.split(":");
 
+    console.log(scannedValue);
+
     // Check if we have exactly 5 parts (qrCode:firstName:lastName:eventTag:origin)
     if (parts.length !== 5) {
       return {
@@ -136,6 +138,7 @@ const ShirtValidation = () => {
   const handleUpload = async (file) => {
     setLoading(true);
     try {
+      console.log(file);
       const html5QrCode = new Html5Qrcode("qr-reader-upload");
 
       const result = await html5QrCode.scanFile(file, false);
