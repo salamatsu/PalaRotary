@@ -500,20 +500,33 @@ const ShirtOrdering = () => {
         style={{
           minHeight: "100vh",
           background: "linear-gradient(135deg, #1E3A71 0%, #0f2847 100%)",
-          padding: "40px 20px",
+          // padding: "40px 20px",
         }}
       >
-        <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
-          {/* Navbar */}
+        {/* Sticky Navbar */}
+        <div
+          className="navbar-sticky"
+          style={{
+            position: "sticky",
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 1000,
+            background: "linear-gradient(135deg, #1E3A71 0%, #0f2847 100%)",
+            // boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+            backdropFilter: "blur(10px)",
+          }}
+        >
           <div
             className="header-section"
             style={{
+              maxWidth: "1400px",
+              margin: "0 auto",
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              marginBottom: "40px",
-              padding: "16px 0",
-              borderBottom: "1px solid rgba(255,255,255,0.2)",
+              // padding: "16px 20px",
+              // borderBottom: "1px solid rgba(255,255,255,0.2)",
             }}
           >
             <Button
@@ -527,10 +540,13 @@ const ShirtOrdering = () => {
                 fontWeight: "500",
               }}
             >
-              Back to Home
+              <span className="button-text">Back to Home</span>
             </Button>
 
-            <div style={{ textAlign: "center", flex: 1, padding: "0 20px" }}>
+            <div
+              className="navbar-title"
+              style={{ textAlign: "center", flex: 1, padding: "0 20px" }}
+            >
               <Title
                 level={2}
                 style={{
@@ -555,9 +571,37 @@ const ShirtOrdering = () => {
                   fontWeight: "500",
                 }}
               >
-                Cart
+                <span className="button-text">Cart</span>
               </Button>
             </Badge>
+          </div>
+        </div>
+
+        <div
+          style={{ maxWidth: "1400px", margin: "0 auto", padding: "0 20px" }}
+        >
+          {/* Mobile/Tablet Title */}
+          <div
+            className="mobile-title"
+            style={{
+              display: "none",
+              textAlign: "center",
+              padding: "24px 0 16px",
+            }}
+          >
+            <Title
+              level={2}
+              style={{
+                color: "white",
+                margin: 0,
+                fontSize: "clamp(24px, 5vw, 32px)",
+              }}
+            >
+              Order Your Custom Shirt
+            </Title>
+            <Text style={{ color: "rgba(255,255,255,0.9)", fontSize: "14px" }}>
+              Design your personalized PALAROTARY 2026 shirt
+            </Text>
           </div>
 
           {/* Main Content */}
@@ -566,6 +610,7 @@ const ShirtOrdering = () => {
               display: "grid",
               gridTemplateColumns: "1fr 1fr",
               gap: "32px",
+              marginTop: "40px",
               marginBottom: "40px",
             }}
             className="shirt-order-grid"
@@ -1252,16 +1297,76 @@ const ShirtOrdering = () => {
 
         {/* Responsive CSS */}
         <style jsx="true">{`
-          @media (max-width: 768px) {
+          /* Tablet breakpoint */
+          @media (max-width: 1024px) {
             .shirt-order-grid {
               grid-template-columns: 1fr !important;
             }
-            .header-section {
-              flex-direction: column !important;
-              gap: 12px !important;
+          }
+
+          /* Mobile and Tablet */
+          @media (max-width: 768px) {
+            /* Hide navbar title on mobile/tablet */
+            .navbar-title {
+              display: none !important;
             }
+
+            /* Show mobile title in main content */
+            .mobile-title {
+              display: block !important;
+            }
+
+            /* Navbar layout - just two buttons */
+            .header-section {
+              flex-direction: row !important;
+              justify-content: space-between !important;
+              gap: 12px !important;
+              padding: 12px 16px !important;
+            }
+
             .header-section > div {
               padding: 0 !important;
+            }
+
+            .navbar-sticky {
+              position: sticky !important;
+              top: 0 !important;
+            }
+
+            /* Keep button text visible on tablet */
+            .header-section .button-text {
+              display: inline !important;
+            }
+          }
+
+          /* Small Mobile */
+          @media (max-width: 480px) {
+            .header-section {
+              padding: 10px 12px !important;
+            }
+
+            .header-section button {
+              font-size: 14px !important;
+              height: 44px !important;
+              padding: 0 12px !important;
+              // min-width: 44px !important;
+            }
+
+            /* Hide button text on very small screens - show only icons */
+            .header-section .button-text {
+              display: none !important;
+            }
+
+            .mobile-title {
+              padding: 16px 0 12px !important;
+            }
+
+            .mobile-title h2 {
+              font-size: 20px !important;
+            }
+
+            .mobile-title span {
+              font-size: 13px !important;
             }
           }
         `}</style>
@@ -1273,9 +1378,14 @@ const ShirtOrdering = () => {
         onClose={() => setShowCartDrawer(false)}
         title={
           <Space>
-            <ShoppingCartOutlined style={{ fontSize: "24px", color: "#1E3A71" }} />
+            <ShoppingCartOutlined
+              style={{ fontSize: "24px", color: "#1E3A71" }}
+            />
             <span>Shopping Cart</span>
-            <Badge count={orders.length} style={{ backgroundColor: "#1E3A71" }} />
+            <Badge
+              count={orders.length}
+              style={{ backgroundColor: "#1E3A71" }}
+            />
           </Space>
         }
         placement="bottom"
@@ -1307,7 +1417,8 @@ const ShirtOrdering = () => {
                 onClick={handleCheckout}
                 icon={<ArrowRightOutlined />}
                 style={{
-                  background: "linear-gradient(135deg, #1E3A71 0%, #0f2847 100%)",
+                  background:
+                    "linear-gradient(135deg, #1E3A71 0%, #0f2847 100%)",
                   border: "none",
                   height: "60px",
                   fontSize: "18px",
@@ -1326,7 +1437,11 @@ const ShirtOrdering = () => {
         {orders.length === 0 ? (
           <div style={{ textAlign: "center", padding: "60px 20px" }}>
             <ShoppingCartOutlined
-              style={{ fontSize: "64px", color: "#d9d9d9", marginBottom: "16px" }}
+              style={{
+                fontSize: "64px",
+                color: "#d9d9d9",
+                marginBottom: "16px",
+              }}
             />
             <Title level={4} type="secondary">
               Your cart is empty
@@ -1353,7 +1468,9 @@ const ShirtOrdering = () => {
                   type="inner"
                   style={{
                     borderRadius: "12px",
-                    border: isEditing ? "2px solid #1E3A71" : "2px solid #f0f0f0",
+                    border: isEditing
+                      ? "2px solid #1E3A71"
+                      : "2px solid #f0f0f0",
                   }}
                 >
                   {order.preview && (
@@ -1368,7 +1485,11 @@ const ShirtOrdering = () => {
                     />
                   )}
 
-                  <Space direction="vertical" size="small" style={{ width: "100%" }}>
+                  <Space
+                    direction="vertical"
+                    size="small"
+                    style={{ width: "100%" }}
+                  >
                     {isEditing ? (
                       <>
                         <Input
@@ -1381,7 +1502,9 @@ const ShirtOrdering = () => {
                         />
                         <Select
                           value={displayOrder.size}
-                          onChange={(value) => handleEditFieldChange("size", value)}
+                          onChange={(value) =>
+                            handleEditFieldChange("size", value)
+                          }
                           style={{ width: "100%" }}
                           size="small"
                         >
@@ -1414,7 +1537,9 @@ const ShirtOrdering = () => {
                         </Text>
                         <Text type="secondary">Size: {order.size}</Text>
                         {order.shirtNumber && (
-                          <Text type="secondary">Number: {order.shirtNumber}</Text>
+                          <Text type="secondary">
+                            Number: {order.shirtNumber}
+                          </Text>
                         )}
                       </>
                     )}
@@ -1427,7 +1552,10 @@ const ShirtOrdering = () => {
                         marginTop: "8px",
                       }}
                     >
-                      <Text strong style={{ color: "#1E3A71", fontSize: "18px" }}>
+                      <Text
+                        strong
+                        style={{ color: "#1E3A71", fontSize: "18px" }}
+                      >
                         ₱{displayOrder.price}
                       </Text>
                       <Space>
