@@ -871,7 +871,7 @@ export default function PalarotaryLandingPage() {
                         fontSize: "28px",
                       }}
                     >
-                      Club Registration
+                      Club
                     </Title>
                     <Paragraph
                       style={{
@@ -881,7 +881,7 @@ export default function PalarotaryLandingPage() {
                         textAlign: "center",
                       }}
                     >
-                      Register your club for PALAROTARY 2026
+                      Register your club
                     </Paragraph>
 
                     <motion.div
@@ -925,7 +925,7 @@ export default function PalarotaryLandingPage() {
                     </motion.div>
 
                     <div style={{ marginBottom: "28px" }}>
-                      <p className="text-red-600 font-semibold italic text-center mb-3">
+                      <p className="text-red-600 font-semibold text-[12px] italic text-center mb-3">
                         NOTE: Only authorized club representatives are permitted
                         to register their respective clubs
                       </p>
@@ -1048,7 +1048,7 @@ export default function PalarotaryLandingPage() {
                         fontSize: "28px",
                       }}
                     >
-                      Member Registration
+                      Members
                     </Title>
                     <Paragraph
                       style={{
@@ -1218,7 +1218,7 @@ export default function PalarotaryLandingPage() {
                         fontSize: "28px",
                       }}
                     >
-                      Order Customized Shirt
+                      Customized Shirt
                     </Title>
                     <Paragraph
                       style={{
@@ -1228,7 +1228,7 @@ export default function PalarotaryLandingPage() {
                         textAlign: "center",
                       }}
                     >
-                      Get your personalized PALAROTARY 2026 shirt
+                      Get your personalized shirt
                     </Paragraph>
 
                     <motion.div
@@ -1282,8 +1282,8 @@ export default function PalarotaryLandingPage() {
                       <Paragraph
                         style={{
                           margin: 0,
-                          fontSize: "13px",
-                          fontWeight: "600",
+                          fontSize: "12px",
+                          fontWeight: "700",
                           color: "#d54839",
                         }}
                       >
@@ -1448,7 +1448,7 @@ export default function PalarotaryLandingPage() {
                         textAlign: "center",
                       }}
                     >
-                      Partner with us to reach 1,000+ Rotarians
+                      Partner with us
                     </Paragraph>
 
                     <motion.div
