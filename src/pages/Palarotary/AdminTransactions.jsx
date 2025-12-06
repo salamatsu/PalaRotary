@@ -37,7 +37,7 @@ const AdminTransactions = () => {
   const [filters, setFilters] = useState({
     status: "ALL",
     page: 1,
-    limit: 20,
+    limit: 10,
   });
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [detailsModal, setDetailsModal] = useState(false);
@@ -155,6 +155,11 @@ const AdminTransactions = () => {
           </Button>
         </Space>
       ),
+    },
+    {
+      title: "Zone",
+      dataIndex: "zone",
+      key: "zone",
     },
     {
       title: "Club Name",

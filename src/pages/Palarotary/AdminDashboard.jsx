@@ -468,11 +468,6 @@ export default function AdminDashboard() {
                           className: "uppercase",
                         },
                         {
-                          title: "Last Name",
-                          dataIndex: "lastName",
-                          key: "lastName",
-                        },
-                        {
                           title: "Email",
                           dataIndex: "email",
                           key: "email",
