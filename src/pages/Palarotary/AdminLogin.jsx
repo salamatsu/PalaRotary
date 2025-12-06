@@ -80,10 +80,6 @@ export default function AdminLogin() {
           form={form}
           layout="vertical"
           onFinish={onFinish}
-          initialValues={{
-            username: "berting@gmail.com",
-            password: "Aaaa1!",
-          }}
           disabled={isPending}
         >
           <Form.Item

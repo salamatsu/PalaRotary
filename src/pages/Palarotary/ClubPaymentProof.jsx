@@ -195,9 +195,20 @@ export default function ClubPaymentProof() {
       return;
     }
 
+    // Remove empty values (empty strings, null, undefined)
+    const filteredValues = Object.entries(values).reduce(
+      (acc, [key, value]) => {
+        if (value !== "" && value !== null && value !== undefined) {
+          acc[key] = value;
+        }
+        return acc;
+      },
+      {}
+    );
+
     uploadPayment(
       {
-        ...values,
+        ...filteredValues,
         token: selectedClub.token,
         paymentProof: paymentProof?.[0]?.originFileObj,
       },

@@ -38,6 +38,7 @@ import {
   isPromoActive,
   SHIRT_PRICING_CONFIG,
 } from "../../lib/constants";
+import { formatCurrency } from "../../utils/formatCurrency";
 
 const { Paragraph, Title } = Typography;
 
@@ -676,7 +677,6 @@ export default function MemberRegistration() {
                       fontSize: "20px",
                       fontWeight: "700",
                       color: "#1e3a8a",
-                      margin: 0,
                       textAlign: "center",
                       margin: "auto",
                     }}
@@ -1209,7 +1209,7 @@ export default function MemberRegistration() {
                             fontSize: "28px",
                           }}
                         >
-                          Order Customized Shirt
+                          Customized Shirt
                         </Title>
                         <Paragraph
                           style={{
@@ -1257,49 +1257,29 @@ export default function MemberRegistration() {
                                 fontSize: "32px",
                               }}
                             >
-                              ₱{getCurrentShirtPrice()}
+                              {formatCurrency(320)}
                             </Title>
-                            {isPromoActive() && (
-                              <Paragraph
-                                style={{
-                                  margin: 0,
-                                  fontSize: "20px",
-                                  color: "#9ca3af",
-                                  textDecoration: "line-through",
-                                }}
-                              >
-                                ₱{SHIRT_PRICING_CONFIG.regularPrice}
-                              </Paragraph>
-                            )}
-                          </div>
-                          <Paragraph
-                            style={{
-                              margin: "0 0 8px 0",
-                              fontSize: "14px",
-                              color: "#6b7280",
-                            }}
-                          >
-                            All sizes - with custom name and number (00-99)
-                          </Paragraph>
-                          {isPromoActive() && (
                             <Paragraph
                               style={{
                                 margin: 0,
-                                fontSize: "13px",
-                                fontWeight: "600",
-                                color: "#d54839",
+                                fontSize: "20px",
+                                color: "#9ca3af",
+                                textDecoration: "line-through",
                               }}
                             >
-                              Promo price until{" "}
-                              {new Date(
-                                SHIRT_PRICING_CONFIG.promoEndDate
-                              ).toLocaleDateString("en-US", {
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                              })}
+                              {formatCurrency(350)}
                             </Paragraph>
-                          )}
+                          </div>
+                          <Paragraph
+                            style={{
+                              margin: 0,
+                              fontSize: "12px",
+                              fontWeight: "700",
+                              color: "#d54839",
+                            }}
+                          >
+                            Promo price until December 25, 2025
+                          </Paragraph>
                         </motion.div>
 
                         {/* Deadline Notice */}
@@ -1326,14 +1306,7 @@ export default function MemberRegistration() {
                               color: "#173052",
                             }}
                           >
-                            Orders available until{" "}
-                            {new Date(
-                              SHIRT_PRICING_CONFIG.orderDeadline
-                            ).toLocaleDateString("en-US", {
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                            })}
+                            Orders available until January 5, 2026
                           </Paragraph>
                         </motion.div>
                         <div style={{ marginBottom: "28px" }}>
@@ -1367,6 +1340,54 @@ export default function MemberRegistration() {
                             </motion.div>
                           ))}
                         </div>
+
+                        {/* Contact Information */}
+                        <motion.div
+                          whileHover={{ scale: 1.02 }}
+                          style={{
+                            background:
+                              "linear-gradient(135deg, #1c3c6d15 0%, #17305215 100%)",
+                            padding: "16px",
+                            borderRadius: "12px",
+                            marginBottom: "20px",
+                            border: "2px solid #1c3c6d30",
+                          }}
+                        >
+                          <Paragraph
+                            style={{
+                              margin: "0 0 8px 0",
+                              fontSize: "13px",
+                              fontWeight: "600",
+                              color: "#1c3c6d",
+                              textAlign: "center",
+                            }}
+                          >
+                            For Inquiry:
+                          </Paragraph>
+                          <Paragraph
+                            style={{
+                              margin: "0 0 4px 0",
+                              fontSize: "15px",
+                              fontWeight: "700",
+                              color: "#173052",
+                              textAlign: "center",
+                            }}
+                          >
+                            VP Ariel Espino
+                          </Paragraph>
+                          <Paragraph
+                            copyable
+                            style={{
+                              margin: 0,
+                              fontSize: "15px",
+                              fontWeight: "600",
+                              color: "#1c3c6d",
+                              textAlign: "center",
+                            }}
+                          >
+                            0916 527 6918
+                          </Paragraph>
+                        </motion.div>
                       </div>
                       <motion.div
                         variants={buttonVariants}

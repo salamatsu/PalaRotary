@@ -79,7 +79,6 @@ export const formatPercent = (decimal = 0) =>
 export const formatBatch = (numbers = [], formatter = formatters.phpCurrency) =>
   numbers.map((num) => formatter.format(num));
 
-
 export const formatCurrency = (amount) => {
   return new Intl.NumberFormat("en-PH", {
     style: "currency",

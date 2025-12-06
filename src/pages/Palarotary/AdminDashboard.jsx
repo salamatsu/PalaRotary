@@ -7,6 +7,7 @@ import {
   ScanOutlined,
   BarChartOutlined,
   DownloadOutlined,
+  SearchOutlined,
 } from "@ant-design/icons";
 import {
   Alert,
@@ -19,6 +20,8 @@ import {
   Tag,
   Button,
   Tabs,
+  Input,
+  Space,
 } from "antd";
 import {
   XAxis,
@@ -414,13 +417,19 @@ export default function AdminDashboard() {
                       </div>
                     }
                   >
+                    {/* Table */}
                     <Table
+                      rowKey="clubId"
                       dataSource={clubs}
                       columns={recentClubsColumns}
-                      rowKey="clubId"
-                      pagination={{ pageSize: 10 }}
-                      size="small"
+                      loading={isLoading}
+                      pagination={{
+                        pageSize: 20,
+                        showSizeChanger: true,
+                        showTotal: (total) => `Total ${total} clubs`,
+                      }}
                       scroll={{ x: 1200 }}
+                      size="small"
                     />
                   </Card>
                 </Col>
@@ -458,7 +467,9 @@ export default function AdminDashboard() {
                       </div>
                     }
                   >
+                    {/* Table */}
                     <Table
+                      rowKey={(record) => record.visitorId || record.email}
                       dataSource={attendanceStats.recent_scans}
                       columns={[
                         {
@@ -484,10 +495,14 @@ export default function AdminDashboard() {
                           render: (date) => (date ? formatDateTime(date) : "-"),
                         },
                       ]}
-                      rowKey={(record) => record.visitorId || record.email}
-                      pagination={{ pageSize: 10 }}
+                      loading={isLoading}
+                      pagination={{
+                        pageSize: 20,
+                        showSizeChanger: true,
+                        showTotal: (total) => `Total ${total} clubs`,
+                      }}
+                      scroll={{ x: 1200 }}
                       size="small"
-                      scroll={{ x: 1000 }}
                     />
                   </Card>
                 </Col>

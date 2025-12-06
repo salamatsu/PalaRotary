@@ -249,7 +249,7 @@ export default function ClubRegistration() {
                 <strong>Zone:</strong> ZONE {values.zone}
               </p>
             )}
-            {/* <p style={{ margin: "4px 0" }}>
+            <p style={{ margin: "4px 0" }}>
               <strong>Contact Person:</strong> {values.firstName}{" "}
               {values.lastName}
             </p>
@@ -258,7 +258,7 @@ export default function ClubRegistration() {
             </p>
             <p style={{ margin: "4px 0" }}>
               <strong>Mobile:</strong> {values.mobileNumber}
-            </p> */}
+            </p>
             {values.paymentProof && values.paymentProof.length > 0 && (
               <p style={{ margin: "4px 0" }}>
                 <strong>Payment Proof:</strong> {values.paymentProof[0].name}
@@ -273,12 +273,23 @@ export default function ClubRegistration() {
         try {
           // Prepare form data
           const formData = new FormData();
-          formData.append("clubName", values.clubName);
-          if (values.zone) formData.append("zone", `ZONE ${values.zone}`);
-          // formData.append("firstName", values.firstName);
-          // formData.append("lastName", values.lastName);
-          // formData.append("email", values.email);
-          // formData.append("mobileNumber", values.mobileNumber);
+
+          // Filter out empty values and append to FormData
+          const fieldsToAppend = {
+            clubName: values.clubName,
+            zone: values.zone ? `ZONE ${values.zone}` : null,
+            firstName: values.firstName,
+            lastName: values.lastName,
+            email: values.email,
+            mobileNumber: values.mobileNumber,
+          };
+
+          // Append only non-empty values to FormData
+          Object.entries(fieldsToAppend).forEach(([key, value]) => {
+            if (value !== null && value !== undefined && value !== '') {
+              formData.append(key, value);
+            }
+          });
 
           // Add payment proof if provided
           if (values.paymentProof && values.paymentProof.length > 0) {
